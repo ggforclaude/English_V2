@@ -269,6 +269,60 @@ test('태그가 짝을 이룬다', () => {
   assert.deepStrictEqual(stack, [], '닫히지 않은 태그: ' + stack.join(', '));
 });
 
+// 마크업 전체(HTML + JS 템플릿 문자열)에서 <태그 ... class="..."> 를 모은다
+function classUsage() {
+  const use = new Map();   // class -> Set(tag)
+  for (const m of SRC.matchAll(/<([a-zA-Z][a-zA-Z0-9]*)\b[^>]*?class="([^"]*)"/g)) {
+    const tag = m[1].toLowerCase();
+    for (const c of m[2].split(/\s+/)) {
+      if (!c || c.includes('$') || c.includes('{')) continue;   // class="${...}" 조각은 건너뛴다
+      if (!use.has(c)) use.set(c, new Set());
+      use.get(c).add(tag);
+    }
+  }
+  return use;
+}
+
+// CSS 규칙에서 각 클래스가 선언하는 속성을 모은다
+function classDecls() {
+  const css = SRC.match(/<style>([\s\S]*?)<\/style>/)[1];
+  const decl = new Map();
+  for (const rule of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const props = [...rule[2].matchAll(/([a-z-]+)\s*:/g)].map(x => x[1]);
+    for (const c of [...rule[1].matchAll(/\.([\w가-힣-]+)/g)].map(x => x[1])) {
+      if (!decl.has(c)) decl.set(c, new Set());
+      props.forEach(p => decl.get(c).add(p));
+    }
+  }
+  return decl;
+}
+
+test('한 클래스를 성격이 다른 요소에 겹쳐 쓰지 않는다', () => {
+  // `.mark` 를 판정 배지와 카드 수식어 양쪽에 쓴 적이 있다.
+  // 배지의 display:inline-flex 와 white-space:nowrap 이 카드에 먹어 레이아웃이 통째로 무너졌다.
+  const KIND = (tag) =>
+    /^(span|button|a|input|select|textarea|label|b|i|strong|em)$/.test(tag) ? '인라인'
+    : /^(h1|h2|h3|h4|p)$/.test(tag) ? '텍스트'
+    : '구조';
+  const offenders = [];
+  for (const [cls, tags] of classUsage()) {
+    const kinds = new Set([...tags].map(KIND));
+    if (kinds.size > 1) offenders.push(`${cls} → ${[...tags].sort().join(', ')}`);
+  }
+  assert.deepStrictEqual(offenders, [], '성격이 다른 요소에 겹쳐 쓴 클래스:\n  ' + offenders.join('\n  '));
+});
+
+test('한 요소에 display 를 정하는 클래스가 둘 이상 붙지 않는다', () => {
+  const decl = classDecls();
+  const offenders = [];
+  for (const m of SRC.matchAll(/<([a-zA-Z][a-zA-Z0-9]*)\b[^>]*?class="([^"]*)"/g)) {
+    const cs = m[2].split(/\s+/).filter(c => c && !c.includes('$') && !c.includes('{'));
+    const hit = cs.filter(c => decl.get(c)?.has('display'));
+    if (hit.length > 1) offenders.push(`<${m[1]} class="${cs.join(' ')}"> → ${hit.join(', ')}`);
+  }
+  assert.deepStrictEqual(offenders, [], '레이아웃이 서로 덮어쓰는 조합:\n  ' + offenders.join('\n  '));
+});
+
 test('SheetJS를 취약점이 고쳐진 배포처·버전에서 받는다', () => {
   // 0.19.2 이하는 CVE-2023-30533(프로토타입 오염) 영향 범위이고,
   // 패치본은 npm·cdnjs가 아니라 cdn.sheetjs.com 에만 있다.

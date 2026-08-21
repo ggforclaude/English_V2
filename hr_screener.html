@@ -104,7 +104,7 @@
     padding: 22px 26px;
     margin-bottom: 16px;
   }
-  .sheet.mark { border-left-color: var(--ink); }
+  .sheet.rail { border-left-color: var(--ink); }   /* 이 단계의 주 채점지 */
   .sheet h2 {
     font-family: var(--font);
     font-size: 16px; font-weight: 700; letter-spacing: -0.025em;
@@ -494,7 +494,7 @@
       <button class="btn-link" id="key-notice-btn">지금 등록</button>
     </div>
 
-    <section class="sheet mark">
+    <section class="sheet rail">
       <h2>채용 직무</h2>
       <p class="desc">평가 기준이 저장된 직무를 고르거나 새로 등록하세요.</p>
       <div class="job-list" id="job-list"></div>
@@ -557,7 +557,7 @@
 
   <!-- ═══════════ 2 ═══════════ -->
   <div class="step" id="step-2">
-    <section class="sheet mark">
+    <section class="sheet rail">
       <h2>지원서 불러오기</h2>
       <p class="desc">지원자마다 시트가 나뉜 지원서 파일, 한 시트에 여러 명이 나열된 파일 모두 읽습니다.</p>
 
@@ -596,7 +596,7 @@
 
   <!-- ═══════════ 3 ═══════════ -->
   <div class="step" id="step-3">
-    <section class="sheet mark">
+    <section class="sheet rail">
       <h2>이 기준으로 채점합니다</h2>
       <p class="desc" id="confirm-sub"></p>
       <div class="crit-sum" id="confirm-crit"></div>
@@ -638,7 +638,7 @@
       </span>
     </div>
 
-    <section class="sheet mark">
+    <section class="sheet rail">
       <div class="sheet-head">
         <div><h2>채점 결과</h2><p class="desc" style="margin:0;" id="results-sub"></p></div>
         <button class="btn-out" id="export-btn">엑셀로 내보내기</button>
