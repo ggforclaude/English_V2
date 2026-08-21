@@ -1,0 +1,2057 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>채용 스크리너</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@500;700&family=Gothic+A1:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<style>
+  /* ============================================================
+     채점표 — 심사자의 책상 위에 놓인 괘선 있는 평가지
+     색은 판정에만 쓴다. 조작 가능한 것은 잉크색, 포커스는 빨간펜.
+     ============================================================ */
+  :root {
+    --ground:   #ebeee9;
+    --sheet:    #fcfdfb;
+    --sheet-2:  #f3f6f1;
+    --rule:     #d2d9d0;
+    --rule-2:   #e4e9e2;
+
+    --ink:      #17201c;
+    --ink-2:    #55625a;
+    --ink-3:    #8a958d;
+
+    --pass:     #1f6f4a;
+    --pass-bg:  #e3efe8;
+    --hold:     #8f6410;
+    --hold-bg:  #f4ecdb;
+    --stamp:    #b3202c;
+    --stamp-bg: #f7e6e7;
+
+    --display: 'Hahmlet', 'Nanum Myeongjo', serif;
+    --body: 'Gothic A1', 'Malgun Gothic', -apple-system, sans-serif;
+    --data: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 40px 24px 132px; }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  /* ---------- 머리 ---------- */
+  header.top {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 20px; padding-bottom: 18px; margin-bottom: 22px;
+    border-bottom: 2px solid var(--ink);
+  }
+  h1 {
+    font-family: var(--display);
+    font-size: 27px; font-weight: 700; letter-spacing: -0.02em;
+    margin: 0; line-height: 1.2;
+  }
+  .lede { color: var(--ink-2); font-size: 13px; margin: 5px 0 0; }
+
+  /* ---------- 단계 ---------- */
+  .stepnav {
+    display: flex; align-items: stretch;
+    border: 1px solid var(--rule); border-bottom-width: 2px;
+    background: var(--sheet); margin-bottom: 24px;
+  }
+  .stepnav-item {
+    display: flex; align-items: center; gap: 9px;
+    flex: 1; min-width: 0;
+    background: none; border: none; border-right: 1px solid var(--rule-2);
+    padding: 11px 14px;
+    font-family: inherit; font-size: 12.5px; font-weight: 500;
+    color: var(--ink-3); cursor: pointer; text-align: left; white-space: nowrap;
+  }
+  .stepnav-item:last-child { border-right: none; }
+  .stepnav-item:disabled { cursor: not-allowed; }
+  .stepnav-item .dot {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 21px; height: 21px; flex-shrink: 0;
+    border: 1px solid var(--rule); background: var(--sheet-2);
+    font-family: var(--data); font-size: 11px; font-weight: 600; color: var(--ink-3);
+  }
+  .stepnav-item.done { color: var(--ink-2); }
+  .stepnav-item.done .dot { border-color: var(--pass); color: var(--pass); background: var(--pass-bg); }
+  .stepnav-item.active { color: var(--ink); font-weight: 700; background: var(--sheet-2); }
+  .stepnav-item.active .dot { background: var(--ink); border-color: var(--ink); color: var(--sheet); }
+
+  /* ---------- 채점지 ---------- */
+  .sheet {
+    background: var(--sheet);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--rule);
+    padding: 22px 26px;
+    margin-bottom: 16px;
+  }
+  .sheet.mark { border-left-color: var(--ink); }
+  .sheet h2 {
+    font-family: var(--display);
+    font-size: 17px; font-weight: 700; letter-spacing: -0.01em;
+    margin: 0 0 3px; line-height: 1.3;
+  }
+  .sheet .desc { font-size: 12.5px; color: var(--ink-2); margin: 0 0 18px; }
+  .sheet-head {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    gap: 14px; flex-wrap: wrap; margin-bottom: 14px;
+  }
+  .sheet-head h2 { margin: 0; }
+
+  .step { display: none; }
+  .step.active { display: block; }
+
+  /* ---------- 입력 ---------- */
+  label.field-label {
+    display: block; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--ink-3); margin-bottom: 6px;
+  }
+
+  input[type="text"], input[type="password"], input[type="number"], textarea, select {
+    width: 100%; font-family: inherit; font-size: 13.5px; color: var(--ink);
+    background: var(--sheet-2); border: 1px solid var(--rule); border-radius: 0;
+    padding: 9px 11px;
+  }
+  input:focus, textarea:focus, select:focus {
+    outline: 2px solid var(--stamp); outline-offset: -1px;
+    background: var(--sheet); border-color: var(--ink);
+  }
+  textarea { resize: vertical; min-height: 92px; line-height: 1.65; }
+
+  .row { display: flex; gap: 12px; }
+  .row > * { flex: 1; min-width: 0; }
+  .stack { display: flex; flex-direction: column; gap: 16px; }
+
+  button { font-family: inherit; cursor: pointer; border-radius: 0; }
+  button:focus-visible, input:focus-visible, select:focus-visible,
+  textarea:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--stamp); outline-offset: 2px;
+  }
+
+  .btn {
+    background: var(--ink); color: var(--sheet); border: 1px solid var(--ink);
+    padding: 10px 20px; font-size: 13.5px; font-weight: 700; letter-spacing: -0.01em;
+  }
+  .btn:hover { background: #000; }
+  .btn:disabled { background: var(--rule); border-color: var(--rule); color: #fff; cursor: not-allowed; }
+  .btn.danger { background: var(--stamp); border-color: var(--stamp); }
+  .btn.danger:hover { background: #97121d; }
+
+  .btn-out {
+    background: transparent; color: var(--ink); border: 1px solid var(--rule);
+    padding: 9px 15px; font-size: 12.5px; font-weight: 500;
+  }
+  .btn-out:hover { border-color: var(--ink); background: var(--sheet-2); }
+  .btn-out:disabled { color: var(--ink-3); cursor: not-allowed; border-color: var(--rule-2); }
+
+  .btn-link {
+    background: none; border: none; color: var(--ink);
+    font-size: 12.5px; font-weight: 700; padding: 2px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .btn-link:hover { border-bottom-color: var(--ink); }
+  .btn-link:disabled { color: var(--ink-3); cursor: not-allowed; border-bottom-color: transparent; }
+
+  /* ---------- 알림 줄 ---------- */
+  .notice {
+    display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    justify-content: space-between;
+    font-size: 12.5px; color: var(--ink-2);
+    background: var(--sheet-2); border: 1px solid var(--rule-2);
+    border-left: 3px solid var(--ink-3);
+    padding: 11px 14px; margin-top: 14px;
+  }
+  .notice.alert { border-left-color: var(--stamp); background: var(--stamp-bg); color: #7d1b23; border-color: #ecd2d4; }
+  .notice.ok { border-left-color: var(--pass); background: var(--pass-bg); color: #145236; border-color: #cbe0d4; }
+
+  /* ---------- 직무 ---------- */
+  .job-list { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
+  .job-chip {
+    display: flex; align-items: center; gap: 7px;
+    border: 1px solid var(--rule); background: var(--sheet-2);
+    padding: 6px 6px 6px 13px; font-size: 12.5px; font-weight: 500; cursor: pointer;
+  }
+  .job-chip.active { border-color: var(--ink); border-left-width: 3px; background: var(--sheet); font-weight: 700; }
+  .job-chip button {
+    background: none; border: none; color: var(--ink-3);
+    font-size: 11px; line-height: 1; padding: 4px 5px;
+  }
+  .job-chip button:hover { color: var(--stamp); background: var(--stamp-bg); }
+
+  .job-form { border-top: 1px solid var(--rule); padding-top: 20px; margin-top: 8px; display: none; }
+  .job-form.open { display: block; }
+
+  /* ---------- 평가 항목 편집 ---------- */
+  .crit-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 9px; }
+  .crit-head .field-label { margin-bottom: 0; }
+  .crit-list { border-top: 1px solid var(--rule-2); }
+  .crit-row {
+    display: grid; grid-template-columns: 84px 1fr 66px 28px;
+    gap: 9px; align-items: start;
+    padding: 9px 0; border-bottom: 1px solid var(--rule-2);
+  }
+  .crit-row .crit-main { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+  .crit-row input, .crit-row select { padding: 7px 9px; font-size: 13px; }
+  .crit-row .crit-desc { font-size: 12px; color: var(--ink-2); }
+  .crit-row .crit-weight { text-align: right; font-family: var(--data); }
+  .crit-del { background: none; border: none; color: var(--ink-3); font-size: 15px; line-height: 1; padding: 8px 5px; }
+  .crit-del:hover { color: var(--stamp); background: var(--stamp-bg); }
+
+  .crit-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+
+  .sum {
+    font-family: var(--data); font-size: 12px; font-weight: 600;
+    padding: 3px 9px; border: 1px solid var(--pass); color: var(--pass); background: var(--pass-bg);
+  }
+  .sum.off { border-color: var(--hold); color: var(--hold); background: var(--hold-bg); }
+
+  .kind {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 1px 7px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.03em;
+    white-space: nowrap; border: 1px solid;
+  }
+  .kind.필수 { border-color: var(--stamp); color: var(--stamp); background: var(--stamp-bg); }
+  .kind.우대 { border-color: var(--ink-2); color: var(--ink-2); background: var(--sheet-2); }
+  .kind.공통 { border-color: var(--rule); color: var(--ink-3); background: var(--sheet-2); }
+
+  /* ---------- 기준 요약 (읽기 전용) ---------- */
+  .crit-sum { border-top: 1px solid var(--ink); }
+  .crit-sum-row {
+    display: grid; grid-template-columns: 52px 1fr 52px;
+    gap: 12px; align-items: baseline;
+    padding: 9px 2px; border-bottom: 1px solid var(--rule-2); font-size: 13px;
+  }
+  .crit-sum-row .cs-label { font-weight: 700; }
+  .crit-sum-row .cs-desc { display: block; font-weight: 400; font-size: 12px; color: var(--ink-2); margin-top: 1px; }
+  .crit-sum-row .cs-w { text-align: right; font-family: var(--data); font-size: 12.5px; color: var(--ink-2); }
+
+  /* ---------- 업로드 ---------- */
+  .drop {
+    border: 1px dashed var(--rule); background: var(--sheet-2);
+    padding: 30px 20px; text-align: center; color: var(--ink-2); font-size: 13px; cursor: pointer;
+  }
+  .drop:hover { border-color: var(--ink); color: var(--ink); }
+  .drop.has { border-style: solid; border-color: var(--ink); background: var(--sheet); color: var(--ink); }
+  .drop .hint { display: block; font-size: 11.5px; color: var(--ink-3); margin-top: 4px; }
+
+  .tabs { display: inline-flex; border: 1px solid var(--rule); margin-bottom: 4px; }
+  .tab {
+    background: var(--sheet-2); border: none; border-right: 1px solid var(--rule);
+    padding: 8px 15px; font-size: 12.5px; font-weight: 500; color: var(--ink-2);
+  }
+  .tab:last-child { border-right: none; }
+  .tab:hover { color: var(--ink); }
+  .tab.active { background: var(--ink); color: var(--sheet); font-weight: 700; }
+
+  .sheet-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; font-size: 12px; color: var(--ink-2); }
+  .sheet-list { margin-top: 8px; border: 1px solid var(--rule); max-height: 290px; overflow-y: auto; background: var(--sheet-2); }
+  .sheet-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-bottom: 1px solid var(--rule-2); font-size: 13px; cursor: pointer;
+  }
+  .sheet-item:last-child { border-bottom: none; }
+  .sheet-item:hover { background: var(--sheet); }
+  .sheet-item input[type="checkbox"] { width: auto; flex: 0 0 auto; margin: 0; accent-color: var(--ink); }
+  .sheet-item .s-name { font-weight: 700; flex: 0 0 auto; }
+  .sheet-item .s-peek { color: var(--ink-3); font-size: 12px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sheet-item .s-meta { color: var(--ink-3); font-size: 11.5px; flex: 0 0 auto; font-family: var(--data); }
+
+  .map-row { display: grid; grid-template-columns: 110px 1fr; align-items: center; gap: 12px; margin-top: 12px; }
+  .map-row label { font-size: 12.5px; color: var(--ink-2); font-weight: 500; }
+
+  /* ---------- 확인 ---------- */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(138px, 1fr)); border: 1px solid var(--rule); }
+  .stat { padding: 13px 15px; border-right: 1px solid var(--rule-2); }
+  .stat:last-child { border-right: none; }
+  .stat .k { font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+  .stat .v { font-family: var(--display); font-size: 22px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.25; margin-top: 3px; }
+  .stat .v .u { font-size: 13px; font-weight: 500; color: var(--ink-2); margin-left: 1px; }
+  .stat .s { font-size: 11.5px; color: var(--ink-2); }
+
+  .names { font-size: 12.5px; line-height: 2.1; }
+  .names span { border: 1px solid var(--rule); background: var(--sheet-2); padding: 2px 9px; margin-right: 5px; white-space: nowrap; }
+
+  .progress { display: none; margin-top: 18px; }
+  .progress.show { display: block; }
+  .progress-track { height: 4px; background: var(--rule-2); overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--ink); width: 0%; transition: width 0.3s ease; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-2); margin-top: 7px; font-family: var(--data); }
+
+  /* ---------- 결과 ---------- */
+  .filters { display: flex; gap: 0; flex-wrap: wrap; border: 1px solid var(--rule); margin-bottom: 4px; }
+  .filter {
+    background: var(--sheet-2); border: none; border-right: 1px solid var(--rule);
+    padding: 7px 14px; font-size: 12.5px; font-weight: 500; color: var(--ink-2);
+  }
+  .filter:last-child { border-right: none; }
+  .filter .n { font-family: var(--data); font-size: 11.5px; margin-left: 5px; color: var(--ink-3); }
+  .filter:hover { color: var(--ink); }
+  .filter.active { background: var(--ink); color: var(--sheet); font-weight: 700; }
+  .filter.active .n { color: var(--sheet); }
+  .filter:disabled { color: var(--ink-3); cursor: not-allowed; }
+
+  .sortbar { display: flex; align-items: center; gap: 8px; margin: 12px 0 6px; font-size: 12px; color: var(--ink-2); }
+  .sortbar select { width: auto; padding: 5px 8px; font-size: 12px; }
+  .sortbar label { margin: 0; }
+
+  .table-scroll { overflow-x: auto; }
+  table.results { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 640px; }
+  table.results th {
+    text-align: left; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--ink-3); font-weight: 700; padding: 0 9px 8px; border-bottom: 2px solid var(--ink);
+    white-space: nowrap;
+  }
+  table.results th.sortable { cursor: pointer; }
+  table.results th.sortable:hover { color: var(--ink); }
+  table.results th .arrow { font-family: var(--data); margin-left: 3px; }
+  table.results td { padding: 11px 9px; border-bottom: 1px solid var(--rule-2); vertical-align: top; }
+  tr.main:hover td { background: var(--sheet-2); }
+  tr.main.open td { background: var(--sheet-2); }
+
+  .rank-cell { width: 46px; padding-left: 0 !important; }
+  .row-toggle {
+    display: flex; align-items: baseline; gap: 5px;
+    background: none; border: none; padding: 0 4px; color: var(--ink-3);
+    font-family: var(--data); font-size: 12.5px; width: 100%;
+  }
+  .row-toggle .chev { display: inline-block; transition: transform 0.15s ease; font-size: 10px; }
+  tr.main.open .row-toggle .chev { transform: rotate(90deg); }
+  .row-toggle:hover { color: var(--ink); }
+
+  .score-cell { width: 52px; font-family: var(--display); font-size: 19px; font-weight: 700; letter-spacing: -0.03em; }
+  .name-cell { width: 78px; font-weight: 700; white-space: nowrap; }
+  .verdict-cell { width: 92px; }
+
+  .mark {
+    display: inline-flex; align-items: center; padding: 1px 8px;
+    font-size: 11.5px; font-weight: 700; white-space: nowrap; border: 1px solid;
+  }
+  .mark.추천 { border-color: var(--pass); color: var(--pass); background: var(--pass-bg); }
+  .mark.보류 { border-color: var(--hold); color: var(--hold); background: var(--hold-bg); }
+  .mark.비추천 { border-color: var(--stamp); color: var(--stamp); background: var(--stamp-bg); }
+  .mark.wait { border-color: var(--rule); color: var(--ink-3); background: var(--sheet-2); }
+  .mark.err { border-color: var(--stamp); color: var(--sheet); background: var(--stamp); }
+
+  /* ---------- 시그니처: 기여도 막대 ---------- */
+  /* 항목마다 (점수 × 비중 ÷ 비중합) 만큼을 왼쪽부터 채운다.
+     채워진 총 길이가 곧 총점이고, 눈금이 합격선이다. */
+  .tally {
+    position: relative; display: flex;
+    height: 13px; background: var(--sheet-2);
+    border: 1px solid var(--rule); margin-bottom: 7px; min-width: 150px;
+  }
+  .tally-seg { height: 100%; border-right: 1px solid var(--sheet); transition: width 0.4s ease; }
+  .tally-seg:last-of-type { border-right: none; }
+  .tally-seg.충족 { background: var(--pass); }
+  .tally-seg.부분충족 { background: var(--hold); }
+  .tally-seg.미충족 { background: var(--stamp); }
+  .tally-cut { position: absolute; top: -4px; bottom: -4px; width: 1px; background: var(--ink); }
+  .tally-cut::after {
+    content: ''; position: absolute; top: -4px; left: -2.5px;
+    border-left: 3px solid transparent; border-right: 3px solid transparent;
+    border-top: 4px solid var(--ink);
+  }
+  .summary-cell .line { font-size: 12.5px; color: var(--ink-2); }
+
+  /* ---------- 상세 ---------- */
+  tr.detail { display: none; }
+  tr.detail.open { display: table-row; }
+  tr.detail td { background: var(--sheet-2); padding: 4px 9px 20px; border-bottom: 2px solid var(--rule); }
+
+  .cr {
+    display: grid; grid-template-columns: 52px 1fr 92px;
+    gap: 12px; align-items: baseline;
+    padding: 11px 0; border-bottom: 1px solid var(--rule-2);
+  }
+  .cr:last-of-type { border-bottom: 1px solid var(--rule); }
+  .cr-label { font-weight: 700; font-size: 13px; }
+  .cr-level { font-size: 11.5px; font-weight: 700; margin-left: 7px; }
+  .cr-level.충족 { color: var(--pass); }
+  .cr-level.부분충족 { color: var(--hold); }
+  .cr-level.미충족 { color: var(--stamp); }
+  .cr-evi {
+    display: block; margin-top: 5px; font-size: 12.5px; color: var(--ink-2);
+    border-left: 2px solid var(--rule); padding-left: 10px; line-height: 1.65;
+  }
+  .cr-evi.unverified { border-left-color: var(--stamp); }
+  .cr-note { display: block; margin-top: 4px; font-size: 12px; color: var(--ink-3); }
+  .cr-score { text-align: right; font-family: var(--data); font-size: 13px; font-weight: 600; white-space: nowrap; }
+  .cr-score .calc { display: block; font-size: 10.5px; font-weight: 400; color: var(--ink-3); }
+  .flag {
+    display: inline-block; margin-left: 6px; padding: 0 5px;
+    font-size: 10.5px; font-weight: 700;
+    border: 1px solid var(--stamp); color: var(--stamp); background: var(--stamp-bg);
+  }
+
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 16px; }
+  .detail-grid h4 { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 7px; }
+  .detail-grid ul { margin: 0; padding-left: 17px; font-size: 12.5px; }
+  .detail-grid li { margin-bottom: 4px; }
+  .verdict-box {
+    grid-column: 1 / -1; font-size: 13px; line-height: 1.65;
+    background: var(--sheet); border: 1px solid var(--rule); border-left: 3px solid var(--ink);
+    padding: 12px 15px;
+  }
+
+  .empty { padding: 34px 12px; color: var(--ink-3); font-size: 13px; text-align: center; }
+
+  /* ---------- 하단 조작대 ---------- */
+  .dock {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+    background: var(--sheet); border-top: 2px solid var(--ink); padding: 12px 24px;
+  }
+  .dock-in { max-width: 1000px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .dock-hint { font-size: 12.5px; color: var(--ink-2); min-width: 0; }
+
+  /* ---------- 알림 ---------- */
+  .toast {
+    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(14px);
+    background: var(--ink); color: var(--sheet); padding: 11px 18px; font-size: 13px;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 50; max-width: 90vw; border-left: 3px solid var(--stamp);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+
+  .veil { position: fixed; inset: 0; background: #17201caa; display: none; align-items: center; justify-content: center; z-index: 40; padding: 20px; }
+  .veil.show { display: flex; }
+  .modal { background: var(--sheet); border: 1px solid var(--ink); border-top-width: 3px; padding: 24px 26px; max-width: 440px; width: 100%; }
+  .modal h3 { font-family: var(--display); margin: 0 0 5px; font-size: 17px; }
+  .modal p { margin: 0 0 14px; font-size: 12.5px; color: var(--ink-2); }
+  .modal-act { display: flex; justify-content: space-between; gap: 8px; margin-top: 18px; }
+
+  .spin {
+    display: inline-block; width: 10px; height: 10px;
+    border: 2px solid var(--rule); border-top-color: var(--ink);
+    border-radius: 50%; animation: spin 0.7s linear infinite;
+    vertical-align: -1px; margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 760px) {
+    .wrap { padding: 28px 16px 132px; }
+    .row { flex-direction: column; }
+    .detail-grid { grid-template-columns: 1fr; }
+    .map-row { grid-template-columns: 1fr; }
+    .crit-row { grid-template-columns: 72px 1fr 54px 24px; }
+    .stepnav-item { flex: 0 0 auto; padding: 10px 11px; }
+    .stepnav-item .lbl { display: none; }
+    .stepnav-item.active { flex: 1; }
+    .stepnav-item.active .lbl { display: inline; }
+    .dock-hint { display: none; }
+    .cr { grid-template-columns: 46px 1fr; }
+    .cr-score { grid-column: 2; text-align: left; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .progress-fill, .toast, .spin, .tally-seg, .row-toggle .chev { transition: none; animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>채용 스크리너</h1>
+      <p class="lede">공고에서 평가 항목을 뽑고, 그 항목대로 지원서를 채점합니다.</p>
+    </div>
+    <button class="btn-out" id="key-btn">API 키</button>
+  </header>
+
+  <nav class="stepnav" aria-label="진행 단계">
+    <button class="stepnav-item" data-step="1"><span class="dot">1</span><span class="lbl">직무 · 평가 기준</span></button>
+    <button class="stepnav-item" data-step="2"><span class="dot">2</span><span class="lbl">지원서 불러오기</span></button>
+    <button class="stepnav-item" data-step="3"><span class="dot">3</span><span class="lbl">실행 전 확인</span></button>
+    <button class="stepnav-item" data-step="4"><span class="dot">4</span><span class="lbl">채점 결과</span></button>
+  </nav>
+
+  <!-- ═══════════ 1 ═══════════ -->
+  <div class="step" id="step-1">
+    <div class="notice alert" id="key-notice" style="display:none; margin-top:0; margin-bottom:16px;">
+      <span><b>API 키를 먼저 등록하세요.</b> 키가 없으면 항목 추출과 채점이 실행되지 않습니다.</span>
+      <button class="btn-link" id="key-notice-btn">지금 등록</button>
+    </div>
+
+    <section class="sheet mark">
+      <h2>채용 직무</h2>
+      <p class="desc">평가 기준이 저장된 직무를 고르거나 새로 등록하세요.</p>
+      <div class="job-list" id="job-list"></div>
+      <button class="btn-link" id="job-add">직무 등록</button>
+
+      <div class="job-form" id="job-form">
+        <div class="stack">
+          <div>
+            <label class="field-label" for="job-title">직무명</label>
+            <input type="text" id="job-title" placeholder="Space마케팅팀 공간운영 기획 및 실행 (과장급)">
+          </div>
+
+          <div>
+            <label class="field-label" for="job-posting">채용공고 원문</label>
+            <textarea id="job-posting" style="min-height:130px;" placeholder="공고를 그대로 붙여넣으세요. 담당업무·자격요건·우대사항이 들어있을수록 항목이 정확해집니다."></textarea>
+            <div style="margin-top:10px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+              <button class="btn-out" id="extract-btn" type="button">평가 항목 뽑기</button>
+              <span style="font-size:12px; color:var(--ink-3);" id="extract-msg">공고를 붙여넣고 누르면 항목 초안이 만들어집니다.</span>
+            </div>
+          </div>
+
+          <div>
+            <div class="crit-head">
+              <label class="field-label">평가 항목</label>
+              <span class="sum" id="crit-sum">합계 0%</span>
+            </div>
+            <div class="crit-list" id="crit-list"></div>
+            <div class="crit-foot">
+              <span>
+                <button class="btn-link" id="crit-add" type="button">항목 추가</button>
+                <button class="btn-link" id="crit-fix" type="button" style="margin-left:16px;">비중 100%로 맞추기</button>
+              </span>
+              <span style="display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--ink-2);">
+                <label for="cutoff" style="margin:0;">합격선</label>
+                <input type="number" id="cutoff" min="0" max="100" step="1" value="70" style="width:70px; text-align:right; font-family:var(--data);">
+                점
+              </span>
+            </div>
+          </div>
+
+          <div class="row" style="justify-content:flex-end;">
+            <button class="btn-out" id="job-cancel" type="button" style="flex:0;">취소</button>
+            <button class="btn" id="job-save" type="button" style="flex:0;">직무 저장</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet" id="crit-card" style="display:none;">
+      <div class="sheet-head">
+        <div>
+          <h2 id="crit-card-title">평가 기준</h2>
+          <p class="desc" style="margin:0;" id="crit-card-sub"></p>
+        </div>
+        <button class="btn-out" id="crit-edit">기준 수정</button>
+      </div>
+      <div class="crit-sum" id="crit-preview"></div>
+    </section>
+  </div>
+
+  <!-- ═══════════ 2 ═══════════ -->
+  <div class="step" id="step-2">
+    <section class="sheet mark">
+      <h2>지원서 불러오기</h2>
+      <p class="desc">지원자마다 시트가 나뉜 지원서 파일, 한 시트에 여러 명이 나열된 파일 모두 읽습니다.</p>
+
+      <div class="drop" id="drop">
+        <div id="drop-label">클릭하거나 파일을 끌어다 놓으세요
+          <span class="hint">xlsx · xls · csv</span>
+        </div>
+        <input type="file" id="file" accept=".xlsx,.xls,.csv" style="display:none;">
+      </div>
+
+      <div id="mode-wrap" style="display:none; margin-top:18px;">
+        <div class="tabs">
+          <button class="tab" id="mode-sheets" type="button">시트마다 한 명</button>
+          <button class="tab" id="mode-rows" type="button">한 시트에 여러 명</button>
+        </div>
+
+        <div id="panel-sheets" style="display:none;">
+          <div class="sheet-bar">
+            <span id="sheet-count">시트 0개</span>
+            <span>
+              <button class="btn-link" id="sheet-all" type="button">전체 선택</button>
+              <button class="btn-link" id="sheet-none" type="button" style="margin-left:14px;">전체 해제</button>
+            </span>
+          </div>
+          <div class="sheet-list" id="sheet-list"></div>
+        </div>
+
+        <div id="panel-rows" style="display:none;">
+          <div class="map-row"><label for="map-sheet">시트</label><select id="map-sheet"></select></div>
+          <div class="map-row"><label for="map-name">이름 열</label><select id="map-name"></select></div>
+          <div class="map-row"><label for="map-cover">자기소개서 열</label><select id="map-cover"></select></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══════════ 3 ═══════════ -->
+  <div class="step" id="step-3">
+    <section class="sheet mark">
+      <h2>이 기준으로 채점합니다</h2>
+      <p class="desc" id="confirm-sub"></p>
+      <div class="crit-sum" id="confirm-crit"></div>
+      <div class="notice" id="confirm-rule"></div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-head">
+        <div><h2>대상자</h2><p class="desc" style="margin:0;" id="confirm-target"></p></div>
+      </div>
+      <div class="names" id="confirm-names"></div>
+    </section>
+
+    <section class="sheet">
+      <div class="sheet-head">
+        <div><h2>예상 비용 · 시간</h2><p class="desc" style="margin:0;">보낼 내용을 그대로 세어 입력량을 구합니다. 세는 것 자체는 과금되지 않습니다.</p></div>
+        <button class="btn-out" id="estimate-btn">다시 계산</button>
+      </div>
+      <div class="stats" id="stats"></div>
+      <div class="notice" id="estimate-msg"></div>
+    </section>
+
+    <section class="sheet">
+      <button class="btn" id="run-btn" style="width:100%; padding:14px; font-size:14.5px;">채점 시작</button>
+      <div class="progress" id="progress">
+        <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+        <div class="progress-label" aria-live="polite"><span id="progress-text">0 / 0</span><span id="progress-pct">0%</span></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══════════ 4 ═══════════ -->
+  <div class="step" id="step-4">
+    <div class="notice" id="restore" style="display:none; margin-top:0; margin-bottom:16px;">
+      <span id="restore-text"></span>
+      <span>
+        <button class="btn-link" id="restore-load">불러오기</button>
+        <button class="btn-link" id="restore-clear" style="margin-left:14px;">지우기</button>
+      </span>
+    </div>
+
+    <section class="sheet mark">
+      <div class="sheet-head">
+        <div><h2>채점 결과</h2><p class="desc" style="margin:0;" id="results-sub"></p></div>
+        <button class="btn-out" id="export-btn">엑셀로 내보내기</button>
+      </div>
+
+      <div id="results-tools" style="display:none;">
+        <div class="filters" id="filters"></div>
+        <div class="sortbar">
+          <label for="sort-key">정렬</label>
+          <select id="sort-key"></select>
+          <button class="btn-link" id="sort-dir">내림차순</button>
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table class="results">
+          <thead>
+            <tr>
+              <th class="rank-cell">#</th>
+              <th class="score-cell sortable" data-sort="total">총점<span class="arrow" id="arr-total"></span></th>
+              <th class="name-cell sortable" data-sort="name">이름<span class="arrow" id="arr-name"></span></th>
+              <th class="verdict-cell sortable" data-sort="verdict">판정<span class="arrow" id="arr-verdict"></span></th>
+              <th>기여도 · 의견</th>
+            </tr>
+          </thead>
+          <tbody id="results-body"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="results-empty">3단계에서 채점을 시작하면 결과가 여기 쌓입니다.</div>
+    </section>
+  </div>
+</div>
+
+<div class="dock">
+  <div class="dock-in">
+    <button class="btn-out" id="prev-btn">이전</button>
+    <span class="dock-hint" id="dock-hint"></span>
+    <button class="btn" id="next-btn">다음</button>
+  </div>
+</div>
+
+<div class="veil" id="key-modal" role="dialog" aria-modal="true" aria-labelledby="key-modal-title">
+  <div class="modal">
+    <h3 id="key-modal-title">Anthropic API 키</h3>
+    <p>키는 이 브라우저의 localStorage에 <b>평문으로</b> 저장됩니다. Anthropic 외부로 전송되지는 않지만, 브라우저 확장프로그램이나 이 페이지의 스크립트는 읽을 수 있습니다. 공용 PC에서는 쓰고 나서 지우세요.</p>
+    <input type="password" id="key-input" placeholder="sk-ant-..." autocomplete="off">
+    <div class="notice" id="key-msg" style="display:none;"></div>
+    <div class="modal-act">
+      <button class="btn-out" id="key-delete" style="color:var(--stamp);">저장된 키 삭제</button>
+      <span style="display:flex; gap:8px;">
+        <button class="btn-out" id="key-close">닫기</button>
+        <button class="btn" id="key-save">확인하고 저장</button>
+      </span>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  const LS_JOBS = 'hr_screener_jobs_v2';
+  const LS_JOBS_OLD = 'hr_screener_jobs_v1';
+  const LS_KEY = 'hr_screener_api_key_v1';
+  const LS_RUN = 'hr_screener_run_v1';
+
+  const MODEL = 'claude-opus-5';
+  const API = 'https://api.anthropic.com/v1';
+  const USD_IN = 5.00;                 // claude-opus-5, per 1M tokens
+  const USD_OUT = 25.00;
+  const KRW_PER_USD = 1380;            // 대략치. 환율이 바뀌면 이 값만 고치세요.
+  const EST_OUT_TOKENS = 900;          // 1명당 예상 출력 토큰 (사고 과정 포함 추정)
+  const SEC_PER_CALL = 22;
+  const CONCURRENCY = 3;
+  const MAX_DOC_CHARS = 30000;
+  const MIN_SHEET_CHARS = 60;
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  const toastEl = $('toast');
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => toastEl.classList.remove('show'), 3200);
+  }
+
+  function apiKey() { return localStorage.getItem(LS_KEY) || ''; }
+
+  // ============================================================
+  //  API
+  // ============================================================
+  function headers(key) {
+    return {
+      'content-type': 'application/json',
+      'x-api-key': key || apiKey(),
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    };
+  }
+
+  async function callClaude(body, signal) {
+    const res = await fetch(API + '/messages', {
+      method: 'POST', headers: headers(), signal,
+      body: JSON.stringify(Object.assign({ model: MODEL }, body))
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.error?.message || ('HTTP ' + res.status));
+    if (data.usage) {
+      runUsage.input += data.usage.input_tokens || 0;
+      runUsage.output += data.usage.output_tokens || 0;
+    }
+    if (data.stop_reason === 'max_tokens') {
+      throw new Error('응답이 길이 제한에서 잘렸습니다. 평가 항목 수를 줄이고 다시 시도하세요.');
+    }
+    return data;
+  }
+
+  function textOf(data) {
+    const block = (data.content || []).find(b => b.type === 'text');
+    if (!block) throw new Error('응답에 본문이 없습니다.');
+    return block.text;
+  }
+
+  function parseJson(text) {
+    const m = text.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+    if (!m) throw new Error('응답을 JSON으로 읽지 못했습니다.');
+    return JSON.parse(m[0]);
+  }
+
+  async function countTokens(system, userMsg, signal) {
+    const res = await fetch(API + '/messages/count_tokens', {
+      method: 'POST', headers: headers(), signal,
+      body: JSON.stringify({ model: MODEL, system, messages: [{ role: 'user', content: userMsg }] })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.error?.message || ('HTTP ' + res.status));
+    return data.input_tokens;
+  }
+
+  // ============================================================
+  //  직무 · 평가 기준
+  // ============================================================
+  let jobs = loadJobs();
+  let selectedJobId = jobs[0]?.id || null;
+
+  function loadJobs() {
+    try {
+      const v2 = JSON.parse(localStorage.getItem(LS_JOBS) || 'null');
+      if (Array.isArray(v2)) return v2;
+    } catch (e) { /* 손상된 데이터는 무시 */ }
+    try {
+      // v1(직무명 + JD 통글)은 형태만 맞춰 살려둔다
+      const v1 = JSON.parse(localStorage.getItem(LS_JOBS_OLD) || '[]');
+      if (Array.isArray(v1) && v1.length) {
+        return v1.map(j => ({ id: j.id, title: j.title, posting: j.jd || '', criteria: [], cutoff: 70 }));
+      }
+    } catch (e) { /* 무시 */ }
+    return [];
+  }
+
+  function saveJobs() { localStorage.setItem(LS_JOBS, JSON.stringify(jobs)); }
+  function currentJob() { return jobs.find(j => j.id === selectedJobId) || null; }
+
+  function renderJobs() {
+    const list = $('job-list');
+    list.innerHTML = '';
+    if (!jobs.length) {
+      const empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.style.cssText = 'padding:4px 0 10px; text-align:left;';
+      empty.textContent = '등록된 직무가 없습니다. 공고를 붙여넣고 첫 직무를 만드세요.';
+      list.appendChild(empty);
+    }
+    jobs.forEach(job => {
+      const chip = document.createElement('div');
+      chip.className = 'job-chip' + (job.id === selectedJobId ? ' active' : '');
+      const label = document.createElement('span');
+      label.textContent = job.title;
+      label.addEventListener('click', () => {
+        selectedJobId = job.id; closeJobForm(); renderJobs(); renderCritPreview(); sync();
+      });
+      const edit = document.createElement('button');
+      edit.textContent = '수정';
+      edit.setAttribute('aria-label', job.title + ' 기준 수정');
+      edit.addEventListener('click', (e) => { e.stopPropagation(); selectedJobId = job.id; renderJobs(); openJobForm(job); });
+      const del = document.createElement('button');
+      del.textContent = '×';
+      del.setAttribute('aria-label', job.title + ' 삭제');
+      del.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const n = job.criteria.length;
+        if (!confirm(`"${job.title}" 직무를 삭제합니다.\n공고 원문과 평가 항목 ${n}개가 함께 사라지고, 되돌릴 수 없습니다.`)) return;
+        jobs = jobs.filter(j => j.id !== job.id);
+        if (selectedJobId === job.id) selectedJobId = jobs[0]?.id || null;
+        saveJobs(); renderJobs(); renderCritPreview(); sync();
+        toast('직무를 삭제했습니다.');
+      });
+      chip.append(label, edit, del);
+      list.appendChild(chip);
+    });
+  }
+
+  function renderCritPreview() {
+    const job = currentJob();
+    const card = $('crit-card');
+    if (!job || $('job-form').classList.contains('open')) { card.style.display = 'none'; return; }
+    card.style.display = 'block';
+    $('crit-card-title').textContent = job.title;
+    const sum = job.criteria.reduce((a, c) => a + (Number(c.weight) || 0), 0);
+    $('crit-card-sub').textContent = job.criteria.length
+      ? `${job.criteria.length}개 항목 · 비중 합계 ${sum}% · 합격선 ${job.cutoff}점`
+      : '평가 항목이 없습니다. [기준 수정]에서 공고를 붙여넣고 항목을 뽑으세요.';
+
+    const box = $('crit-preview');
+    box.innerHTML = '';
+    if (!job.criteria.length) {
+      box.innerHTML = '<div class="empty">아직 항목이 없습니다.</div>';
+      return;
+    }
+    job.criteria.forEach(c => box.appendChild(critSumRow(c)));
+  }
+
+  function critSumRow(c) {
+    const row = document.createElement('div');
+    row.className = 'crit-sum-row';
+    row.innerHTML =
+      `<span class="kind ${esc(c.kind)}">${esc(c.kind)}</span>` +
+      `<span class="cs-label">${esc(c.label)}${c.desc ? `<span class="cs-desc">${esc(c.desc)}</span>` : ''}</span>` +
+      `<span class="cs-w">${Number(c.weight) || 0}%</span>`;
+    return row;
+  }
+
+  // ---- 편집 폼 ----
+  let editingJobId = null;
+  let draftCriteria = [];
+  let critSeq = 0;
+  let formTouched = false;
+
+  const newCrit = (kind, label, desc, weight) => ({
+    id: 'c' + (++critSeq), kind: kind || '공통',
+    label: label || '', desc: desc || '', weight: Number(weight) || 0
+  });
+
+  function openJobForm(job) {
+    editingJobId = job ? job.id : null;
+    $('job-title').value = job ? job.title : '';
+    $('job-posting').value = job ? (job.posting || '') : '';
+    $('cutoff').value = job ? (job.cutoff ?? 70) : 70;
+    critSeq = 0;
+    draftCriteria = job && job.criteria.length ? job.criteria.map(c => newCrit(c.kind, c.label, c.desc, c.weight)) : [];
+    formTouched = false;
+    $('extract-msg').textContent = '공고를 붙여넣고 누르면 항목 초안이 만들어집니다.';
+    renderCritEditor();
+    $('job-form').classList.add('open');
+    $('crit-card').style.display = 'none';
+    $('job-title').focus();
+  }
+
+  function closeJobForm() {
+    editingJobId = null;
+    formTouched = false;
+    $('job-form').classList.remove('open');
+    renderCritPreview();
+  }
+
+  $('job-form').addEventListener('input', () => { formTouched = true; });
+
+  function renderCritEditor() {
+    const list = $('crit-list');
+    list.innerHTML = '';
+    if (!draftCriteria.length) {
+      list.innerHTML = '<div class="empty" style="padding:20px 10px;">공고를 붙여넣고 [평가 항목 뽑기]를 누르거나, 아래 [항목 추가]로 직접 만드세요.</div>';
+    }
+    draftCriteria.forEach(c => {
+      const row = document.createElement('div');
+      row.className = 'crit-row';
+
+      const kind = document.createElement('select');
+      kind.setAttribute('aria-label', '구분');
+      ['필수', '우대', '공통'].forEach(k => {
+        const o = document.createElement('option'); o.value = k; o.textContent = k; kind.appendChild(o);
+      });
+      kind.value = c.kind;
+      kind.addEventListener('change', () => { c.kind = kind.value; formTouched = true; });
+
+      const main = document.createElement('div');
+      main.className = 'crit-main';
+      const label = document.createElement('input');
+      label.type = 'text'; label.value = c.label;
+      label.placeholder = '항목명 — 예: 공간운영 실무 경력 3년 이상';
+      label.setAttribute('aria-label', '항목명');
+      label.addEventListener('input', () => { c.label = label.value; });
+      const desc = document.createElement('input');
+      desc.type = 'text'; desc.className = 'crit-desc'; desc.value = c.desc;
+      desc.placeholder = '지원서에서 무엇을 근거로 볼지 (선택)';
+      desc.setAttribute('aria-label', '판단 근거');
+      desc.addEventListener('input', () => { c.desc = desc.value; });
+      main.append(label, desc);
+
+      const w = document.createElement('input');
+      w.type = 'number'; w.className = 'crit-weight'; w.min = '0'; w.max = '100'; w.step = '1'; w.value = c.weight;
+      w.setAttribute('aria-label', '비중 퍼센트');
+      w.addEventListener('input', () => { c.weight = Number(w.value) || 0; updateSum(); });
+
+      const del = document.createElement('button');
+      del.type = 'button'; del.className = 'crit-del'; del.textContent = '×';
+      del.setAttribute('aria-label', '항목 삭제');
+      del.addEventListener('click', () => {
+        draftCriteria = draftCriteria.filter(x => x.id !== c.id);
+        formTouched = true; renderCritEditor();
+      });
+
+      row.append(kind, main, w, del);
+      list.appendChild(row);
+    });
+    updateSum();
+  }
+
+  const draftSum = () => draftCriteria.reduce((a, c) => a + (Number(c.weight) || 0), 0);
+
+  function updateSum() {
+    const sum = draftSum();
+    const el = $('crit-sum');
+    el.textContent = '합계 ' + sum + '%';
+    el.classList.toggle('off', sum !== 100);
+  }
+
+  $('crit-add').addEventListener('click', () => { draftCriteria.push(newCrit()); formTouched = true; renderCritEditor(); });
+
+  $('crit-fix').addEventListener('click', () => {
+    if (!draftCriteria.length) return;
+    const sum = draftSum();
+    if (sum <= 0) {
+      const even = Math.floor(100 / draftCriteria.length);
+      draftCriteria.forEach(c => c.weight = even);
+    } else {
+      draftCriteria.forEach(c => c.weight = Math.round((Number(c.weight) || 0) / sum * 100));
+    }
+    const diff = 100 - draftSum();   // 반올림 오차는 비중이 가장 큰 항목이 흡수
+    if (diff !== 0) {
+      const top = draftCriteria.reduce((a, b) => (b.weight > a.weight ? b : a), draftCriteria[0]);
+      top.weight = Math.max(0, top.weight + diff);
+    }
+    formTouched = true;
+    renderCritEditor();
+  });
+
+  $('job-add').addEventListener('click', () => openJobForm(null));
+  $('crit-edit').addEventListener('click', () => { const j = currentJob(); if (j) openJobForm(j); });
+  $('job-cancel').addEventListener('click', () => {
+    if (formTouched && !confirm('작성 중인 내용을 버리고 닫습니다.')) return;
+    closeJobForm();
+  });
+
+  $('job-save').addEventListener('click', () => {
+    const title = $('job-title').value.trim();
+    const posting = $('job-posting').value.trim();
+    const cutoff = Math.min(100, Math.max(0, Number($('cutoff').value) || 0));
+    const criteria = draftCriteria.filter(c => c.label.trim()).map(c => ({
+      kind: c.kind, label: c.label.trim(), desc: c.desc.trim(), weight: Number(c.weight) || 0
+    }));
+
+    if (!title) { toast('직무명을 입력하세요.'); $('job-title').focus(); return; }
+    if (!criteria.length) { toast('평가 항목을 최소 1개 만드세요.'); return; }
+    const sum = criteria.reduce((a, c) => a + c.weight, 0);
+    if (sum !== 100 && !confirm(`비중 합계가 ${sum}%입니다.\n100%가 아니어도 총점은 ${sum} 기준으로 환산됩니다. 이대로 저장할까요?`)) return;
+
+    if (editingJobId) {
+      Object.assign(jobs.find(j => j.id === editingJobId), { title, posting, criteria, cutoff });
+    } else {
+      const job = { id: 'job_' + Date.now(), title, posting, criteria, cutoff };
+      jobs.push(job);
+      selectedJobId = job.id;
+    }
+    saveJobs(); closeJobForm(); renderJobs(); renderCritPreview(); sync();
+    toast('직무를 저장했습니다.');
+  });
+
+  // ---- 공고 → 항목 ----
+  const EXTRACT_SYSTEM = `당신은 채용 공고를 읽고 서류전형 평가 항목을 설계하는 HR 전문가입니다.
+주어진 공고에서 지원서로 판별 가능한 평가 항목을 5~8개 뽑으세요.
+
+규칙:
+- kind는 "필수"(자격요건에 명시), "우대"(우대사항), "공통"(직무 무관 공통 역량) 중 하나입니다.
+- label은 20자 이내로 구체적으로 씁니다. 연차·규모 같은 정량 조건이 공고에 있으면 label에 포함하세요.
+- desc는 지원서에서 무엇을 근거로 볼지 한 문장으로 씁니다.
+- weight는 정수이며 전체 합이 정확히 100이어야 합니다. 필수 항목에 더 큰 비중을 주세요.
+- 학력·나이·성별처럼 차별 소지가 있는 항목은 만들지 마세요.
+
+다른 텍스트 없이 아래 JSON만 출력하세요:
+{"criteria":[{"kind":"필수","label":"...","desc":"...","weight":30}]}`;
+
+  $('extract-btn').addEventListener('click', async () => {
+    const posting = $('job-posting').value.trim();
+    if (!posting) { toast('채용공고 원문을 먼저 붙여넣으세요.'); $('job-posting').focus(); return; }
+    if (!apiKey()) { toast('API 키를 먼저 등록하세요.'); openKeyModal(); return; }
+    if (draftCriteria.length &&
+        !confirm(`지금 만들어둔 항목 ${draftCriteria.length}개를 새 초안으로 덮어씁니다.\n손으로 고친 내용은 사라집니다. 계속할까요?`)) return;
+
+    const btn = $('extract-btn');
+    btn.disabled = true;
+    $('extract-msg').innerHTML = '<span class="spin"></span>공고를 읽고 항목을 뽑는 중';
+    try {
+      const data = await callClaude({
+        max_tokens: 2000, system: EXTRACT_SYSTEM,
+        output_config: { effort: 'medium' },
+        messages: [{ role: 'user', content: '채용공고:\n' + posting }]
+      });
+      const parsed = parseJson(textOf(data));
+      const arr = Array.isArray(parsed) ? parsed : (parsed.criteria || []);
+      if (!arr.length) throw new Error('공고에서 평가 항목을 찾지 못했습니다. 담당업무·자격요건이 포함됐는지 확인하세요.');
+      critSeq = 0;
+      draftCriteria = arr.map(c => newCrit(['필수', '우대', '공통'].includes(c.kind) ? c.kind : '공통', c.label, c.desc, c.weight));
+      formTouched = true;
+      renderCritEditor();
+      if (!$('job-title').value.trim()) {
+        const first = posting.split('\n').map(s => s.trim()).find(s => s);
+        if (first) $('job-title').value = first.slice(0, 60);
+      }
+      $('extract-msg').textContent = `${arr.length}개 항목을 만들었습니다. 내용과 비중을 확인하고 고치세요.`;
+    } catch (err) {
+      $('extract-msg').textContent = err.message;
+      toast(err.message);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // ============================================================
+  //  API 키
+  // ============================================================
+  let lastFocused = null;
+  const keyModal = $('key-modal');
+
+  const maskKey = (k) => (!k ? '' : (k.length > 12 ? k.slice(0, 7) + '…' + k.slice(-4) : '설정됨'));
+
+  function openKeyModal() {
+    lastFocused = document.activeElement;
+    const k = apiKey();
+    $('key-input').value = k;
+    const msg = $('key-msg');
+    if (k) {
+      msg.style.display = 'flex'; msg.className = 'notice ok';
+      msg.textContent = '키가 저장되어 있습니다 — ' + maskKey(k);
+    } else {
+      msg.style.display = 'none';
+    }
+    keyModal.classList.add('show');
+    $('key-input').focus();
+  }
+
+  function closeKeyModal() {
+    keyModal.classList.remove('show');
+    if (lastFocused && lastFocused.focus) lastFocused.focus();
+  }
+
+  $('key-btn').addEventListener('click', openKeyModal);
+  $('key-notice-btn').addEventListener('click', openKeyModal);
+  $('key-close').addEventListener('click', closeKeyModal);
+  keyModal.addEventListener('click', (e) => { if (e.target === keyModal) closeKeyModal(); });
+
+  $('key-delete').addEventListener('click', () => {
+    if (!apiKey()) { toast('저장된 키가 없습니다.'); return; }
+    if (!confirm('저장된 API 키를 이 브라우저에서 지웁니다.')) return;
+    localStorage.removeItem(LS_KEY);
+    $('key-input').value = '';
+    const msg = $('key-msg');
+    msg.style.display = 'flex'; msg.className = 'notice'; msg.textContent = '키를 지웠습니다.';
+    sync();
+  });
+
+  $('key-save').addEventListener('click', async () => {
+    const key = $('key-input').value.trim();
+    const msg = $('key-msg');
+    msg.style.display = 'flex';
+    if (!key) { msg.className = 'notice alert'; msg.textContent = '키를 입력하세요.'; return; }
+
+    const btn = $('key-save');
+    btn.disabled = true;
+    msg.className = 'notice';
+    msg.innerHTML = '<span class="spin"></span>키를 확인하는 중';
+    try {
+      // 토큰 세기로 검증한다 — 과금되지 않는다
+      const res = await fetch(API + '/messages/count_tokens', {
+        method: 'POST', headers: headers(key),
+        body: JSON.stringify({ model: MODEL, messages: [{ role: 'user', content: '.' }] })
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d?.error?.message || ('HTTP ' + res.status));
+      }
+      localStorage.setItem(LS_KEY, key);
+      msg.className = 'notice ok';
+      msg.textContent = '확인했습니다. 키를 저장했습니다.';
+      sync();
+      setTimeout(closeKeyModal, 700);
+    } catch (err) {
+      msg.className = 'notice alert';
+      msg.textContent = '이 키로는 요청이 거절됐습니다 — ' + err.message;
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (!keyModal.classList.contains('show')) return;
+    if (e.key === 'Escape') { e.preventDefault(); closeKeyModal(); return; }
+    if (e.key !== 'Tab') return;
+    const f = keyModal.querySelectorAll('button, input, select, textarea, [href]');
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  });
+
+  // ============================================================
+  //  업로드 · 파싱
+  // ============================================================
+  let workbook = null;
+  let mode = 'sheets';
+  let sheetDocs = [];
+  let sheetRows = null;
+  let headersRow = [];
+  let fileName = '';
+
+  const drop = $('drop');
+  const fileInput = $('file');
+  drop.addEventListener('click', () => fileInput.click());
+  drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('has'); });
+  drop.addEventListener('dragleave', () => { if (!workbook) drop.classList.remove('has'); });
+  drop.addEventListener('drop', (e) => {
+    e.preventDefault();
+    if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', () => { if (fileInput.files[0]) handleFile(fileInput.files[0]); });
+
+  function handleFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        workbook = XLSX.read(e.target.result, { type: 'array' });
+        if (!workbook.SheetNames.length) { toast('이 파일에는 시트가 없습니다.'); return; }
+        fileName = file.name;
+        buildSheetDocs();
+        populateSheetSelect();
+        loadRowSheet(workbook.SheetNames[0]);
+        mode = workbook.SheetNames.length > 1 ? 'sheets' : 'rows';   // 시트가 여럿이면 시트당 1명
+        drop.classList.add('has');
+        $('mode-wrap').style.display = 'block';
+        estimate = null;
+        applyMode();
+      } catch (err) {
+        toast('이 파일을 열지 못했습니다. xlsx·xls·csv인지 확인하세요. (' + err.message + ')');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  // 시트 한 장을 통째로 텍스트로 눌러 담는다 (지원서 양식 대응)
+  function sheetToText(sheetName) {
+    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {
+      header: 1, defval: '', blankrows: false, raw: false
+    });
+    const lines = [];
+    rows.forEach(row => {
+      const cells = row.map(c => String(c ?? '').replace(/[ \t]+/g, ' ').trim()).filter(c => c !== '');
+      // 값이 전부 '-'(미입력)인 줄은 버린다
+      if (cells.length && cells.some(c => c !== '-')) lines.push(cells.join(' | '));
+    });
+    let text = lines.join('\n');
+    if (text.length > MAX_DOC_CHARS) text = text.slice(0, MAX_DOC_CHARS) + '\n…(이하 생략)';
+    return text;
+  }
+
+  // 시트 안에 "이름 | 홍길동" 형태가 있으면 그걸 쓰고, 없으면 시트명을 이름으로
+  function guessNameInSheet(sheetName, text) {
+    const m = text.match(/^(?:이름|성명|성\s*명|지원자명?)\s*\|\s*([^\n|]+)/m);
+    const v = m && m[1].trim();
+    return (v && v.length <= 20) ? v : sheetName;
+  }
+
+  function buildSheetDocs() {
+    sheetDocs = workbook.SheetNames.map(n => {
+      const text = sheetToText(n);
+      return {
+        sheet: n, name: guessNameInSheet(n, text), text, chars: text.length,
+        picked: text.length >= MIN_SHEET_CHARS   // 표지·요약 등 거의 빈 시트는 자동 해제
+      };
+    });
+    renderSheetList();
+  }
+
+  function renderSheetList() {
+    const list = $('sheet-list');
+    list.innerHTML = '';
+    sheetDocs.forEach(s => {
+      const row = document.createElement('label');
+      row.className = 'sheet-item';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox'; cb.checked = s.picked;
+      cb.addEventListener('change', () => { s.picked = cb.checked; estimate = null; updateSheetCount(); sync(); });
+      const nm = document.createElement('span');
+      nm.className = 's-name'; nm.textContent = s.name;
+      const peek = document.createElement('span');
+      peek.className = 's-peek';
+      peek.textContent = s.name === s.sheet ? (s.text.split('\n')[1] || '') : '시트: ' + s.sheet;
+      const meta = document.createElement('span');
+      meta.className = 's-meta'; meta.textContent = s.chars.toLocaleString() + '자';
+      row.append(cb, nm, peek, meta);
+      list.appendChild(row);
+    });
+    updateSheetCount();
+  }
+
+  function updateSheetCount() {
+    const picked = sheetDocs.filter(s => s.picked).length;
+    $('sheet-count').textContent = `시트 ${sheetDocs.length}개 중 ${picked}개 선택`;
+    updateDropLabel();
+  }
+
+  $('sheet-all').addEventListener('click', () => { sheetDocs.forEach(s => s.picked = true); estimate = null; renderSheetList(); sync(); });
+  $('sheet-none').addEventListener('click', () => { sheetDocs.forEach(s => s.picked = false); estimate = null; renderSheetList(); sync(); });
+
+  function populateSheetSelect() {
+    const sel = $('map-sheet');
+    sel.innerHTML = '';
+    workbook.SheetNames.forEach(n => {
+      const o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o);
+    });
+    sel.value = workbook.SheetNames[0];
+  }
+
+  $('map-sheet').addEventListener('change', () => { loadRowSheet($('map-sheet').value); estimate = null; sync(); });
+  $('map-name').addEventListener('change', () => { estimate = null; sync(); });
+  $('map-cover').addEventListener('change', () => { estimate = null; sync(); });
+
+  function loadRowSheet(sheetName) {
+    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, defval: '', raw: false });
+    if (!rows.length) { headersRow = []; sheetRows = []; populateMapping(); return; }
+    headersRow = rows[0].map(h => String(h).trim());
+    sheetRows = rows.slice(1).filter(r => r.some(c => String(c).trim() !== ''));
+    populateMapping();
+  }
+
+  function guessColumn(patterns) {
+    const i = headersRow.findIndex(h => patterns.some(p => h.includes(p)));
+    return i >= 0 ? i : 0;
+  }
+
+  function populateMapping() {
+    const nameSel = $('map-name'), coverSel = $('map-cover');
+    nameSel.innerHTML = ''; coverSel.innerHTML = '';
+    headersRow.forEach((h, i) => {
+      const t = h || `(${i + 1}번째 열)`;
+      const o1 = document.createElement('option'); o1.value = i; o1.textContent = t; nameSel.appendChild(o1);
+      const o2 = document.createElement('option'); o2.value = i; o2.textContent = t; coverSel.appendChild(o2);
+    });
+    nameSel.value = guessColumn(['이름', '성명', 'name', 'Name']);
+    coverSel.value = guessColumn(['자기소개', '자소서', '지원동기', 'cover', 'Cover']);
+  }
+
+  $('mode-sheets').addEventListener('click', () => { mode = 'sheets'; estimate = null; applyMode(); });
+  $('mode-rows').addEventListener('click', () => { mode = 'rows'; estimate = null; applyMode(); });
+
+  function applyMode() {
+    $('mode-sheets').classList.toggle('active', mode === 'sheets');
+    $('mode-rows').classList.toggle('active', mode === 'rows');
+    $('panel-sheets').style.display = mode === 'sheets' ? 'block' : 'none';
+    $('panel-rows').style.display = mode === 'rows' ? 'block' : 'none';
+    updateDropLabel();
+    sync();
+  }
+
+  function updateDropLabel() {
+    if (!workbook) return;
+    $('drop-label').innerHTML = esc(fileName) +
+      `<span class="hint">${candidates().length}명 불러옴 · 클릭하면 다른 파일로 바꿉니다</span>`;
+  }
+
+  function candidates() {
+    if (!workbook) return [];
+    if (mode === 'sheets') return sheetDocs.filter(s => s.picked).map(s => ({ name: s.name, doc: s.text }));
+    if (!sheetRows || !headersRow.length) return [];
+    const ni = Number($('map-name').value), ci = Number($('map-cover').value);
+    return sheetRows.map(row => ({
+      name: String(row[ni] ?? '').trim() || '(이름 없음)',
+      doc: String(row[ci] ?? '').trim()
+    }));
+  }
+
+  // ============================================================
+  //  채점 프롬프트
+  // ============================================================
+  const SCREEN_SYSTEM = `당신은 채용 서류 스크리너입니다. 주어진 평가 항목 하나하나에 대해, 지원서에 실제로 적힌 내용만을 근거로 판정하세요.
+지원서는 엑셀 지원서 양식을 텍스트로 옮긴 것이라 "항목 | 값" 형태가 섞여 있습니다. 형식이 아니라 내용으로 판단하세요.
+
+규칙:
+- 평가 항목의 id를 모두 포함하고, 주어진 순서를 그대로 유지하세요.
+- score는 0~100 정수입니다. 총점은 계산하지 마세요. 비중을 적용한 총점은 시스템이 직접 계산합니다.
+- level은 "충족", "부분충족", "미충족" 중 하나입니다.
+- evidence에는 판단의 근거가 된 지원서 문장을 원문 그대로 옮기세요. 지어내거나 요약하지 마세요.
+  근거가 지원서에 없으면 evidence를 빈 문자열로 두고 level을 "미충족"으로 하세요.
+- note는 그 점수를 준 이유를 한 문장으로 씁니다.
+
+다른 텍스트 없이 아래 JSON만 출력하세요:
+{"criteria":[{"id":"c1","score":80,"level":"충족","evidence":"지원서 원문 인용","note":"한 문장 근거"}],"strengths":["..."],"weaknesses":["..."],"reason":"한두 문장 종합 의견"}`;
+
+  function buildUserMsg(job, cand) {
+    const lines = job.criteria.map((c, i) =>
+      `c${i + 1} [${c.kind}, 비중 ${c.weight}%] ${c.label}${c.desc ? ' — ' + c.desc : ''}`
+    ).join('\n');
+    return `[직무] ${job.title}
+
+[평가 항목]
+${lines}
+
+[지원자] ${cand.name}
+
+[지원서]
+${cand.doc || '(내용 없음)'}`;
+  }
+
+  // ============================================================
+  //  실행 전 확인
+  // ============================================================
+  let estimate = null;
+
+  function renderConfirm() {
+    const job = currentJob();
+    const cands = candidates();
+    const sum = job ? job.criteria.reduce((a, c) => a + c.weight, 0) : 0;
+
+    $('confirm-sub').textContent = job
+      ? `${job.title} · ${job.criteria.length}개 항목 · 비중 합계 ${sum}%`
+      : '직무가 선택되지 않았습니다.';
+
+    const box = $('confirm-crit');
+    box.innerHTML = '';
+    (job?.criteria || []).forEach(c => box.appendChild(critSumRow(c)));
+
+    const hasMust = (job?.criteria || []).some(c => c.kind === '필수');
+    const cut = job?.cutoff ?? 70;
+    const rule = $('confirm-rule');
+    rule.className = 'notice' + (sum !== 100 ? ' alert' : '');
+    rule.innerHTML = `<span><b>채점</b> — AI는 항목별 점수만 매기고, 총점은 이 화면의 비중으로 브라우저가 계산합니다` +
+      (sum !== 100 ? ` (합계가 ${sum}%이므로 ${sum} 기준 환산).` : '.') +
+      `<br><b>판정</b> — ${cut}점 이상 추천, ${Math.max(0, cut - 15)}점 이상 보류, 그 아래 비추천.` +
+      (hasMust ? `<br><b>필수 항목</b>이 하나라도 미충족이면 점수와 무관하게 비추천으로 내립니다.` : '') +
+      `</span>`;
+
+    $('confirm-target').textContent = workbook
+      ? `${fileName} · ${mode === 'sheets' ? '시트마다 한 명' : '한 시트에 여러 명'} · ${cands.length}명`
+      : '지원서 파일이 없습니다.';
+    const names = $('confirm-names');
+    names.innerHTML = '';
+    cands.forEach(c => { const s = document.createElement('span'); s.textContent = c.name; names.appendChild(s); });
+    if (!cands.length) names.textContent = '선택된 지원자가 없습니다.';
+
+    renderEstimate();
+  }
+
+  function renderEstimate() {
+    const grid = $('stats'), msg = $('estimate-msg');
+    const cands = candidates();
+
+    if (!estimate) {
+      grid.innerHTML = `<div class="stat"><div class="k">대상</div><div class="v">${cands.length}<span class="u">명</span></div><div class="s">계산 전</div></div>`;
+      msg.className = 'notice';
+      msg.textContent = '3단계에 들어오면 자동으로 계산합니다. 지원자나 기준을 바꾸면 [다시 계산]을 누르세요.';
+      return;
+    }
+
+    const e = estimate;
+    grid.innerHTML = `
+      <div class="stat"><div class="k">대상</div><div class="v">${e.people}<span class="u">명</span></div><div class="s">1인 평균 ${Math.round(e.inTok / Math.max(1, e.people)).toLocaleString()} 토큰</div></div>
+      <div class="stat"><div class="k">입력</div><div class="v">${e.inTok.toLocaleString()}</div><div class="s">실측</div></div>
+      <div class="stat"><div class="k">출력</div><div class="v">${e.outTok.toLocaleString()}</div><div class="s">1인 ${EST_OUT_TOKENS} 추정</div></div>
+      <div class="stat"><div class="k">비용</div><div class="v">$${e.usd.toFixed(2)}</div><div class="s">약 ₩${Math.round(e.krw).toLocaleString()}</div></div>
+      <div class="stat"><div class="k">시간</div><div class="v">${fmtSec(e.sec)}</div><div class="s">동시 ${CONCURRENCY}건</div></div>`;
+    msg.className = 'notice';
+    msg.innerHTML = `<span>입력은 실측, 출력은 추정입니다. 실제 금액은 응답 길이에 따라 달라집니다.
+      단가는 ${MODEL} 기준 입력 $${USD_IN.toFixed(2)} / 출력 $${USD_OUT.toFixed(2)} per 1M 토큰, 환율 ₩${KRW_PER_USD.toLocaleString()}/$.</span>`;
+  }
+
+  function fmtSec(sec) {
+    if (sec < 60) return Math.round(sec) + '초';
+    const m = Math.floor(sec / 60), s = Math.round(sec % 60);
+    return s ? `${m}분 ${s}초` : `${m}분`;
+  }
+
+  $('estimate-btn').addEventListener('click', () => runEstimate(true));
+
+  async function runEstimate(force) {
+    const job = currentJob(), cands = candidates();
+    if (!job || !cands.length || !apiKey()) return;
+    if (estimate && !force) return;
+
+    const btn = $('estimate-btn');
+    btn.disabled = true;
+    $('stats').innerHTML = `<div class="stat"><div class="k">계산 중</div><div class="v"><span class="spin"></span></div><div class="s">${cands.length}명</div></div>`;
+    try {
+      let inTok = 0, cursor = 0;
+      await Promise.all(Array.from({ length: Math.min(4, cands.length) }, async () => {
+        while (cursor < cands.length) {
+          inTok += await countTokens(SCREEN_SYSTEM, buildUserMsg(job, cands[cursor++]));
+        }
+      }));
+      const outTok = cands.length * EST_OUT_TOKENS;
+      const usd = inTok / 1e6 * USD_IN + outTok / 1e6 * USD_OUT;
+      estimate = {
+        people: cands.length, inTok, outTok, usd,
+        krw: usd * KRW_PER_USD,
+        sec: Math.ceil(cands.length / CONCURRENCY) * SEC_PER_CALL
+      };
+      renderEstimate();
+    } catch (err) {
+      estimate = null;
+      renderEstimate();
+      const msg = $('estimate-msg');
+      msg.className = 'notice alert';
+      msg.textContent = '토큰을 세지 못했습니다 — ' + err.message;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // ============================================================
+  //  채점
+  // ============================================================
+  let results = [];
+  let runJob = null;                       // 채점에 실제로 쓰인 기준 (결과와 함께 보관)
+  let runUsage = { input: 0, output: 0 };
+  let running = false;
+  let abortCtl = null;
+
+  async function analyze(job, cand, signal) {
+    const data = await callClaude({
+      max_tokens: 4000, system: SCREEN_SYSTEM,
+      output_config: { effort: 'medium' },
+      messages: [{ role: 'user', content: buildUserMsg(job, cand) }]
+    }, signal);
+    return parseJson(textOf(data));
+  }
+
+  // AI는 항목 점수만 준다. 총점·판정은 여기서 계산한다.
+  function scoreOf(job, parsed) {
+    const byId = {};
+    (parsed.criteria || []).forEach(c => { byId[String(c.id).trim()] = c; });
+
+    const rows = job.criteria.map((c, i) => {
+      const got = byId['c' + (i + 1)] || {};
+      return {
+        kind: c.kind, label: c.label, weight: c.weight,
+        score: Math.min(100, Math.max(0, Number(got.score) || 0)),
+        level: ['충족', '부분충족', '미충족'].includes(got.level) ? got.level : '미충족',
+        evidence: String(got.evidence || '').trim(),
+        note: String(got.note || '').trim()
+      };
+    });
+
+    const wsum = rows.reduce((a, r) => a + r.weight, 0);
+    const total = wsum > 0 ? Math.round(rows.reduce((a, r) => a + r.score * r.weight, 0) / wsum) : 0;
+    const mustFail = rows.some(r => r.kind === '필수' && r.level === '미충족');
+
+    let verdict;
+    if (mustFail) verdict = '비추천';
+    else if (total >= job.cutoff) verdict = '추천';
+    else if (total >= job.cutoff - 15) verdict = '보류';
+    else verdict = '비추천';
+
+    return { rows, total, verdict, mustFail, wsum };
+  }
+
+  // 인용된 근거가 지원서에 실제로 있는지 대조한다.
+  // 판정을 깎지는 않는다 — 사람이 확인할 지점을 표시할 뿐이다.
+  const norm = (s) => String(s || '').replace(/[\s|"'“”‘’]/g, '');
+
+  function verifyEvidence(doc, evidence) {
+    if (!evidence) return 'none';
+    if (!doc) return 'unknown';
+    return norm(doc).includes(norm(evidence)) ? 'ok' : 'missing';
+  }
+
+  function applyVerification(r) {
+    (r.rows || []).forEach(row => { row.verify = verifyEvidence(r.doc, row.evidence); });
+    r.unverified = (r.rows || []).filter(row => row.verify === 'missing').length;
+  }
+
+  $('run-btn').addEventListener('click', async () => {
+    if (running) { abortCtl?.abort(); return; }
+
+    const job = currentJob(), cands = candidates();
+    if (!job || !job.criteria.length) { toast('평가 항목이 있는 직무를 선택하세요.'); return; }
+    if (!cands.length) { toast('채점할 지원자가 없습니다.'); return; }
+    if (!apiKey()) { toast('API 키를 먼저 등록하세요.'); openKeyModal(); return; }
+
+    running = true;
+    abortCtl = new AbortController();
+    runJob = { title: job.title, criteria: job.criteria.map(c => ({ ...c })), cutoff: job.cutoff };
+    runUsage = { input: 0, output: 0 };
+    results = cands.map(c => ({ name: c.name, doc: c.doc, loading: true, error: null, stopped: false }));
+
+    filterVerdict = 'all';
+    buildResultsTable();
+    goStep(4);
+
+    const btn = $('run-btn');
+    btn.textContent = '중단';
+    btn.classList.add('danger');
+    $('progress').classList.add('show');
+    let done = 0;
+    const total = results.length;
+    setProgress(done, total);
+
+    let cursor = 0;
+    async function worker() {
+      while (cursor < results.length && !abortCtl.signal.aborted) {
+        const r = results[cursor++];
+        try {
+          const parsed = await analyze(runJob, { name: r.name, doc: r.doc }, abortCtl.signal);
+          Object.assign(r, scoreOf(runJob, parsed), {
+            strengths: parsed.strengths || [],
+            weaknesses: parsed.weaknesses || [],
+            reason: parsed.reason || '',
+            loading: false
+          });
+          applyVerification(r);
+        } catch (err) {
+          r.loading = false;
+          if (err.name === 'AbortError') r.stopped = true;
+          else r.error = err.message;
+        }
+        done++;
+        setProgress(done, total);
+        updateRow(r);
+        refreshMeta();
+      }
+      // 중단된 뒤 남은 건은 대기 상태로 두지 않는다
+      while (cursor < results.length) {
+        const r = results[cursor++];
+        r.loading = false; r.stopped = true;
+        updateRow(r);
+      }
+    }
+    const wasAborted = () => abortCtl.signal.aborted;
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, total) }, worker));
+
+    running = false;
+    btn.textContent = '채점 시작';
+    btn.classList.remove('danger');
+    applyOrder();
+    refreshMeta();
+    saveRun();
+    sync();
+    toast(wasAborted() ? '채점을 중단했습니다.' : '채점을 마쳤습니다.');
+  });
+
+  function setProgress(done, total) {
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    $('progress-fill').style.width = pct + '%';
+    $('progress-text').textContent = `${done} / ${total}`;
+    $('progress-pct').textContent = pct + '%';
+  }
+
+  async function retryOne(r) {
+    if (!runJob) return;
+    if (!r.doc) { toast('지원서 원문이 없어 다시 채점할 수 없습니다. 파일을 다시 올려 주세요.'); return; }
+    r.loading = true; r.error = null; r.stopped = false;
+    updateRow(r);
+    try {
+      const parsed = await analyze(runJob, { name: r.name, doc: r.doc });
+      Object.assign(r, scoreOf(runJob, parsed), {
+        strengths: parsed.strengths || [], weaknesses: parsed.weaknesses || [],
+        reason: parsed.reason || '', loading: false
+      });
+      applyVerification(r);
+    } catch (err) {
+      r.loading = false; r.error = err.message;
+    }
+    updateRow(r);
+    refreshMeta();
+    saveRun();
+  }
+
+  // ============================================================
+  //  결과 저장 · 복원
+  // ============================================================
+  function saveRun() {
+    if (!results.length) return;
+    const snap = {
+      savedAt: new Date().toISOString(),
+      model: MODEL, fileName, mode,
+      usage: runUsage,
+      job: runJob,
+      docs: true,
+      results: results.map(r => ({
+        name: r.name, doc: r.doc, total: r.total, verdict: r.verdict, mustFail: r.mustFail,
+        wsum: r.wsum, rows: r.rows, strengths: r.strengths, weaknesses: r.weaknesses,
+        reason: r.reason, error: r.error, stopped: r.stopped, unverified: r.unverified
+      }))
+    };
+    try {
+      localStorage.setItem(LS_RUN, JSON.stringify(snap));
+    } catch (e) {
+      try {   // 용량이 넘치면 지원서 원문을 빼고 다시 저장한다
+        snap.docs = false;
+        snap.results.forEach(r => { r.doc = ''; });
+        localStorage.setItem(LS_RUN, JSON.stringify(snap));
+      } catch (e2) {
+        toast('결과가 너무 커서 저장하지 못했습니다. 엑셀로 내보내 두세요.');
+      }
+    }
+  }
+
+  function readSnapshot() {
+    try { return JSON.parse(localStorage.getItem(LS_RUN) || 'null'); }
+    catch (e) { return null; }
+  }
+
+  function renderRestoreBanner() {
+    const snap = readSnapshot();
+    const el = $('restore');
+    if (!snap || !snap.results?.length || results.length) { el.style.display = 'none'; return; }
+    const d = new Date(snap.savedAt);
+    const p = (n) => String(n).padStart(2, '0');
+    const when = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+    $('restore-text').innerHTML =
+      `<b>${esc(snap.job?.title || '이전 채점')}</b> · ${when} · ${snap.results.length}명` +
+      (snap.docs === false ? ' · 지원서 원문이 빠져 다시 채점·근거 대조는 할 수 없습니다' : '');
+    el.style.display = 'flex';
+  }
+
+  $('restore-load').addEventListener('click', () => {
+    const snap = readSnapshot();
+    if (!snap) return;
+    runJob = snap.job;
+    runUsage = snap.usage || { input: 0, output: 0 };
+    fileName = snap.fileName || '';
+    results = snap.results.map(r => ({ ...r, loading: false }));
+    filterVerdict = 'all';
+    buildResultsTable();
+    applyOrder();
+    refreshMeta();
+    $('restore').style.display = 'none';
+    sync();
+    toast('저장해둔 결과를 불러왔습니다.');
+  });
+
+  $('restore-clear').addEventListener('click', () => {
+    if (!confirm('저장된 채점 결과를 지웁니다. 되돌릴 수 없습니다.')) return;
+    localStorage.removeItem(LS_RUN);
+    $('restore').style.display = 'none';
+    toast('저장된 결과를 지웠습니다.');
+  });
+
+  // ============================================================
+  //  결과 표 — 행은 한 번만 만들고 이후에는 갱신한다
+  // ============================================================
+  const nodeOf = new Map();     // result -> {tr, detail}
+  let sortKey = 'total';
+  let sortDir = 'desc';
+  let filterVerdict = 'all';
+
+  function buildResultsTable() {
+    const body = $('results-body');
+    body.innerHTML = '';
+    nodeOf.clear();
+
+    results.forEach((r, i) => {
+      const tr = document.createElement('tr');
+      tr.className = 'main';
+      const detail = document.createElement('tr');
+      detail.className = 'detail';
+      detail.id = 'detail-' + i;
+      detail.innerHTML = '<td colspan="5"></td>';
+      body.append(tr, detail);
+      nodeOf.set(r, { tr, detail });
+      updateRow(r);
+    });
+
+    buildSortOptions();
+    refreshMeta();
+  }
+
+  function toggleRow(r) {
+    const n = nodeOf.get(r);
+    if (!n) return;
+    r.expanded = !r.expanded;
+    n.detail.classList.toggle('open', !!r.expanded);
+    n.tr.classList.toggle('open', !!r.expanded);
+    const btn = n.tr.querySelector('.row-toggle');
+    if (btn) btn.setAttribute('aria-expanded', r.expanded ? 'true' : 'false');
+  }
+
+  function updateRow(r) {
+    const n = nodeOf.get(r);
+    if (!n) return;
+    const { tr, detail } = n;
+    const done = !r.loading && !r.error && !r.stopped;
+
+    tr.innerHTML = `
+      <td class="rank-cell">
+        <button class="row-toggle" type="button" aria-expanded="${r.expanded ? 'true' : 'false'}" aria-controls="${detail.id}">
+          <span class="chev">▸</span><span class="rk">${r.rank ?? ''}</span>
+          <span class="sr-only">${esc(r.name)} 상세 보기</span>
+        </button>
+      </td>
+      <td class="score-cell">${done ? r.total : '<span style="color:var(--ink-3);font-size:14px;">—</span>'}</td>
+      <td class="name-cell">${esc(r.name)}</td>
+      <td class="verdict-cell">${
+        r.loading ? '<span class="mark wait">채점 중</span>' :
+        r.stopped ? '<span class="mark wait">중단됨</span>' :
+        r.error ? '<span class="mark err">오류</span>' :
+        `<span class="mark ${esc(r.verdict)}">${esc(r.verdict)}</span>` +
+          (r.mustFail ? ' <span class="flag">필수 미충족</span>' : '')
+      }</td>
+      <td class="summary-cell">${
+        done ? tallyHtml(r) + `<span class="line">${esc(r.reason || '')}</span>` :
+        r.error ? `<span class="line">${esc(r.error)}</span>` :
+        r.stopped ? '<span class="line">중단되어 채점하지 않았습니다.</span>' :
+        '<span class="line" style="color:var(--ink-3);">대기 중</span>'
+      }</td>`;
+
+    tr.querySelector('.row-toggle').addEventListener('click', (e) => { e.stopPropagation(); toggleRow(r); });
+    tr.addEventListener('click', () => toggleRow(r));
+
+    detail.classList.toggle('open', !!r.expanded);
+    tr.classList.toggle('open', !!r.expanded);
+    detail.querySelector('td').innerHTML = detailHtml(r);
+    const retry = detail.querySelector('.retry');
+    if (retry) retry.addEventListener('click', (e) => { e.stopPropagation(); retryOne(r); });
+  }
+
+  // 시그니처 — 항목마다 (점수 × 비중 ÷ 비중합) 만큼 왼쪽부터 채운다.
+  // 채워진 총 길이가 곧 총점이고, 눈금이 합격선이다.
+  function tallyHtml(r) {
+    const wsum = r.wsum || (r.rows || []).reduce((a, x) => a + x.weight, 0);
+    if (!wsum) return '';
+    const cut = runJob?.cutoff ?? 70;
+    const segs = (r.rows || []).map(row => {
+      const w = row.score * row.weight / wsum;   // 이 항목이 총점에 기여한 몫
+      if (w <= 0) return '';
+      return `<div class="tally-seg ${esc(row.level)}" style="width:${w}%" title="${esc(row.label)} · ${row.score}점 × ${row.weight}% = ${w.toFixed(1)}점"></div>`;
+    }).join('');
+    return `<div class="tally" role="img" aria-label="총점 ${r.total}점, 합격선 ${cut}점">${segs}<div class="tally-cut" style="left:${cut}%"></div></div>`;
+  }
+
+  function detailHtml(r) {
+    if (r.error || r.stopped) {
+      return `<div style="padding:12px 0;">
+        <span class="line">${esc(r.error || '중단되어 채점하지 않았습니다.')}</span>
+        <button class="btn-link retry" type="button" style="margin-left:12px;">다시 채점</button>
+      </div>`;
+    }
+    if (r.loading) return '';
+
+    const wsum = r.wsum || (r.rows || []).reduce((a, x) => a + x.weight, 0) || 100;
+    const crits = (r.rows || []).map(row => {
+      const contrib = (row.score * row.weight / wsum).toFixed(1);
+      let evi;
+      if (!row.evidence) {
+        evi = `<span class="cr-evi unverified" style="color:var(--stamp);">지원서에서 근거를 찾지 못했습니다.</span>`;
+      } else if (row.verify === 'missing') {
+        evi = `<span class="cr-evi unverified">“${esc(row.evidence)}”<span class="flag">원문 미확인</span></span>`;
+      } else {
+        evi = `<span class="cr-evi">“${esc(row.evidence)}”</span>`;
+      }
+      return `<div class="cr">
+        <span class="kind ${esc(row.kind)}">${esc(row.kind)}</span>
+        <span>
+          <span class="cr-label">${esc(row.label)}</span><span class="cr-level ${esc(row.level)}">${esc(row.level)}</span>
+          ${evi}
+          ${row.note ? `<span class="cr-note">${esc(row.note)}</span>` : ''}
+        </span>
+        <span class="cr-score">${row.score} <span style="color:var(--ink-3);font-weight:400;">/ ${row.weight}%</span><span class="calc">기여 ${contrib}점</span></span>
+      </div>`;
+    }).join('');
+
+    return crits + `
+      <div class="detail-grid">
+        <div><h4>강점</h4><ul>${(r.strengths || []).map(s => `<li>${esc(s)}</li>`).join('') || '<li>—</li>'}</ul></div>
+        <div><h4>약점</h4><ul>${(r.weaknesses || []).map(s => `<li>${esc(s)}</li>`).join('') || '<li>—</li>'}</ul></div>
+        <div class="verdict-box">${esc(r.reason || '')}</div>
+      </div>`;
+  }
+
+  // ---- 정렬 · 필터 ----
+  function buildSortOptions() {
+    const sel = $('sort-key');
+    sel.innerHTML = '';
+    const opts = [['total', '총점'], ['name', '이름'], ['verdict', '판정']];
+    (runJob?.criteria || []).forEach((c, i) => opts.push(['crit:' + i, c.label]));
+    opts.forEach(([v, t]) => {
+      const o = document.createElement('option'); o.value = v; o.textContent = t; sel.appendChild(o);
+    });
+    if (!opts.some(([v]) => v === sortKey)) sortKey = 'total';
+    sel.value = sortKey;
+  }
+
+  function sortValue(r) {
+    if (sortKey === 'name') return r.name;
+    if (sortKey === 'verdict') return ({ '추천': 3, '보류': 2, '비추천': 1 })[r.verdict] ?? 0;
+    if (sortKey.startsWith('crit:')) return r.rows?.[Number(sortKey.slice(5))]?.score ?? -1;
+    return r.total ?? -1;
+  }
+
+  function sortedResults() {
+    const dir = sortDir === 'asc' ? 1 : -1;
+    return [...results].sort((a, b) => {
+      const va = sortValue(a), vb = sortValue(b);
+      if (typeof va === 'string' || typeof vb === 'string') {
+        return String(va).localeCompare(String(vb), 'ko') * dir;
+      }
+      return (va - vb) * dir;
+    });
+  }
+
+  function visible(r) {
+    if (filterVerdict === 'all') return true;
+    if (filterVerdict === 'error') return !!(r.error || r.stopped);
+    return r.verdict === filterVerdict && !r.error && !r.stopped;
+  }
+
+  function applyOrder() {
+    const body = $('results-body');
+    let rank = 0;
+    sortedResults().forEach(r => {
+      const n = nodeOf.get(r);
+      if (!n) return;
+      const show = visible(r);
+      n.tr.style.display = show ? '' : 'none';
+      // 상세 행은 open 클래스가 표시를 맡는다. 숨길 때만 인라인으로 눌러둔다.
+      n.detail.style.display = show ? '' : 'none';
+      if (show && !r.error && !r.stopped && !r.loading) { rank++; r.rank = rank; } else r.rank = null;
+      const rk = n.tr.querySelector('.rk');
+      if (rk) rk.textContent = r.rank ?? '';
+      body.append(n.tr, n.detail);
+    });
+  }
+
+  function refreshMeta() {
+    const doneList = results.filter(r => !r.loading && !r.error && !r.stopped);
+    const counts = {
+      all: results.length,
+      추천: results.filter(r => r.verdict === '추천' && !r.error && !r.stopped).length,
+      보류: results.filter(r => r.verdict === '보류' && !r.error && !r.stopped).length,
+      비추천: results.filter(r => r.verdict === '비추천' && !r.error && !r.stopped).length,
+      error: results.filter(r => r.error || r.stopped).length
+    };
+
+    const unver = doneList.reduce((a, r) => a + (r.unverified || 0), 0);
+    $('results-sub').innerHTML = results.length
+      ? `${esc(runJob?.title || '')} · ${results.length}명 중 ${doneList.length}명 채점` +
+        (unver ? ` · <span style="color:var(--stamp);font-weight:700;">근거 미확인 ${unver}건</span>` : '')
+      : '';
+
+    const bar = $('filters');
+    bar.innerHTML = '';
+    [['all', '전체'], ['추천', '추천'], ['보류', '보류'], ['비추천', '비추천'], ['error', '오류·중단']].forEach(([k, t]) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'filter' + (filterVerdict === k ? ' active' : '');
+      b.innerHTML = `${t}<span class="n">${counts[k]}</span>`;
+      b.disabled = counts[k] === 0 && k !== 'all';
+      b.addEventListener('click', () => { filterVerdict = k; applyOrder(); refreshMeta(); });
+      bar.appendChild(b);
+    });
+
+    ['total', 'name', 'verdict'].forEach(k => {
+      $('arr-' + k).textContent = sortKey === k ? (sortDir === 'asc' ? '↑' : '↓') : '';
+    });
+    $('sort-dir').textContent = sortDir === 'asc' ? '오름차순' : '내림차순';
+    $('results-empty').style.display = results.length ? 'none' : 'block';
+    $('results-tools').style.display = results.length ? 'block' : 'none';
+  }
+
+  document.querySelectorAll('th.sortable').forEach(th => {
+    th.addEventListener('click', () => {
+      const k = th.dataset.sort;
+      if (sortKey === k) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+      else { sortKey = k; sortDir = k === 'name' ? 'asc' : 'desc'; }
+      $('sort-key').value = sortKey;
+      applyOrder(); refreshMeta();
+    });
+  });
+
+  $('sort-key').addEventListener('change', () => { sortKey = $('sort-key').value; applyOrder(); refreshMeta(); });
+  $('sort-dir').addEventListener('click', () => { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; applyOrder(); refreshMeta(); });
+
+  // ---- 내보내기 ----
+  $('export-btn').addEventListener('click', () => {
+    if (!results.length) { toast('내보낼 결과가 없습니다.'); return; }
+    const rows = sortedResults().map((r, i) => {
+      const base = {
+        '순위': (r.error || r.stopped) ? '' : i + 1,
+        '이름': r.name,
+        '총점': (r.error || r.stopped) ? '' : r.total,
+        '판정': r.error ? '오류' : r.stopped ? '중단' : r.verdict + (r.mustFail ? ' (필수 미충족)' : '')
+      };
+      (runJob?.criteria || []).forEach((c, ci) => {
+        const row = r.rows?.[ci];
+        base[`${c.label} (${c.weight}%)`] = row ? `${row.score} / ${row.level}` : '';
+        base[`${c.label} 근거`] = row ? (row.evidence + (row.verify === 'missing' ? ' [원문 미확인]' : '')) : '';
+      });
+      base['강점'] = (r.strengths || []).join(' / ');
+      base['약점'] = (r.weaknesses || []).join(' / ');
+      base['종합의견'] = r.error ? r.error : r.reason;
+      return base;
+    });
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '채점결과');
+    XLSX.writeFile(wb, `채용스크리닝_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  });
+
+  // ============================================================
+  //  단계 이동
+  // ============================================================
+  let step = 1;
+
+  function ready(n) {
+    const job = currentJob();
+    if (n === 1) return true;
+    if (n === 2) return !!(job && job.criteria.length);
+    if (n === 3) return ready(2) && candidates().length > 0;
+    if (n === 4) return results.length > 0;
+    return false;
+  }
+
+  function why(n) {
+    const job = currentJob();
+    if (n === 2) {
+      if (!job) return '직무를 선택하거나 등록하세요.';
+      if (!job.criteria.length) return '평가 항목이 없습니다. [기준 수정]에서 항목을 만드세요.';
+    }
+    if (n === 3) {
+      if (!workbook) return '지원서 엑셀 파일을 올리세요.';
+      if (!candidates().length) return mode === 'sheets'
+        ? '채점할 시트를 최소 1개 선택하세요.'
+        : '선택한 시트에서 지원자 행을 찾지 못했습니다.';
+    }
+    if (n === 4) return '아직 채점 결과가 없습니다.';
+    return '';
+  }
+
+  function goStep(n) {
+    if (n > step && !ready(n)) { toast(why(n)); return; }
+    step = n;
+    document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+    $('step-' + n).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (n === 3) { renderConfirm(); runEstimate(false); }
+    if (n === 4) renderRestoreBanner();
+    sync();
+  }
+
+  document.querySelectorAll('.stepnav-item').forEach(btn => {
+    btn.addEventListener('click', () => goStep(Number(btn.dataset.step)));
+  });
+  $('prev-btn').addEventListener('click', () => { if (step > 1) goStep(step - 1); });
+  $('next-btn').addEventListener('click', () => { if (step < 4) goStep(step + 1); });
+
+  function sync() {
+    document.querySelectorAll('.stepnav-item').forEach(btn => {
+      const n = Number(btn.dataset.step);
+      btn.classList.toggle('active', n === step);
+      btn.classList.toggle('done', n < step && ready(n));
+      btn.disabled = n > step && !ready(n);
+      if (n === step) btn.setAttribute('aria-current', 'step');
+      else btn.removeAttribute('aria-current');
+    });
+
+    $('key-notice').style.display = apiKey() ? 'none' : 'flex';
+    $('prev-btn').style.visibility = step === 1 ? 'hidden' : 'visible';
+    const next = $('next-btn');
+    next.style.visibility = step === 4 ? 'hidden' : 'visible';
+    next.disabled = step < 4 && !ready(step + 1);
+
+    const hint = $('dock-hint');
+    if (!apiKey()) hint.textContent = 'API 키를 먼저 등록하세요.';
+    else if (step === 3) {
+      const job = currentJob();
+      hint.textContent = running
+        ? '채점 중 — 언제든 중단할 수 있습니다.'
+        : `${job ? job.title + ' 기준 · ' : ''}${candidates().length}명 채점 준비 완료`;
+    }
+    else if (step === 4) hint.textContent = running ? '채점 중' : '행을 열면 항목별 점수와 근거가 보입니다.';
+    else if (step < 4 && !ready(step + 1)) hint.textContent = why(step + 1);
+    else hint.textContent = '';
+
+    if (step === 3 && !running) $('run-btn').disabled = !ready(3);
+  }
+
+  // 진행 중이거나 작성 중인 내용이 있으면 떠날 때 알린다
+  window.addEventListener('beforeunload', (e) => {
+    if (running || ($('job-form').classList.contains('open') && formTouched)) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+
+  // ============================================================
+  //  시작
+  // ============================================================
+  renderJobs();
+  renderCritPreview();
+  if (!jobs.length) openJobForm(null);
+  goStep(1);
+  if (readSnapshot()?.results?.length) {
+    toast('저장해둔 채점 결과가 있습니다. 4단계에서 불러오세요.');
+  }
+})();
+</script>
+</body>
+</html>
