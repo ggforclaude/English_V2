@@ -323,6 +323,17 @@ test('한 요소에 display 를 정하는 클래스가 둘 이상 붙지 않는�
   assert.deepStrictEqual(offenders, [], '레이아웃이 서로 덮어쓰는 조합:\n  ' + offenders.join('\n  '));
 });
 
+test('flex 축약형으로 기준 폭을 0으로 만들지 않는다', () => {
+  // `flex: 0` 은 grow:0 shrink:1 basis:0 이다. 기준 폭이 0인데 늘어나지도 않으니
+  // min-width 바닥까지 없으면 요소가 패딩만 남게 눌리고, 한글은 한 글자씩 쪼개진다.
+  // 버튼을 그렇게 눌러 "직무 저장"이 네 줄로 쪼개진 적이 있다. 쓰려면 `flex: 0 0 auto`.
+  const hits = [...SRC.matchAll(/flex\s*:\s*0\s*(?=[;"}])/g)].map(m => {
+    const line = SRC.slice(0, m.index).split('\n').length;
+    return `${line}행: ${SRC.slice(m.index, m.index + 40).split('\n')[0]}`;
+  });
+  assert.deepStrictEqual(hits, [], 'flex: 0 0 auto 로 바꾸세요:\n  ' + hits.join('\n  '));
+});
+
 test('SheetJS를 취약점이 고쳐진 배포처·버전에서 받는다', () => {
   // 0.19.2 이하는 CVE-2023-30533(프로토타입 오염) 영향 범위이고,
   // 패치본은 npm·cdnjs가 아니라 cdn.sheetjs.com 에만 있다.
