@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>채용 스크리너</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" as="style" crossorigin
@@ -81,7 +81,7 @@
     background: none; border: none; border-right: 1px solid var(--rule-2);
     padding: 11px 14px;
     font-family: inherit; font-size: 12.5px; font-weight: 500;
-    color: var(--ink-3); cursor: pointer; text-align: left; white-space: nowrap;
+    color: var(--ink-3); cursor: pointer; text-align: left; white-space: nowrap; min-height: 44px;
   }
   .stepnav-item:last-child { border-right: none; }
   .stepnav-item:disabled { cursor: not-allowed; }
@@ -128,7 +128,7 @@
   }
 
   input[type="text"], input[type="password"], input[type="number"], textarea, select {
-    width: 100%; font-family: inherit; font-size: 13.5px; color: var(--ink);
+    width: 100%; font-family: inherit; font-size: 16px; color: var(--ink);
     background: var(--sheet-2); border: 1px solid var(--rule); border-radius: 0;
     padding: 9px 11px;
   }
@@ -150,7 +150,7 @@
 
   .btn {
     background: var(--ink); color: var(--sheet); border: 1px solid var(--ink);
-    padding: 10px 20px; font-size: 13.5px; font-weight: 700; letter-spacing: -0.01em;
+    padding: 10px 20px; font-size: 13.5px; font-weight: 700; letter-spacing: -0.01em; min-height: 44px; display: inline-flex; align-items: center;
   }
   .btn:hover { background: #000; }
   .btn:disabled { background: var(--rule); border-color: var(--rule); color: #fff; cursor: not-allowed; }
@@ -159,15 +159,15 @@
 
   .btn-out {
     background: transparent; color: var(--ink); border: 1px solid var(--rule);
-    padding: 9px 15px; font-size: 12.5px; font-weight: 500;
+    padding: 9px 15px; font-size: 12.5px; font-weight: 500; min-height: 44px; display: inline-flex; align-items: center;
   }
   .btn-out:hover { border-color: var(--ink); background: var(--sheet-2); }
   .btn-out:disabled { color: var(--ink-3); cursor: not-allowed; border-color: var(--rule-2); }
 
   .btn-link {
     background: none; border: none; color: var(--ink);
-    font-size: 12.5px; font-weight: 700; padding: 2px 0;
-    border-bottom: 1px solid var(--rule);
+    font-size: 12.5px; font-weight: 700; padding: 10px 0;
+    border-bottom: 1px solid var(--rule); min-height: 44px; display: inline-flex; align-items: center;
   }
   .btn-link:hover { border-bottom-color: var(--ink); }
   .btn-link:disabled { color: var(--ink-3); cursor: not-allowed; border-bottom-color: transparent; }
@@ -194,7 +194,7 @@
   .job-chip.active { border-color: var(--ink); border-left-width: 3px; background: var(--sheet); font-weight: 700; }
   .job-chip button {
     background: none; border: none; color: var(--ink-3);
-    font-size: 11px; line-height: 1; padding: 4px 5px;
+    font-size: 11px; line-height: 1; padding: 10px 8px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center;
   }
   .job-chip button:hover { color: var(--stamp); background: var(--stamp-bg); }
 
@@ -214,7 +214,7 @@
   .crit-row input, .crit-row select { padding: 7px 9px; font-size: 13px; }
   .crit-row .crit-desc { font-size: 12px; color: var(--ink-2); }
   .crit-row .crit-weight { text-align: right; font-family: var(--font); font-variant-numeric: tabular-nums; }
-  .crit-del { background: none; border: none; color: var(--ink-3); font-size: 15px; line-height: 1; padding: 8px 5px; }
+  .crit-del { background: none; border: none; color: var(--ink-3); font-size: 15px; line-height: 1; padding: 10px 8px; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; }
   .crit-del:hover { color: var(--stamp); background: var(--stamp-bg); }
 
   .crit-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
@@ -257,7 +257,7 @@
   .tabs { display: inline-flex; border: 1px solid var(--rule); margin-bottom: 4px; }
   .tab {
     background: var(--sheet-2); border: none; border-right: 1px solid var(--rule);
-    padding: 8px 15px; font-size: 12.5px; font-weight: 500; color: var(--ink-2);
+    padding: 10px 15px; font-size: 12.5px; font-weight: 500; color: var(--ink-2); min-height: 44px; display: flex; align-items: center;
   }
   .tab:last-child { border-right: none; }
   .tab:hover { color: var(--ink); }
@@ -302,7 +302,7 @@
   .filters { display: flex; gap: 0; flex-wrap: wrap; border: 1px solid var(--rule); margin-bottom: 4px; }
   .filter {
     background: var(--sheet-2); border: none; border-right: 1px solid var(--rule);
-    padding: 7px 14px; font-size: 12.5px; font-weight: 500; color: var(--ink-2);
+    padding: 10px 14px; font-size: 12.5px; font-weight: 500; color: var(--ink-2); min-height: 44px; display: flex; align-items: center;
   }
   .filter:last-child { border-right: none; }
   .filter .n { font-family: var(--font); font-variant-numeric: tabular-nums; font-size: 11.5px; margin-left: 5px; color: var(--ink-3); }
@@ -420,7 +420,7 @@
   /* ---------- 하단 조작대 ---------- */
   .dock {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
-    background: var(--sheet); border-top: 2px solid var(--ink); padding: 12px 24px;
+    background: var(--sheet); border-top: 2px solid var(--ink); padding: 12px 24px 12px calc(24px + env(safe-area-inset-bottom));
   }
   .dock-in { max-width: 1000px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
   .dock-hint { font-size: 12.5px; color: var(--ink-2); min-width: 0; }
@@ -453,7 +453,9 @@
     .wrap { padding: 28px 16px 132px; }
     .detail-grid { grid-template-columns: 1fr; }
     .map-row { grid-template-columns: 1fr; }
-    .crit-row { grid-template-columns: 72px 1fr 54px 24px; }
+    .crit-row { grid-template-columns: 1fr; gap: 6px; }
+    .crit-row .crit-main { flex-direction: row; align-items: center; }
+    .crit-row input { max-width: 100%; }
     .stepnav-item { flex: 0 0 auto; padding: 10px 11px; }
     .stepnav-item .lbl { display: none; }
     .stepnav-item.active { flex: 1 0 auto; }
