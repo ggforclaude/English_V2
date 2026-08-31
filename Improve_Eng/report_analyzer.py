@@ -297,6 +297,14 @@ def _build_report_html(weak_areas: list, overall_progress: dict, supplemental: d
 
     supplemental_html = ""
     for item in supplemental.get("weak_areas", [])[:3]:
+        practice_html = "".join([
+            f"""<div class="q">
+                <p><strong>Q:</strong> {q.get('question', '')}</p>
+                <p><strong>A:</strong> {q.get('correct_answer', '')}</p>
+                <p><em>{q.get('explanation', '')}</em></p>
+            </div>"""
+            for q in item.get('practice_questions', [])
+        ])
         supplemental_html += f"""
         <div class="supplemental-card">
             <h3>{item.get('domain', 'Unknown').upper()}</h3>
@@ -306,11 +314,7 @@ def _build_report_html(weak_areas: list, overall_progress: dict, supplemental: d
             <details>
                 <summary>연습 문제 보기</summary>
                 <div class="practice-questions">
-                    {"".join([f"""<div class="q">
-                        <p><strong>Q:</strong> {q.get('question', '')}</p>
-                        <p><strong>A:</strong> {q.get('correct_answer', '')}</p>
-                        <p><em>{q.get('explanation', '')}</em></p>
-                    </div>""" for q in item.get('practice_questions', [])])}
+                    {practice_html}
                 </div>
             </details>
         </div>
