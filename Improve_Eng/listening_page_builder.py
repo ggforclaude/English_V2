@@ -1,39 +1,30 @@
 """
 듣기 페이지 생성
 /today/listening 페이지를 빌드합니다.
+초급(1분) + 뉴스(3~5분) 두 섹션, 음원 플레이어 + 스크립트 토글
 """
 import pathlib
 import json
 from datetime import date
 
 
-def build_listening_page(
-    today: date,
-    voa_content: dict,
-) -> str:
+def build_listening_page(today: date, listening_content: dict) -> str:
     """듣기 페이지 생성."""
-    page_path = _save_listening_html(
-        today=today,
-        voa_content=voa_content,
-    )
+    page_path = _save_listening_html(today=today, listening_content=listening_content)
     return page_path
 
 
-def _save_listening_html(
-    today: date,
-    voa_content: dict,
-) -> str:
+def _save_listening_html(today: date, listening_content: dict) -> str:
     """HTML 파일로 저장."""
     base = pathlib.Path(__file__).parent.parent / "docs" / "today" / "listening"
     base.mkdir(parents=True, exist_ok=True)
     out = base / "index.html"
 
-    voa_json = json.dumps(voa_content, ensure_ascii=False, indent=2)
-    title = voa_content.get("title", "Listening Content")
-    source = voa_content.get("source", "VOA Learning English")
-    audio_url = voa_content.get("audio_url", "")
-    link = voa_content.get("link", "")
-    text = voa_content.get("text", "")
+    beginner = listening_content.get("beginner", {})
+    news = listening_content.get("news", {})
+
+    beginner_json = json.dumps(beginner.get("vocabulary", []), ensure_ascii=False)
+    news_json = json.dumps(news.get("vocabulary", []), ensure_ascii=False)
 
     html = f"""<!DOCTYPE html>
 <html lang="ko">
@@ -56,7 +47,7 @@ def _save_listening_html(
         }}
 
         .container {{
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             background: white;
             border-radius: 10px;
@@ -67,143 +58,241 @@ def _save_listening_html(
         .header {{
             background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
             color: white;
-            padding: 30px;
+            padding: 40px 30px;
             text-align: center;
         }}
 
         .header h1 {{
             font-size: 2.5em;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }}
 
         .header p {{
             font-size: 1.1em;
-            opacity: 0.9;
-        }}
-
-        .source {{
-            font-size: 0.95em;
-            background: rgba(255,255,255,0.2);
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            margin-top: 10px;
+            opacity: 0.95;
         }}
 
         .content {{
-            padding: 30px;
+            padding: 40px;
         }}
 
-        .section {{
-            margin-bottom: 30px;
+        .listening-section {{
+            margin-bottom: 50px;
         }}
 
-        .section-title {{
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #fa709a;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
+        .section-header {{
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
             border-bottom: 3px solid #fa709a;
         }}
 
-        .audio-player {{
+        .section-icon {{
+            font-size: 2.5em;
+            margin-right: 20px;
+        }}
+
+        .section-info h2 {{
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 5px;
+        }}
+
+        .section-info p {{
+            color: #666;
+            font-size: 0.95em;
+        }}
+
+        .difficulty-badge {{
+            display: inline-block;
+            background: #fa709a;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-left: 10px;
+            font-weight: bold;
+        }}
+
+        .difficulty-badge.beginner {{
+            background: #4CAF50;
+        }}
+
+        .difficulty-badge.intermediate {{
+            background: #2196F3;
+        }}
+
+        .player-container {{
             background: #f8f9fa;
             border: 2px solid #e9ecef;
             border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }}
+
+        .player-title {{
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.05em;
         }}
 
         audio {{
             width: 100%;
             margin-bottom: 15px;
-            border-radius: 5px;
+            height: 40px;
         }}
 
-        .audio-info {{
+        .player-info {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             color: #666;
-            font-size: 0.95em;
-            margin-bottom: 10px;
+            font-size: 0.9em;
+            padding: 10px 0;
+            border-top: 1px solid #e9ecef;
+            padding-top: 15px;
         }}
 
-        .transcript {{
-            background: #f0f4ff;
-            border-left: 4px solid #fa709a;
-            padding: 20px;
-            border-radius: 5px;
-            line-height: 1.8;
-            color: #333;
-            max-height: 400px;
-            overflow-y: auto;
-        }}
-
-        .transcript-title {{
-            font-weight: bold;
-            color: #fa709a;
-            margin-bottom: 15px;
-        }}
-
-        .word-note {{
-            background: white;
-            padding: 15px;
-            border-radius: 5px;
-            border-left: 3px solid #fee140;
-            margin-top: 20px;
-            font-size: 0.95em;
-            color: #666;
-            line-height: 1.6;
-        }}
-
-        .learning-tips {{
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 20px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }}
-
-        .tips-title {{
-            font-weight: bold;
-            color: #1976d2;
-            margin-bottom: 10px;
-        }}
-
-        .tips-list {{
-            list-style: none;
-            padding-left: 0;
-        }}
-
-        .tips-list li {{
-            padding: 8px 0;
-            color: #333;
-            position: relative;
-            padding-left: 25px;
-        }}
-
-        .tips-list li:before {{
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #2196f3;
-            font-weight: bold;
-        }}
-
-        .external-link {{
+        .source-link {{
             display: inline-block;
-            padding: 12px 30px;
             background: #fa709a;
             color: white;
-            text-decoration: none;
+            padding: 8px 15px;
             border-radius: 5px;
-            font-weight: bold;
-            margin-top: 15px;
+            text-decoration: none;
+            font-size: 0.9em;
             transition: background 0.3s;
         }}
 
-        .external-link:hover {{
-            background: #f04060;
+        .source-link:hover {{
+            background: #f55b7a;
+        }}
+
+        .script-toggle {{
+            background: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }}
+
+        .script-header {{
+            padding: 15px 20px;
+            background: #f8f9fa;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            color: #333;
+            transition: background 0.3s;
+        }}
+
+        .script-header:hover {{
+            background: #e9ecef;
+        }}
+
+        .script-toggle-icon {{
+            font-size: 1.3em;
+            transition: transform 0.3s;
+        }}
+
+        .script-toggle.open .script-toggle-icon {{
+            transform: rotate(180deg);
+        }}
+
+        .script-content {{
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            padding: 0 20px;
+        }}
+
+        .script-toggle.open .script-content {{
+            max-height: 500px;
+            transition: max-height 0.3s ease-in;
+        }}
+
+        .script-text {{
+            padding: 20px 0;
+            line-height: 1.8;
+        }}
+
+        .script-ko {{
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 1em;
+        }}
+
+        .script-en {{
+            color: #666;
+            font-size: 0.95em;
+            font-style: italic;
+            border-top: 2px solid #f0f0f0;
+            padding-top: 20px;
+        }}
+
+        .vocabulary-section {{
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }}
+
+        .vocabulary-title {{
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }}
+
+        .vocabulary-list {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }}
+
+        .vocab-item {{
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 12px;
+            font-size: 0.9em;
+        }}
+
+        .vocab-word {{
+            font-weight: bold;
+            color: #fa709a;
+            margin-bottom: 5px;
+        }}
+
+        .vocab-meaning {{
+            color: #666;
+        }}
+
+        .learning-points {{
+            background: #f8f9fa;
+            border-left: 4px solid #fa709a;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }}
+
+        .learning-points-title {{
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+        }}
+
+        .learning-points-list {{
+            list-style-position: inside;
+            color: #666;
+            font-size: 0.95em;
+        }}
+
+        .learning-points-list li {{
+            margin-bottom: 8px;
         }}
 
         .navigation {{
@@ -226,26 +315,34 @@ def _save_listening_html(
         }}
 
         .nav-button:hover {{
-            background: #f04060;
-        }}
-
-        .empty-message {{
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            color: #856404;
-            padding: 20px;
-            border-radius: 5px;
-            text-align: center;
-            margin-bottom: 20px;
+            background: #f55b7a;
         }}
 
         @media (max-width: 768px) {{
-            .header h1 {{
-                font-size: 1.8em;
+            .content {{
+                padding: 20px;
             }}
 
-            .transcript {{
-                max-height: 300px;
+            .header {{
+                padding: 25px 15px;
+            }}
+
+            .header h1 {{
+                font-size: 2em;
+            }}
+
+            .section-header {{
+                flex-direction: column;
+                align-items: flex-start;
+            }}
+
+            .section-icon {{
+                margin-right: 0;
+                margin-bottom: 10px;
+            }}
+
+            .vocabulary-list {{
+                grid-template-columns: 1fr;
             }}
         }}
     </style>
@@ -254,64 +351,174 @@ def _save_listening_html(
     <div class="container">
         <div class="header">
             <h1>🎧 오늘의 듣기</h1>
-            <p>{title}</p>
-            <div class="source">📻 {source}</div>
+            <p>음원 듣고 스크립트로 확인하세요</p>
         </div>
 
         <div class="content">
-            <div class="learning-tips">
-                <div class="tips-title">💡 효과적인 듣기 팁</div>
-                <ul class="tips-list">
-                    <li>먼저 자막 없이 한 번 들어보세요</li>
-                    <li>모르는 단어는 나중에 확인하고 계속 들으세요</li>
-                    <li>같은 내용을 여러 번 반복해서 들으세요</li>
-                    <li>가능하면 따라 말해보세요 (Shadowing)</li>
-                </ul>
-            </div>
-
-            {f'''
-            <div class="section">
-                <div class="section-title">🎵 오디오</div>
-                <div class="audio-player">
-                    <audio controls>
-                        <source src="{audio_url}" type="audio/mpeg">
-                        당신의 브라우저는 audio 요소를 지원하지 않습니다.
-                    </audio>
-                    <div class="audio-info">
-                        듣기 난이도: 약 2-3분 | {source}
+            <!-- 초급 섹션 -->
+            <div class="listening-section">
+                <div class="section-header">
+                    <div class="section-icon">🟢</div>
+                    <div class="section-info">
+                        <div>
+                            <h2>{beginner.get('title', 'Beginner Listening')}</h2>
+                            <p>{beginner.get('topic', '')}</p>
+                            <span class="difficulty-badge beginner">{beginner.get('difficulty', 'Beginner')}</span>
+                        </div>
                     </div>
-                    {f'<a href="{link}" class="external-link" target="_blank">원본 페이지 방문</a>' if link else ''}
                 </div>
-            </div>
-            ''' if audio_url else f'''
-            <div class="empty-message">
-                <strong>⚠️ 오디오가 준비되지 않았습니다</strong><br>
-                원본 페이지에서 듣기 자료를 확인하세요.
-                {f'<br><a href="{link}" class="external-link" target="_blank" style="margin: 10px auto; display: inline-block;">원본 페이지 방문</a>' if link else ''}
-            </div>
-            '''}
 
-            {f'''
-            <div class="section">
-                <div class="section-title">📝 스크립트</div>
-                <div class="transcript">
-                    <div class="transcript-title">전문</div>
-                    {text}
+                <div class="player-container">
+                    <div class="player-title">🎵 음원</div>
+                    <audio controls>
+                        <source src="{beginner.get('audio_url', '#')}" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                    <div class="player-info">
+                        <span>⏱️ {beginner.get('duration', 'N/A')}</span>
+                        <a href="{beginner.get('source_url', '#')}" target="_blank" class="source-link">
+                            📌 {beginner.get('source', 'Source')}
+                        </a>
+                    </div>
                 </div>
-            </div>
-            ''' if text else ''}
 
-            <div class="word-note">
-                <strong>💬 학습 팁:</strong> 스크립트와 함께 다시 한 번 들어보세요.
-                이번에는 발음, 강세, 억양에 주목하세요.
+                <!-- 스크립트 토글 -->
+                <div class="script-toggle" onclick="toggleScript(this)">
+                    <div class="script-header">
+                        <span>📝 스크립트 보기</span>
+                        <span class="script-toggle-icon">▼</span>
+                    </div>
+                    <div class="script-content">
+                        <div class="script-text">
+                            <div class="script-ko">{beginner.get('script_ko', '')}</div>
+                            <div class="script-en">{beginner.get('script_en', '')}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 어휘 -->
+                {'<div class="vocabulary-section">' if beginner.get('vocabulary') else ''}
+                <div class="vocabulary-title">📚 주요 표현</div>
+                <div class="vocabulary-list" id="beginnerVocab"></div>
+                {'</div>' if beginner.get('vocabulary') else ''}
+
+                <!-- 학습 포인트 -->
+                {'<div class="learning-points">' if beginner.get('learning_points') else ''}
+                <div class="learning-points-title">✨ 학습 포인트</div>
+                <ul class="learning-points-list" id="beginnerPoints"></ul>
+                {'</div>' if beginner.get('learning_points') else ''}
             </div>
 
-            <div class="navigation">
-                <a href="/today/grammar" class="nav-button">← 문법으로</a>
-                <a href="/today/reading" class="nav-button">읽기 →</a>
+            <hr style="border: none; border-top: 2px solid #e9ecef; margin: 50px 0;">
+
+            <!-- 뉴스 섹션 -->
+            <div class="listening-section">
+                <div class="section-header">
+                    <div class="section-icon">🔵</div>
+                    <div class="section-info">
+                        <div>
+                            <h2>{news.get('title', 'News Listening')}</h2>
+                            <p>{news.get('topic', '')}</p>
+                            <span class="difficulty-badge intermediate">{news.get('difficulty', 'Intermediate')}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="player-container">
+                    <div class="player-title">🎵 음원</div>
+                    <audio controls>
+                        <source src="{news.get('audio_url', '#')}" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                    <div class="player-info">
+                        <span>⏱️ {news.get('duration', 'N/A')}</span>
+                        <a href="{news.get('source_url', '#')}" target="_blank" class="source-link">
+                            📌 {news.get('source', 'Source')}
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 스크립트 토글 -->
+                <div class="script-toggle" onclick="toggleScript(this)">
+                    <div class="script-header">
+                        <span>📝 스크립트 보기</span>
+                        <span class="script-toggle-icon">▼</span>
+                    </div>
+                    <div class="script-content">
+                        <div class="script-text">
+                            <div class="script-ko">{news.get('script_ko', '')}</div>
+                            <div class="script-en">{news.get('script_en', '')}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 어휘 -->
+                {'<div class="vocabulary-section">' if news.get('vocabulary') else ''}
+                <div class="vocabulary-title">📚 주요 표현</div>
+                <div class="vocabulary-list" id="newsVocab"></div>
+                {'</div>' if news.get('vocabulary') else ''}
+
+                <!-- 학습 포인트 -->
+                {'<div class="learning-points">' if news.get('learning_points') else ''}
+                <div class="learning-points-title">✨ 학습 포인트</div>
+                <ul class="learning-points-list" id="newsPoints"></ul>
+                {'</div>' if news.get('learning_points') else ''}
             </div>
         </div>
+
+        <div class="navigation">
+            <a href="/today/vocab" class="nav-button">← 표현으로</a>
+            <a href="/today" class="nav-button">홈 →</a>
+        </div>
     </div>
+
+    <script>
+        const beginnerVocabData = {beginner_json};
+        const newsVocabData = {news_json};
+
+        // 스크립트 토글 함수
+        function toggleScript(element) {{
+            element.classList.toggle('open');
+        }}
+
+        // 어휘 렌더링
+        function renderVocabulary(data, elementId) {{
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            data.forEach(vocab => {{
+                const div = document.createElement('div');
+                div.className = 'vocab-item';
+                div.innerHTML = `
+                    <div class="vocab-word">${{vocab.word}}</div>
+                    <div class="vocab-meaning">${{vocab.meaning}}</div>
+                `;
+                element.appendChild(div);
+            }});
+        }}
+
+        // 학습 포인트 렌더링
+        function renderLearningPoints(data, elementId) {{
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            data.forEach(point => {{
+                const li = document.createElement('li');
+                li.textContent = point;
+                element.appendChild(li);
+            }});
+        }}
+
+        // 초기화
+        renderVocabulary(beginnerVocabData, 'beginnerVocab');
+        renderVocabulary(newsVocabData, 'newsVocab');
+
+        const beginnerPoints = {json.dumps(beginner.get('learning_points', []), ensure_ascii=False)};
+        const newsPoints = {json.dumps(news.get('learning_points', []), ensure_ascii=False)};
+
+        renderLearningPoints(beginnerPoints, 'beginnerPoints');
+        renderLearningPoints(newsPoints, 'newsPoints');
+    </script>
 </body>
 </html>
 """

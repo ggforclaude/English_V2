@@ -37,7 +37,6 @@ KST = pytz.timezone("Asia/Seoul")
 
 async def main() -> None:
     """메인 실행 루프"""
-    from voa_crawler import fetch_voa_daily_content
     from anki_connector import get_anki_stats
     from today_page_builder import build_today_page
     from words_page_builder import build_words_page
@@ -57,6 +56,7 @@ async def main() -> None:
         fetch_vocabulary_from_text,
     )
     from reading_sources import fetch_daily_reading_article
+    from listening_sources import fetch_daily_listening_content
 
     today = datetime.now(KST).date()
     tracker = LevelTracker()
@@ -67,10 +67,11 @@ async def main() -> None:
     log.info("=" * 60)
 
     try:
-        # 1. VOA Learning English 콘텐츠 수집
-        log.info("[1] VOA Learning English 콘텐츠 수집...")
-        voa_content = await fetch_voa_daily_content(today)
-        log.info(f"  ✓ {voa_content.get('title', '')[:50]}...")
+        # 1. 듣기 콘텐츠 수집 (초급 + 뉴스)
+        log.info("[1] 듣기 콘텐츠 수집...")
+        listening_content = await fetch_daily_listening_content()
+        log.info(f"  ✓ 초급: {listening_content['beginner'].get('title', '')[:40]}...")
+        log.info(f"  ✓ 뉴스: {listening_content['news'].get('title', '')[:40]}...")
 
         # 2. 새로운 문법 주제 생성
         log.info("[2] 새로운 문법 주제 생성...")
@@ -122,8 +123,8 @@ async def main() -> None:
         is_baseline = day_number <= 7
         daily_learning = await generate_daily_learning(
             grammar_info=grammar_content,
-            listening_item=voa_content,
-            listening_script={"script_en": voa_content.get("text", "")},
+            listening_item=listening_content.get("news", {}),
+            listening_script={"script_en": listening_content.get("news", {}).get("script_en", "")},
             etymology=full_content.get("etymology", {}),
             pronunciation=full_content.get("pronunciation", {}),
             current_levels=current_levels,
@@ -150,7 +151,7 @@ async def main() -> None:
             today=today,
             day_number=day_number,
             anki_stats=anki_stats,
-            voa_content=voa_content,
+            voa_content=listening_content.get("news", {}),
             grammar_content=grammar_content,
             grammar_topic=grammar_topic,
             daily_learning=daily_learning,
@@ -191,7 +192,7 @@ async def main() -> None:
         log.info("[8-4] /today/listening 페이지 생성...")
         listening_page = build_listening_page(
             today=today,
-            voa_content=voa_content,
+            listening_content=listening_content,
         )
         log.info(f"  ✓ 저장: {listening_page}")
 
