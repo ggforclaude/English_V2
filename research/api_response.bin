@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-
-
-<WARNING>
-	<msg type='java.lang.String' value='서버오류2' />
-	<level type='int' value='0' />
-	<detail type='java.lang.String' value='' />
-	<timestamp type='java.sql.Timestamp' value='1777873898780' />
-</WARNING>
