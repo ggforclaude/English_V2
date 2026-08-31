@@ -378,7 +378,7 @@ JSON 형식으로 다음과 같이 반환:
 
     try:
         message = client.messages.create(
-            model="claude-opus-4-1-20250805",
+            model="claude-opus-5",
             max_tokens=1000,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -430,7 +430,7 @@ JSON 형식:
 
     try:
         message = client.messages.create(
-            model="claude-opus-4-1-20250805",
+            model="claude-opus-5",
             max_tokens=1500,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -493,7 +493,7 @@ JSON 형식:
 
     try:
         message = client.messages.create(
-            model="claude-opus-4-1-20250805",
+            model="claude-opus-5",
             max_tokens=1500,
             messages=[{"role": "user", "content": prompt}]
         )
@@ -535,7 +535,7 @@ JSON 형식:
     words_list = []
     try:
         message = client.messages.create(
-            model="claude-opus-4-1-20250805",
+            model="claude-opus-5",
             max_tokens=300,
             messages=[{"role": "user", "content": prompt}]
         )
