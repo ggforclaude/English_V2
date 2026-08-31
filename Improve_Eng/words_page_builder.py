@@ -603,7 +603,7 @@ def _save_words_html(
             }}
 
             questionHTML += `
-                <button class="btn btn-check" onclick="checkAnswer('{questionType}')">정답 확인</button>
+                <button class="btn btn-check" onclick="checkAnswer('${{questionType}}')">정답 확인</button>
                 <div id="resultArea"></div>
             `;
 
