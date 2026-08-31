@@ -395,62 +395,29 @@ JSON 형식으로 다음과 같이 반환:
 
 
 async def fetch_daily_grammar_topic(current_level: str = "B1") -> dict:
-    """Claude API로 매일 새로운 문법 주제 + 설명 생성."""
-    import anthropic
+    """커리큘럼 기반 문법 주제 제시 (매일 다른 주제)."""
+    from grammar_curriculum import get_today_grammar
+    from level_tracker import LevelTracker
+    from datetime import datetime
+    import pytz
 
-    client = anthropic.Anthropic()
-    today = date.today().isoformat()
+    tracker = LevelTracker()
+    kst = pytz.timezone("Asia/Seoul")
+    today = datetime.now(kst).date()
+    day_number = tracker.get_day_number(today)
 
-    prompt = f"""
-당신은 영어 문법 전문가입니다. 오늘({today})에 학습할 새로운 영어 문법 주제를 생성해주세요.
-
-요구사항:
-1. 현재 레벨: {current_level}
-2. 학습자에게 유용한 실용적인 문법 주제
-3. 다음을 포함:
-   - 문법 규칙 (영어 + 한글)
-   - 3가지 예문 (각각 영어 + 한글)
-   - 일반적인 실수와 교정
-
-JSON 형식:
-{{
-  "topic": "문법 주제",
-  "level": "B1",
-  "explanation_en": "설명 (영어)",
-  "explanation_ko": "설명 (한글)",
-  "examples": [
-    {{
-      "sentence_en": "예문 (영어)",
-      "sentence_ko": "예문 (한글)"
-    }}
-  ],
-  "common_mistakes": "일반적인 실수와 수정"
-}}
-"""
-
-    try:
-        message = client.messages.create(
-            model="claude-opus-5",
-            max_tokens=1500,
-            messages=[{"role": "user", "content": prompt}]
-        )
-
-        import json
-        response_text = next((block.text for block in message.content if hasattr(block, 'text')), "")
-        start = response_text.find('{')
-        end = response_text.rfind('}') + 1
-        json_str = response_text[start:end]
-        return json.loads(json_str)
-    except Exception as e:
-        log.error(f"Failed to generate grammar topic: {e}")
-        return {
-            "topic": "Grammar Topic",
-            "level": current_level,
-            "explanation_en": "",
-            "explanation_ko": "",
-            "examples": [],
-            "common_mistakes": ""
-        }
+    topic = get_today_grammar(day_number)
+    return topic if topic else {
+        "id": "unknown",
+        "topic": "Grammar Topic",
+        "level": current_level,
+        "explanation_en": "",
+        "explanation_ko": "",
+        "examples": [],
+        "source": {"name": "BBC Learning English", "url": "https://www.bbc.co.uk/learningenglish/"},
+        "additional_resources": [],
+        "quiz": []
+    }
 
 
 async def fetch_vocabulary_from_text(text: str, current_level: str = "B1") -> dict:
