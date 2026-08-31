@@ -615,7 +615,7 @@ def _save_words_html(
             // Enter 키로 제출
             document.getElementById('answerInput').addEventListener('keypress', function(e) {{
                 if (e.key === 'Enter') {{
-                    checkAnswer('{questionType}');
+                    checkAnswer(questionType);
                 }}
             }});
         }}
