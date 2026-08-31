@@ -453,6 +453,61 @@ JSON 형식:
         }
 
 
+async def fetch_vocabulary_from_text(text: str, current_level: str = "B1") -> dict:
+    """읽기 텍스트에서 새로운 어휘를 추출하고 설명을 생성."""
+    import anthropic
+    import json
+
+    client = anthropic.Anthropic()
+
+    prompt = f"""
+당신은 영어 교육 전문가입니다. 다음 텍스트에서 {current_level} 수준의 학습자가 배워야 할 새로운 단어 5-8개를 선택하고 각각에 대해 설명해주세요.
+
+텍스트:
+{text[:500]}
+
+요구사항:
+1. 일상 회화에서 자주 사용되는 단어
+2. 각 단어마다:
+   - 단어
+   - 발음
+   - 의미 (영어)
+   - 의미 (한글)
+   - 예문 (영어)
+   - 텍스트에서 나온 원문 문장
+
+JSON 형식:
+{{
+  "words": [
+    {{
+      "word": "단어",
+      "pronunciation": "/발음/",
+      "meaning_en": "의미 (영어)",
+      "meaning_ko": "의미 (한글)",
+      "example": "예문",
+      "context_sentence": "원문에서 나온 문장"
+    }}
+  ]
+}}
+"""
+
+    try:
+        message = client.messages.create(
+            model="claude-opus-4-1-20250805",
+            max_tokens=1500,
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        response_text = message.content[0].text
+        start = response_text.find('{')
+        end = response_text.rfind('}') + 1
+        json_str = response_text[start:end]
+        return json.loads(json_str)
+    except Exception as e:
+        log.error(f"Failed to extract vocabulary: {e}")
+        return {"words": []}
+
+
 async def fetch_daily_words(current_level: str = "B1") -> dict:
     """매일 외울 10개 단어를 Claude API + Free Dictionary API에서 가져오기."""
     import anthropic

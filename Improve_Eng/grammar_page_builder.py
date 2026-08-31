@@ -1,0 +1,324 @@
+"""
+문법 페이지 생성
+/today/grammar 페이지를 빌드합니다.
+"""
+import pathlib
+import json
+from datetime import date
+
+
+def build_grammar_page(
+    today: date,
+    grammar_topic: dict,
+) -> str:
+    """문법 페이지 생성."""
+    page_path = _save_grammar_html(
+        today=today,
+        grammar_topic=grammar_topic,
+    )
+    return page_path
+
+
+def _save_grammar_html(
+    today: date,
+    grammar_topic: dict,
+) -> str:
+    """HTML 파일로 저장."""
+    base = pathlib.Path(__file__).parent.parent / "docs" / "today" / "grammar"
+    base.mkdir(parents=True, exist_ok=True)
+    out = base / "index.html"
+
+    grammar_json = json.dumps(grammar_topic, ensure_ascii=False, indent=2)
+    topic = grammar_topic.get("topic", "Grammar Topic")
+    level = grammar_topic.get("level", "B1")
+    explanation_ko = grammar_topic.get("explanation_ko", "")
+    explanation_en = grammar_topic.get("explanation_en", "")
+    examples = grammar_topic.get("examples", [])
+    common_mistakes = grammar_topic.get("common_mistakes", "")
+
+    html = f"""<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오늘의 문법 - Improve English</title>
+    <style>
+        * {{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }}
+
+        body {{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }}
+
+        .container {{
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }}
+
+        .header {{
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }}
+
+        .header h1 {{
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }}
+
+        .header p {{
+            font-size: 1.1em;
+            opacity: 0.9;
+        }}
+
+        .level-badge {{
+            display: inline-block;
+            background: rgba(255,255,255,0.3);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-top: 10px;
+        }}
+
+        .content {{
+            padding: 30px;
+        }}
+
+        .section {{
+            margin-bottom: 30px;
+        }}
+
+        .section-title {{
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }}
+
+        .explanation {{
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }}
+
+        .explanation-ko {{
+            color: #333;
+            font-size: 1.05em;
+            margin-bottom: 15px;
+        }}
+
+        .explanation-en {{
+            color: #666;
+            font-size: 0.95em;
+            font-style: italic;
+            border-top: 1px solid #ddd;
+            padding-top: 15px;
+        }}
+
+        .examples-container {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }}
+
+        .example-card {{
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }}
+
+        .example-card:hover {{
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+        }}
+
+        .example-title {{
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }}
+
+        .example-en {{
+            background: #f0f4ff;
+            padding: 12px;
+            border-radius: 5px;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+            line-height: 1.6;
+            border-left: 3px solid #667eea;
+        }}
+
+        .example-ko {{
+            color: #666;
+            font-size: 0.9em;
+            font-style: italic;
+        }}
+
+        .mistakes-section {{
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }}
+
+        .mistakes-title {{
+            font-weight: bold;
+            color: #ff6b6b;
+            margin-bottom: 10px;
+        }}
+
+        .mistakes-content {{
+            color: #333;
+            line-height: 1.8;
+        }}
+
+        .mistake-row {{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 10px;
+        }}
+
+        .mistake {{
+            background: rgba(255,107,107,0.1);
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #ff6b6b;
+        }}
+
+        .correct {{
+            background: rgba(34,197,94,0.1);
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #22c55e;
+        }}
+
+        .label {{
+            font-weight: bold;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }}
+
+        .navigation {{
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }}
+
+        .nav-button {{
+            display: inline-block;
+            padding: 12px 30px;
+            margin: 0 10px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }}
+
+        .nav-button:hover {{
+            background: #764ba2;
+        }}
+
+        @media (max-width: 768px) {{
+            .examples-container {{
+                grid-template-columns: 1fr;
+            }}
+
+            .mistake-row {{
+                grid-template-columns: 1fr;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 오늘의 문법</h1>
+            <p>{topic}</p>
+            <div class="level-badge">Level: {level}</div>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <div class="section-title">📖 설명</div>
+                <div class="explanation">
+                    <div class="explanation-ko">{explanation_ko}</div>
+                    <div class="explanation-en">{explanation_en}</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">📝 예문</div>
+                <div class="examples-container" id="examplesContainer">
+                    <!-- 예문이 여기에 동적으로 생성됩니다 -->
+                </div>
+            </div>
+
+            {f'''
+            <div class="section">
+                <div class="section-title">⚠️ 흔한 실수</div>
+                <div class="mistakes-section">
+                    <div class="mistakes-content">
+                        {common_mistakes}
+                    </div>
+                </div>
+            </div>
+            ''' if common_mistakes else ''}
+
+            <div class="navigation">
+                <a href="/today/vocab" class="nav-button">← 어휘로</a>
+                <a href="/today/listening" class="nav-button">듣기 →</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const grammarData = {grammar_json};
+        const examplesContainer = document.getElementById('examplesContainer');
+
+        if (grammarData.examples && grammarData.examples.length > 0) {{
+            grammarData.examples.forEach((example, index) => {{
+                const card = document.createElement('div');
+                card.className = 'example-card';
+                card.innerHTML = `
+                    <div class="example-title">예시 ${{index + 1}}</div>
+                    <div class="example-en">${{example.sentence_en || 'N/A'}}</div>
+                    <div class="example-ko">${{example.sentence_ko || 'N/A'}}</div>
+                `;
+                examplesContainer.appendChild(card);
+            }});
+        }} else {{
+            examplesContainer.innerHTML = '<p style="color: #999;">예문이 준비되지 않았습니다.</p>';
+        }}
+    </script>
+</body>
+</html>
+"""
+
+    out.write_text(html, encoding="utf-8")
+    return str(out)

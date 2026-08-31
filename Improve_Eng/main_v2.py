@@ -42,9 +42,22 @@ async def main() -> None:
     from sheets_manager_v2 import get_sheets_manager
     from report_analyzer import analyze_weak_points
     from today_page_builder import build_today_page
+    from words_page_builder import build_words_page
+    from vocab_page_builder import build_vocab_page
+    from grammar_page_builder import build_grammar_page
+    from listening_page_builder import build_listening_page
+    from reading_page_builder import build_reading_page
+    from writing_page_builder import build_writing_page
+    from correction_page_builder import build_correction_page
     from level_tracker import LevelTracker
     from question_generator import generate_all_questions, generate_daily_learning
-    from content_fetcher import fetch_daily_content, fetch_daily_vocabulary, fetch_daily_grammar_topic
+    from content_fetcher import (
+        fetch_daily_content,
+        fetch_daily_vocabulary,
+        fetch_daily_grammar_topic,
+        fetch_daily_words,
+        fetch_vocabulary_from_text,
+    )
     from reading_sources import fetch_daily_reading_article
 
     today = datetime.now(KST).date()
@@ -74,15 +87,28 @@ async def main() -> None:
         full_content = await fetch_daily_content(today)
         full_content["grammar_detailed"] = grammar_topic
 
-        # 2-2. 새로운 단어 생성
-        log.info("[2-2] 새로운 어휘 생성...")
+        # 2-2. 새로운 단어 생성 (10개 단어)
+        log.info("[2-2] 매일 외울 10개 단어 생성...")
+        daily_words = await fetch_daily_words(current_levels.get("vocab", "B1"))
+        log.info(f"  ✓ {len(daily_words.get('words', []))} 단어 생성")
+
+        # 2-2-1. 기존 어휘 생성 (5개 - Claude)
+        log.info("[2-2-1] 새로운 어휘 생성...")
         daily_vocabulary = await fetch_daily_vocabulary(current_levels.get("vocab", "B1"))
-        log.info(f"  ✓ {len(daily_vocabulary.get('words', []))} 단어 생성")
+        log.info(f"  ✓ {len(daily_vocabulary.get('words', []))} 어휘 생성")
 
         # 2-3. 다독 콘텐츠 추천
         log.info("[2-3] 다독 콘텐츠 추천...")
         reading_article = await fetch_daily_reading_article()
         log.info(f"  ✓ {reading_article.get('title', 'Article')[:50]}...")
+
+        # 2-3-1. 읽기 콘텐츠에서 어휘 추출
+        log.info("[2-3-1] 읽기 콘텐츠에서 어휘 추출...")
+        vocabulary_from_text = await fetch_vocabulary_from_text(
+            reading_article.get('text', '')[:1000],
+            current_levels.get("vocab", "B1")
+        )
+        log.info(f"  ✓ {len(vocabulary_from_text.get('words', []))} 어휘 추출")
 
         # 3. Anki 통계 조회
         log.info("[3] Anki 학습 상태 조회...")
@@ -140,8 +166,8 @@ async def main() -> None:
                 weak_areas=weak_points_report.get("weak_areas", []),
             )
 
-        # 8. /today 페이지 생성
-        log.info("[8] /today 페이지 생성...")
+        # 8. /today 메인 페이지 생성
+        log.info("[8] /today 메인 페이지 생성...")
         page_path = build_today_page(
             today=today,
             day_number=day_number,
@@ -156,6 +182,62 @@ async def main() -> None:
             report_available=(weak_points_report is not None),
         )
         log.info(f"  ✓ 저장: {page_path}")
+
+        # 8-1. /today/words 페이지 생성
+        log.info("[8-1] /today/words 페이지 생성...")
+        words_page = build_words_page(
+            today=today,
+            daily_words=daily_words,
+            current_levels=current_levels,
+        )
+        log.info(f"  ✓ 저장: {words_page}")
+
+        # 8-2. /today/vocab 페이지 생성
+        log.info("[8-2] /today/vocab 페이지 생성...")
+        vocab_page = build_vocab_page(
+            today=today,
+            vocabulary=vocabulary_from_text,
+            reading_article=reading_article,
+        )
+        log.info(f"  ✓ 저장: {vocab_page}")
+
+        # 8-3. /today/grammar 페이지 생성
+        log.info("[8-3] /today/grammar 페이지 생성...")
+        grammar_page = build_grammar_page(
+            today=today,
+            grammar_topic=grammar_topic,
+        )
+        log.info(f"  ✓ 저장: {grammar_page}")
+
+        # 8-4. /today/listening 페이지 생성
+        log.info("[8-4] /today/listening 페이지 생성...")
+        listening_page = build_listening_page(
+            today=today,
+            voa_content=voa_content,
+        )
+        log.info(f"  ✓ 저장: {listening_page}")
+
+        # 8-5. /today/reading 페이지 생성
+        log.info("[8-5] /today/reading 페이지 생성...")
+        reading_page = build_reading_page(
+            today=today,
+            reading_article=reading_article,
+        )
+        log.info(f"  ✓ 저장: {reading_page}")
+
+        # 8-6. /today/writing 페이지 생성
+        log.info("[8-6] /today/writing 페이지 생성...")
+        writing_page = build_writing_page(
+            today=today,
+            daily_words=daily_words,
+            grammar_topic=grammar_topic,
+        )
+        log.info(f"  ✓ 저장: {writing_page}")
+
+        # 8-7. /today/correction 페이지 생성
+        log.info("[8-7] /today/correction 페이지 생성...")
+        correction_page = build_correction_page(today=today)
+        log.info(f"  ✓ 저장: {correction_page}")
 
         # 9. /report 페이지 생성 (주 1회)
         if weak_points_report and weak_points_report.get("html_report"):

@@ -1,0 +1,320 @@
+"""
+듣기 페이지 생성
+/today/listening 페이지를 빌드합니다.
+"""
+import pathlib
+import json
+from datetime import date
+
+
+def build_listening_page(
+    today: date,
+    voa_content: dict,
+) -> str:
+    """듣기 페이지 생성."""
+    page_path = _save_listening_html(
+        today=today,
+        voa_content=voa_content,
+    )
+    return page_path
+
+
+def _save_listening_html(
+    today: date,
+    voa_content: dict,
+) -> str:
+    """HTML 파일로 저장."""
+    base = pathlib.Path(__file__).parent.parent / "docs" / "today" / "listening"
+    base.mkdir(parents=True, exist_ok=True)
+    out = base / "index.html"
+
+    voa_json = json.dumps(voa_content, ensure_ascii=False, indent=2)
+    title = voa_content.get("title", "Listening Content")
+    source = voa_content.get("source", "VOA Learning English")
+    audio_url = voa_content.get("audio_url", "")
+    link = voa_content.get("link", "")
+    text = voa_content.get("text", "")
+
+    html = f"""<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오늘의 듣기 - Improve English</title>
+    <style>
+        * {{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }}
+
+        body {{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }}
+
+        .container {{
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }}
+
+        .header {{
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }}
+
+        .header h1 {{
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }}
+
+        .header p {{
+            font-size: 1.1em;
+            opacity: 0.9;
+        }}
+
+        .source {{
+            font-size: 0.95em;
+            background: rgba(255,255,255,0.2);
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 10px;
+        }}
+
+        .content {{
+            padding: 30px;
+        }}
+
+        .section {{
+            margin-bottom: 30px;
+        }}
+
+        .section-title {{
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #fa709a;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #fa709a;
+        }}
+
+        .audio-player {{
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }}
+
+        audio {{
+            width: 100%;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }}
+
+        .audio-info {{
+            color: #666;
+            font-size: 0.95em;
+            margin-bottom: 10px;
+        }}
+
+        .transcript {{
+            background: #f0f4ff;
+            border-left: 4px solid #fa709a;
+            padding: 20px;
+            border-radius: 5px;
+            line-height: 1.8;
+            color: #333;
+            max-height: 400px;
+            overflow-y: auto;
+        }}
+
+        .transcript-title {{
+            font-weight: bold;
+            color: #fa709a;
+            margin-bottom: 15px;
+        }}
+
+        .word-note {{
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid #fee140;
+            margin-top: 20px;
+            font-size: 0.95em;
+            color: #666;
+            line-height: 1.6;
+        }}
+
+        .learning-tips {{
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }}
+
+        .tips-title {{
+            font-weight: bold;
+            color: #1976d2;
+            margin-bottom: 10px;
+        }}
+
+        .tips-list {{
+            list-style: none;
+            padding-left: 0;
+        }}
+
+        .tips-list li {{
+            padding: 8px 0;
+            color: #333;
+            position: relative;
+            padding-left: 25px;
+        }}
+
+        .tips-list li:before {{
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #2196f3;
+            font-weight: bold;
+        }}
+
+        .external-link {{
+            display: inline-block;
+            padding: 12px 30px;
+            background: #fa709a;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: background 0.3s;
+        }}
+
+        .external-link:hover {{
+            background: #f04060;
+        }}
+
+        .navigation {{
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }}
+
+        .nav-button {{
+            display: inline-block;
+            padding: 12px 30px;
+            margin: 0 10px;
+            background: #fa709a;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }}
+
+        .nav-button:hover {{
+            background: #f04060;
+        }}
+
+        .empty-message {{
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            color: #856404;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            margin-bottom: 20px;
+        }}
+
+        @media (max-width: 768px) {{
+            .header h1 {{
+                font-size: 1.8em;
+            }}
+
+            .transcript {{
+                max-height: 300px;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎧 오늘의 듣기</h1>
+            <p>{title}</p>
+            <div class="source">📻 {source}</div>
+        </div>
+
+        <div class="content">
+            <div class="learning-tips">
+                <div class="tips-title">💡 효과적인 듣기 팁</div>
+                <ul class="tips-list">
+                    <li>먼저 자막 없이 한 번 들어보세요</li>
+                    <li>모르는 단어는 나중에 확인하고 계속 들으세요</li>
+                    <li>같은 내용을 여러 번 반복해서 들으세요</li>
+                    <li>가능하면 따라 말해보세요 (Shadowing)</li>
+                </ul>
+            </div>
+
+            {f'''
+            <div class="section">
+                <div class="section-title">🎵 오디오</div>
+                <div class="audio-player">
+                    <audio controls>
+                        <source src="{audio_url}" type="audio/mpeg">
+                        당신의 브라우저는 audio 요소를 지원하지 않습니다.
+                    </audio>
+                    <div class="audio-info">
+                        듣기 난이도: 약 2-3분 | {source}
+                    </div>
+                    {f'<a href="{link}" class="external-link" target="_blank">원본 페이지 방문</a>' if link else ''}
+                </div>
+            </div>
+            ''' if audio_url else f'''
+            <div class="empty-message">
+                <strong>⚠️ 오디오가 준비되지 않았습니다</strong><br>
+                원본 페이지에서 듣기 자료를 확인하세요.
+                {f'<br><a href="{link}" class="external-link" target="_blank" style="margin: 10px auto; display: inline-block;">원본 페이지 방문</a>' if link else ''}
+            </div>
+            '''}
+
+            {f'''
+            <div class="section">
+                <div class="section-title">📝 스크립트</div>
+                <div class="transcript">
+                    <div class="transcript-title">전문</div>
+                    {text}
+                </div>
+            </div>
+            ''' if text else ''}
+
+            <div class="word-note">
+                <strong>💬 학습 팁:</strong> 스크립트와 함께 다시 한 번 들어보세요.
+                이번에는 발음, 강세, 억양에 주목하세요.
+            </div>
+
+            <div class="navigation">
+                <a href="/today/grammar" class="nav-button">← 문법으로</a>
+                <a href="/today/reading" class="nav-button">읽기 →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+    out.write_text(html, encoding="utf-8")
+    return str(out)
