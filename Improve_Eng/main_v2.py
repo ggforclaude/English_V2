@@ -103,7 +103,7 @@ async def main() -> None:
         # 2-3-1. 읽기 콘텐츠에서 어휘 추출
         log.info("[2-3-1] 읽기 콘텐츠에서 어휘 추출...")
         vocabulary_from_text = await fetch_vocabulary_from_text(
-            reading_article.get('text', '')[:1000],
+            reading_article.get('content_en', '')[:1000],
             current_levels.get("vocab", "B1")
         )
         log.info(f"  ✓ {len(vocabulary_from_text.get('words', []))} 어휘 추출")
