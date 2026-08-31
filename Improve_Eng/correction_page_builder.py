@@ -3,7 +3,6 @@
 /today/correction 페이지를 빌드합니다.
 """
 import pathlib
-import json
 from datetime import date
 
 
@@ -19,7 +18,7 @@ def _save_correction_html(today: date) -> str:
     base.mkdir(parents=True, exist_ok=True)
     out = base / "index.html"
 
-    html = f"""<!DOCTYPE html>
+    html = """<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
