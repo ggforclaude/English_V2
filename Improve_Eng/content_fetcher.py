@@ -384,7 +384,7 @@ JSON 형식으로 다음과 같이 반환:
         )
 
         import json
-        response_text = message.content[0].text
+        response_text = next((block.text for block in message.content if hasattr(block, 'text')), "")
         start = response_text.find('{')
         end = response_text.rfind('}') + 1
         json_str = response_text[start:end]
@@ -436,7 +436,7 @@ JSON 형식:
         )
 
         import json
-        response_text = message.content[0].text
+        response_text = next((block.text for block in message.content if hasattr(block, 'text')), "")
         start = response_text.find('{')
         end = response_text.rfind('}') + 1
         json_str = response_text[start:end]

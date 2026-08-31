@@ -39,8 +39,6 @@ async def main() -> None:
     """메인 실행 루프"""
     from voa_crawler import fetch_voa_daily_content
     from anki_connector import get_anki_stats
-    from sheets_manager_v2 import get_sheets_manager
-    from report_analyzer import analyze_weak_points
     from today_page_builder import build_today_page
     from words_page_builder import build_words_page
     from vocab_page_builder import build_vocab_page
@@ -63,7 +61,6 @@ async def main() -> None:
     today = datetime.now(KST).date()
     tracker = LevelTracker()
     day_number = tracker.get_day_number(today)
-    sheets = await get_sheets_manager()
 
     log.info("=" * 60)
     log.info(f"Improve_Eng v2 시작: {today}  Day {day_number}")
@@ -144,27 +141,8 @@ async def main() -> None:
         )
         log.info(f"  ✓ {len(questions)} 영역 문제 생성")
 
-        # 7. 지난 분석 및 약점 리포트 생성 (주 1회 또는 필요시)
+        # 7. 약점 리포트 생성 (Google Sheets 제거됨)
         weak_points_report = None
-        if day_number % 7 == 1:  # 주 1회 (매주 월요일)
-            log.info("[7] 약점 분석 리포트 생성...")
-            learning_history = await sheets.get_learning_history(days=30)
-            prev_results = tracker.get_yesterday_results(today)
-            wrong_items = prev_results.get("wrong_items", []) if prev_results else []
-
-            weak_points_report = await analyze_weak_points(
-                learning_history=learning_history,
-                wrong_items=wrong_items,
-                current_levels=current_levels,
-                days_count=30,
-            )
-            log.info(f"  ✓ 약점 {len(weak_points_report.get('weak_areas', []))}개 분석")
-
-            # 약점을 Sheets에 저장
-            await sheets.save_weak_points(
-                analysis_date=today,
-                weak_areas=weak_points_report.get("weak_areas", []),
-            )
 
         # 8. /today 메인 페이지 생성
         log.info("[8] /today 메인 페이지 생성...")
@@ -245,36 +223,7 @@ async def main() -> None:
             report_path = _save_report_html(weak_points_report["html_report"])
             log.info(f"  ✓ 저장: {report_path}")
 
-        # 10. Google Sheets에 오늘 데이터 저장
-        log.info("[10] Google Sheets에 학습 데이터 저장...")
-        questions_correct = _estimate_questions_correct(tracker, today)
-        questions_total = len(questions)
-
-        await sheets.save_daily_learning(
-            today=today,
-            day_number=day_number,
-            anki_stats=anki_stats,
-            grammar_content=grammar_content,
-            voa_content=voa_content,
-            output_topic=daily_learning.get("topic", "일상 이야기"),
-            reading_rec="Oxford Bookworms",
-            questions_correct=questions_correct,
-            questions_total=questions_total,
-            levels=current_levels,
-        )
-        log.info("  ✓ Sheets 저장 완료")
-
-        # 11. VOA 콘텐츠 캐시
-        log.info("[11] VOA 콘텐츠 캐시...")
-        await sheets.cache_voa_content(
-            today=today,
-            level=voa_content.get("level", ""),
-            title=voa_content.get("title", ""),
-            audio_url=voa_content.get("audio_url", ""),
-            text_summary=voa_content.get("text", "")[:200],
-            link=voa_content.get("link", ""),
-        )
-        log.info("  ✓ 캐시 완료")
+        # 10-11. Google Sheets 저장 제거됨
 
         # 12. 오늘 문제를 Sheets에 저장 (내일 채점용)
         log.info("[12] 오늘 문제 저장...")

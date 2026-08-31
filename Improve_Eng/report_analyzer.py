@@ -245,8 +245,8 @@ JSON으로만 응답하세요."""
             messages=[{"role": "user", "content": prompt}],
         )
 
-        # JSON 파싱
-        response_text = message.content[0].text
+        # JSON 파싱 (Claude Opus 5 ThinkingBlock 처리)
+        response_text = next((block.text for block in message.content if hasattr(block, 'text')), "")
         try:
             result = json.loads(response_text)
             return result
