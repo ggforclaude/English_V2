@@ -1,0 +1,42 @@
+name: Daily English Learning v2
+
+on:
+  schedule:
+    # 매일 04:00 KST (UTC 19:00)
+    - cron: '0 19 * * *'
+
+  # 테스트용: 수동 실행 (GitHub Actions 페이지에서 Run workflow)
+  workflow_dispatch:
+
+jobs:
+  english-v2:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Write Google Credentials
+        run: |
+          echo '${{ secrets.GOOGLE_CREDENTIALS_JSON }}' > Improve_Eng/credentials.json
+        shell: bash
+
+      - name: Install dependencies
+        run: |
+          cd Improve_Eng
+          pip install -r requirements.txt
+
+      - name: Run main_v2.py
+        run: |
+          cd Improve_Eng
+          python main_v2.py
+        env:
+          GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PAGES_BASE_URL: ${{ secrets.PAGES_BASE_URL }}
+          GOOGLE_CREDENTIALS_PATH: credentials.json
