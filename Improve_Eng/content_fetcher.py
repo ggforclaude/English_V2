@@ -339,3 +339,115 @@ def _scrape_article(url: str) -> str:
         return " ".join(p.get_text() for p in paragraphs)[:2000]
     except Exception:
         return ""
+
+
+# ── 매일 새로운 콘텐츠 생성 (Claude API) ───────────────────────────────────────
+
+async def fetch_daily_vocabulary(current_level: str = "B1") -> dict:
+    """Claude API로 매일 새로운 어휘 5개 생성."""
+    import anthropic
+
+    client = anthropic.Anthropic()
+    today = date.today().isoformat()
+
+    prompt = f"""
+당신은 영어 학습 전문가입니다. 오늘({today})에 학습할 새로운 영어 단어 5개를 생성해주세요.
+
+요구사항:
+1. 현재 레벨: {current_level}
+2. 실생활에서 자주 사용되는 단어
+3. 각 단어마다:
+   - 영단어
+   - 음성기호
+   - 한글 의미
+   - 예문 (영어 + 한글)
+
+JSON 형식으로 다음과 같이 반환:
+{{
+  "words": [
+    {{
+      "word": "단어",
+      "pronunciation": "/발음/",
+      "meaning_ko": "한글 의미",
+      "example_en": "예문 (영어)",
+      "example_ko": "예문 (한글)"
+    }}
+  ]
+}}
+"""
+
+    try:
+        message = client.messages.create(
+            model="claude-opus-4-1-20250805",
+            max_tokens=1000,
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        import json
+        response_text = message.content[0].text
+        start = response_text.find('{')
+        end = response_text.rfind('}') + 1
+        json_str = response_text[start:end]
+        return json.loads(json_str)
+    except Exception as e:
+        log.error(f"Failed to generate vocabulary: {e}")
+        return {"words": []}
+
+
+async def fetch_daily_grammar_topic(current_level: str = "B1") -> dict:
+    """Claude API로 매일 새로운 문법 주제 + 설명 생성."""
+    import anthropic
+
+    client = anthropic.Anthropic()
+    today = date.today().isoformat()
+
+    prompt = f"""
+당신은 영어 문법 전문가입니다. 오늘({today})에 학습할 새로운 영어 문법 주제를 생성해주세요.
+
+요구사항:
+1. 현재 레벨: {current_level}
+2. 학습자에게 유용한 실용적인 문법 주제
+3. 다음을 포함:
+   - 문법 규칙 (영어 + 한글)
+   - 3가지 예문 (각각 영어 + 한글)
+   - 일반적인 실수와 교정
+
+JSON 형식:
+{{
+  "topic": "문법 주제",
+  "level": "B1",
+  "explanation_en": "설명 (영어)",
+  "explanation_ko": "설명 (한글)",
+  "examples": [
+    {{
+      "sentence_en": "예문 (영어)",
+      "sentence_ko": "예문 (한글)"
+    }}
+  ],
+  "common_mistakes": "일반적인 실수와 수정"
+}}
+"""
+
+    try:
+        message = client.messages.create(
+            model="claude-opus-4-1-20250805",
+            max_tokens=1500,
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        import json
+        response_text = message.content[0].text
+        start = response_text.find('{')
+        end = response_text.rfind('}') + 1
+        json_str = response_text[start:end]
+        return json.loads(json_str)
+    except Exception as e:
+        log.error(f"Failed to generate grammar topic: {e}")
+        return {
+            "topic": "Grammar Topic",
+            "level": current_level,
+            "explanation_en": "",
+            "explanation_ko": "",
+            "examples": [],
+            "common_mistakes": ""
+        }

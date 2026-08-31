@@ -44,7 +44,8 @@ async def main() -> None:
     from today_page_builder import build_today_page
     from level_tracker import LevelTracker
     from question_generator import generate_all_questions, generate_daily_learning
-    from content_fetcher import fetch_daily_content
+    from content_fetcher import fetch_daily_content, fetch_daily_vocabulary, fetch_daily_grammar_topic
+    from reading_sources import fetch_daily_reading_article
 
     today = datetime.now(KST).date()
     tracker = LevelTracker()
@@ -61,11 +62,27 @@ async def main() -> None:
         voa_content = await fetch_voa_daily_content(today)
         log.info(f"  ✓ {voa_content.get('title', '')[:50]}...")
 
-        # 2. 문법 콘텐츠 (기존 content_fetcher 사용)
-        log.info("[2] 문법 콘텐츠 수집...")
+        # 2. 새로운 문법 주제 생성
+        log.info("[2] 새로운 문법 주제 생성...")
+        current_levels = tracker.calculate_current_levels()
+        grammar_topic = await fetch_daily_grammar_topic(current_levels.get("grammar", "B1"))
+        grammar_content = {"topic": grammar_topic.get("topic", "Grammar"), "level": grammar_topic.get("level", "B1")}
+        log.info(f"  ✓ {grammar_content['topic']}")
+
+        # 2-1. 기존 콘텐츠 (어원, 발음)
+        log.info("[2-1] 기존 학습 콘텐츠 수집...")
         full_content = await fetch_daily_content(today)
-        grammar_content = full_content.get("grammar", {})
-        log.info(f"  ✓ {grammar_content.get('topic', 'Grammar')}")
+        full_content["grammar_detailed"] = grammar_topic
+
+        # 2-2. 새로운 단어 생성
+        log.info("[2-2] 새로운 어휘 생성...")
+        daily_vocabulary = await fetch_daily_vocabulary(current_levels.get("vocab", "B1"))
+        log.info(f"  ✓ {len(daily_vocabulary.get('words', []))} 단어 생성")
+
+        # 2-3. 다독 콘텐츠 추천
+        log.info("[2-3] 다독 콘텐츠 추천...")
+        reading_article = await fetch_daily_reading_article()
+        log.info(f"  ✓ {reading_article.get('title', 'Article')[:50]}...")
 
         # 3. Anki 통계 조회
         log.info("[3] Anki 학습 상태 조회...")
@@ -131,7 +148,10 @@ async def main() -> None:
             anki_stats=anki_stats,
             voa_content=voa_content,
             grammar_content=grammar_content,
+            grammar_topic=grammar_topic,
             daily_learning=daily_learning,
+            daily_vocabulary=daily_vocabulary,
+            reading_article=reading_article,
             current_levels=current_levels,
             report_available=(weak_points_report is not None),
         )

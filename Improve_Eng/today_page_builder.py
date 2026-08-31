@@ -16,14 +16,22 @@ def build_today_page(
     daily_learning: dict,
     current_levels: dict,
     report_available: bool = False,
+    grammar_topic: dict = None,
+    daily_vocabulary: dict = None,
+    reading_article: dict = None,
 ) -> pathlib.Path:
     """
     /today 고정 페이지 생성.
     docs/today/index.html 저장 (JavaScript로 현재 날짜와 매칭)
     """
+    grammar_topic = grammar_topic or {}
+    daily_vocabulary = daily_vocabulary or {}
+    reading_article = reading_article or {}
+
     html = _render_today_page(
         today, day_number, anki_stats, voa_content, grammar_content,
-        daily_learning, current_levels, report_available
+        daily_learning, current_levels, report_available,
+        grammar_topic, daily_vocabulary, reading_article
     )
 
     base = pathlib.Path(__file__).parent.parent / "docs" / "today"
@@ -34,11 +42,15 @@ def build_today_page(
 
 
 def _render_today_page(today, day_number, anki_stats, voa_content, grammar_content,
-                       daily_learning, current_levels, report_available):
+                       daily_learning, current_levels, report_available,
+                       grammar_topic=None, daily_vocabulary=None, reading_article=None):
     """
     /today 페이지 HTML 렌더링
-    5개 섹션: 단어(Anki), 문법, 듣기(VOA), 출력(에세이), 다독
+    7개 섹션: 단어(새로운 어휘), 문법(새로운 주제), 듣기(VOA), 출력(에세이), 다독(아티클), 문법상세, 추가학습
     """
+    grammar_topic = grammar_topic or {}
+    daily_vocabulary = daily_vocabulary or {}
+    reading_article = reading_article or {}
 
     today_str = str(today)
 
@@ -47,6 +59,9 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
     voa_json = json.dumps(voa_content, ensure_ascii=False)
     grammar_json = json.dumps(grammar_content, ensure_ascii=False)
     learning_json = json.dumps(daily_learning, ensure_ascii=False)
+    vocab_json = json.dumps(daily_vocabulary, ensure_ascii=False)
+    grammar_topic_json = json.dumps(grammar_topic, ensure_ascii=False)
+    reading_json = json.dumps(reading_article, ensure_ascii=False)
 
     return f"""<!DOCTYPE html>
 <html lang="ko">
@@ -345,19 +360,25 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
                 </div>
             </div>
 
+            <!-- 1-1. 새로운 어휘 (매일 생성) -->
+            <div class="section">
+                <div class="section-title">
+                    <span class="section-emoji">✨</span>
+                    <span>오늘의 새로운 어휘</span>
+                </div>
+                <div class="section-content">
+                    {_render_vocabulary_section(daily_vocabulary)}
+                </div>
+            </div>
+
             <!-- 2. 문법 (20분) -->
             <div class="section">
                 <div class="section-title">
                     <span class="section-emoji">✏️</span>
-                    <span>문법 (20분)</span>
+                    <span>문법 (20분) - 새로운 주제</span>
                 </div>
                 <div class="section-content">
-                    <h4>{grammar_content.get('topic', '문법 학습')}</h4>
-                    <p style="margin: 10px 0;">{grammar_content.get('korean', 'Grammar explanation')[:200]}</p>
-                    <div class="vocab-item">
-                        <strong>예시:</strong><br/>
-                        {grammar_content.get('example', '')}
-                    </div>
+                    {_render_grammar_topic_section(grammar_topic)}
                     <div class="external-links">
                         <a href="https://www.bbc.co.uk/learningenglish/english/features/learningenglish-grammar" target="_blank">
                             BBC Grammar →
@@ -432,15 +453,18 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
                 </div>
             </div>
 
-            <!-- 5. 다독 (5분) - 권장 도서 -->
+            <!-- 5. 다독 (5분) - 오늘의 아티클 + 권장 도서 -->
             <div class="section">
                 <div class="section-title">
                     <span class="section-emoji">📖</span>
-                    <span>다독 (5분)</span>
+                    <span>다독 (5분) - 오늘의 읽기</span>
                 </div>
                 <div class="section-content">
-                    <p>현재 수준에 맞는 원서를 읽어보세요.</p>
+                    {_render_reading_article_section(reading_article)}
 
+                    <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+
+                    <p style="margin-top: 15px;"><strong>📚 추가 읽기 자료:</strong></p>
                     <div class="reading-content">
                         <strong>단계별 권장:</strong><br/>
                         <ul style="margin-top: 8px; margin-left: 20px; font-size: 0.9em;">
@@ -451,13 +475,12 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
                         </ul>
                     </div>
 
-                    <p style="margin-top: 15px; font-size: 0.85em; color: #666;">
-                        모르는 단어가 한 페이지에 2-3개 이하인 책을 선택하세요.
-                    </p>
-
                     <div class="external-links">
                         <a href="https://www.oup.com/elt/bookworms" target="_blank">
                             Oxford Bookworms →
+                        </a>
+                        <a href="https://www.gutenberg.org" target="_blank">
+                            Project Gutenberg →
                         </a>
                     </div>
                 </div>
@@ -516,3 +539,82 @@ def _render_report_link(report_available: bool) -> str:
     if report_available:
         return '<a href="/report" class="report-link">📊 학습 리포트 보기 →</a>'
     return ''
+
+
+def _render_vocabulary_section(daily_vocabulary: dict) -> str:
+    """새로운 어휘 섹션 렌더링"""
+    if not daily_vocabulary or not daily_vocabulary.get('words'):
+        return '<p>오늘의 어휘를 생성 중입니다...</p>'
+
+    words = daily_vocabulary.get('words', [])
+    vocab_html = ''
+
+    for word in words[:5]:
+        vocab_html += f"""
+        <div class="vocab-item">
+            <strong>{word.get('word', '')}</strong>
+            <span style="color: #999; font-size: 0.9em;">({word.get('pronunciation', '')})</span>
+            <p style="margin: 5px 0; color: #0f766e;"><strong>뜻:</strong> {word.get('meaning_ko', '')}</p>
+            <p style="margin: 5px 0; color: #555;"><strong>예문:</strong> {word.get('example_en', '')}</p>
+            <p style="margin: 5px 0; color: #888; font-size: 0.9em;">{word.get('example_ko', '')}</p>
+        </div>
+        """
+
+    return vocab_html
+
+
+def _render_grammar_topic_section(grammar_topic: dict) -> str:
+    """새로운 문법 주제 섹션 렌더링"""
+    if not grammar_topic or not grammar_topic.get('topic'):
+        return '<p>문법 주제를 생성 중입니다...</p>'
+
+    html = f"""
+    <h4>{grammar_topic.get('topic', '문법 학습')}</h4>
+    <p style="margin: 10px 0; color: #555;"><strong>📖 설명 (한글):</strong></p>
+    <p style="margin: 10px 0; color: #666; line-height: 1.6;">
+        {grammar_topic.get('explanation_ko', 'Explanation not available')[:300]}
+    </p>
+    """
+
+    if grammar_topic.get('examples'):
+        html += '<p style="margin-top: 15px;"><strong>📝 예문:</strong></p>'
+        for i, example in enumerate(grammar_topic.get('examples', [])[:3], 1):
+            html += f"""
+            <div class="vocab-item">
+                <strong>예 {i}:</strong><br/>
+                <p style="margin: 5px 0; color: #0f766e;">{example.get('sentence_en', '')}</p>
+                <p style="margin: 5px 0; color: #888; font-size: 0.9em;">{example.get('sentence_ko', '')}</p>
+            </div>
+            """
+
+    if grammar_topic.get('common_mistakes'):
+        html += f"""
+        <div class="anki-status" style="background: #ffe5e5; border-color: #ff6b6b;">
+            <strong>⚠️ 주의:</strong> {grammar_topic.get('common_mistakes', 'Common mistakes')[:200]}
+        </div>
+        """
+
+    return html
+
+
+def _render_reading_article_section(reading_article: dict) -> str:
+    """오늘의 읽기 아티클 섹션 렌더링"""
+    if not reading_article or not reading_article.get('url'):
+        return '<p>오늘의 읽기 자료를 준비 중입니다...</p>'
+
+    return f"""
+    <div class="vocab-item">
+        <strong>📰 {reading_article.get('source', 'Reading Source')}</strong>
+        <p style="margin: 8px 0; color: #0f766e; font-weight: bold;">
+            {reading_article.get('title', 'Article')}
+        </p>
+        <p style="margin: 8px 0; color: #666; font-size: 0.9em;">
+            {reading_article.get('summary', 'No summary available')[:200]}...
+        </p>
+        <p style="margin-top: 10px;">
+            <a href="{reading_article.get('url', '#')}" target="_blank" class="link-button">
+                기사 읽기 →
+            </a>
+        </p>
+    </div>
+    """
