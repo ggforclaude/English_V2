@@ -15,6 +15,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -47,7 +50,5 @@ jobs:
           git config --local user.name "GitHub Action"
           git add docs/
           git commit -m "Update daily learning content" || true
-          git push origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          git push
         continue-on-error: true
