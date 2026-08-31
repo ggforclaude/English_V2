@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오늘의 읽기 - Improve English</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .source {
+            font-size: 0.95em;
+            background: rgba(255,255,255,0.2);
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 10px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #11998e;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #11998e;
+        }
+
+        .article-info {
+            background: #f0f9f7;
+            border-left: 4px solid #11998e;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .article-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #11998e;
+            margin-bottom: 10px;
+        }
+
+        .article-meta {
+            color: #666;
+            font-size: 0.95em;
+            margin-bottom: 10px;
+        }
+
+        .level-badge {
+            display: inline-block;
+            background: #38ef7d;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .article-summary {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 5px;
+            padding: 20px;
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .reading-tips {
+            background: #e8f5e9;
+            border-left: 4px solid #38ef7d;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .tips-title {
+            font-weight: bold;
+            color: #11998e;
+            margin-bottom: 10px;
+        }
+
+        .tips-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .tips-list li {
+            padding: 8px 0;
+            color: #333;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .tips-list li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #38ef7d;
+            font-weight: bold;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 15px 40px;
+            background: #11998e;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.05em;
+            transition: all 0.3s;
+            margin: 10px 10px 10px 0;
+        }
+
+        .cta-button:hover {
+            background: #0d7c6f;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.3);
+        }
+
+        .recommended-books {
+            background: #f0f9f7;
+            border: 2px solid #11998e;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .books-title {
+            font-weight: bold;
+            color: #11998e;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .book-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .book-card:hover {
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.1);
+            border-color: #11998e;
+        }
+
+        .book-title {
+            font-weight: bold;
+            color: #11998e;
+            margin-bottom: 5px;
+        }
+
+        .book-author {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .book-level {
+            display: inline-block;
+            background: #e0f2f1;
+            color: #11998e;
+            padding: 3px 10px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .navigation {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .nav-button {
+            display: inline-block;
+            padding: 12px 30px;
+            margin: 0 10px;
+            background: #11998e;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .nav-button:hover {
+            background: #0d7c6f;
+        }
+
+        @media (max-width: 768px) {
+            .books-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 오늘의 읽기</h1>
+            <p>다양한 주제로 읽기 실력을 키우세요</p>
+            <div class="source">📰 BBC Learning English</div>
+        </div>
+
+        <div class="content">
+            <div class="article-info">
+                <div class="article-title">Daily Reading Article</div>
+                <div class="article-meta">BBC Learning English</div>
+                <span class="level-badge">Level: B1</span>
+            </div>
+
+            
+            <div class="article-summary">
+                <strong>📖 요약:</strong><br><br>
+                BBC Learning English 웹사이트 방문
+            </div>
+
+            <a href="https://www.bbc.co.uk/learningenglish" class="cta-button" target="_blank">📖 원문 읽기 →</a>
+            
+
+            <div class="reading-tips">
+                <div class="tips-title">💡 효과적인 읽기 팁</div>
+                <ul class="tips-list">
+                    <li>먼저 제목과 첫 문단만 읽고 내용을 예측해보세요</li>
+                    <li>모르는 단어는 사전을 먼저 찾지 말고 문맥으로 유추하세요</li>
+                    <li>전체 내용을 빠르게 읽은 후 모르는 부분을 다시 읽으세요</li>
+                    <li>읽은 내용을 자신의 말로 요약해보세요</li>
+                </ul>
+            </div>
+
+            <div class="recommended-books">
+                <div class="books-title">📕 추천 도서 (비슷한 난이도)</div>
+                <div class="books-grid" id="booksGrid">
+                    <!-- 책 카드가 동적으로 생성됩니다 -->
+                </div>
+            </div>
+
+            <div class="navigation">
+                <a href="/today/listening" class="nav-button">← 듣기로</a>
+                <a href="/today/writing" class="nav-button">작문 →</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 추천 도서 데이터
+        const recommendedBooks = [
+            {
+                title: "The Hobbit",
+                author: "J.R.R. Tolkien",
+                level: "B1"
+            },
+            {
+                title: "Charlotte's Web",
+                author: "E.B. White",
+                level: "A2"
+            },
+            {
+                title: "The Great Gatsby",
+                author: "F. Scott Fitzgerald",
+                level: "B2"
+            },
+            {
+                title: "Animal Farm",
+                author: "George Orwell",
+                level: "B1"
+            }
+        ];
+
+        const booksGrid = document.getElementById('booksGrid');
+        recommendedBooks.forEach(book => {
+            const card = document.createElement('div');
+            card.className = 'book-card';
+            card.innerHTML = `
+                <div class="book-title">${book.title}</div>
+                <div class="book-author">${book.author}</div>
+                <div class="book-level">Level: ${book.level}</div>
+            `;
+            booksGrid.appendChild(card);
+        });
+    </script>
+</body>
+</html>
