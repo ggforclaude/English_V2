@@ -1,0 +1,498 @@
+"""
+발음 평가 페이지 생성
+/today/pronunciation 페이지를 빌드합니다.
+Web Speech API를 사용한 발음 연습 및 평가
+"""
+import pathlib
+import json
+from datetime import date
+
+
+def build_pronunciation_page(today: date, daily_words: dict) -> str:
+    """발음 페이지 생성."""
+    page_path = _save_pronunciation_html(today=today, daily_words=daily_words)
+    return page_path
+
+
+def _save_pronunciation_html(today: date, daily_words: dict) -> str:
+    """HTML 파일로 저장."""
+    base = pathlib.Path(__file__).parent.parent / "docs" / "today" / "pronunciation"
+    base.mkdir(parents=True, exist_ok=True)
+    out = base / "index.html"
+
+    words = daily_words.get("words", [])
+    words_json = json.dumps(words, ensure_ascii=False)
+
+    html = f"""<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>발음 평가 - Improve English</title>
+    <style>
+        * {{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }}
+
+        body {{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }}
+
+        .container {{
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }}
+
+        .header {{
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }}
+
+        .header h1 {{
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }}
+
+        .header p {{
+            font-size: 1.1em;
+            opacity: 0.95;
+            margin-bottom: 10px;
+        }}
+
+        .instructions {{
+            background: rgba(255,255,255,0.2);
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }}
+
+        .content {{
+            padding: 40px;
+        }}
+
+        .intro {{
+            background: #fff5f7;
+            border-left: 4px solid #f5576c;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            color: #333;
+            line-height: 1.6;
+        }}
+
+        .intro-title {{
+            font-weight: bold;
+            color: #f5576c;
+            margin-bottom: 10px;
+        }}
+
+        .words-container {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }}
+
+        .word-card {{
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 25px;
+            transition: all 0.3s;
+        }}
+
+        .word-card:hover {{
+            border-color: #f5576c;
+            box-shadow: 0 5px 20px rgba(245, 87, 108, 0.1);
+        }}
+
+        .word-text {{
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #f5576c;
+            margin-bottom: 10px;
+        }}
+
+        .pronunciation {{
+            font-size: 0.9em;
+            color: #999;
+            margin-bottom: 15px;
+            font-style: italic;
+        }}
+
+        .meaning {{
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+            color: #666;
+            line-height: 1.5;
+        }}
+
+        .button-group {{
+            display: flex;
+            gap: 10px;
+        }}
+
+        .btn {{
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }}
+
+        .btn-record {{
+            background: #f5576c;
+            color: white;
+        }}
+
+        .btn-record:hover {{
+            background: #d63447;
+        }}
+
+        .btn-record.recording {{
+            background: #dc3545;
+            animation: pulse 1s infinite;
+        }}
+
+        @keyframes pulse {{
+            0%, 100% {{ opacity: 1; }}
+            50% {{ opacity: 0.7; }}
+        }}
+
+        .btn-play {{
+            background: #667eea;
+            color: white;
+        }}
+
+        .btn-play:hover {{
+            background: #5568d3;
+        }}
+
+        .status {{
+            font-size: 0.85em;
+            color: #999;
+            margin-top: 10px;
+            text-align: center;
+        }}
+
+        .result {{
+            background: #f0f8f7;
+            border-left: 4px solid #38ef7d;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 0.85em;
+            color: #28a745;
+            display: none;
+        }}
+
+        .result.active {{
+            display: block;
+        }}
+
+        .summary {{
+            background: #fff8f0;
+            border-left: 4px solid #f5576c;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }}
+
+        .summary-title {{
+            font-weight: bold;
+            color: #f5576c;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }}
+
+        .summary-stats {{
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }}
+
+        .stat-item {{
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }}
+
+        .stat-number {{
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #f5576c;
+        }}
+
+        .stat-label {{
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }}
+
+        .navigation {{
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }}
+
+        .nav-button {{
+            display: inline-block;
+            padding: 12px 30px;
+            margin: 0 10px;
+            background: #f5576c;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }}
+
+        .nav-button:hover {{
+            background: #d63447;
+        }}
+
+        @media (max-width: 768px) {{
+            .content {{
+                padding: 20px;
+            }}
+
+            .header {{
+                padding: 25px 15px;
+            }}
+
+            .header h1 {{
+                font-size: 2em;
+            }}
+
+            .words-container {{
+                grid-template-columns: 1fr;
+            }}
+
+            .summary-stats {{
+                grid-template-columns: 1fr;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎤 발음 평가</h1>
+            <p>오늘의 단어 발음을 연습하세요</p>
+            <div class="instructions">
+                🎙️ 마이크 권한이 필요합니다 | 조용한 환경 권장
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="intro">
+                <div class="intro-title">📝 발음 연습 방법</div>
+                1. 단어를 클릭하면 원어민 발음이 재생됩니다<br>
+                2. "🎤 녹음하기" 버튼을 누르고 천천히 발음해보세요<br>
+                3. 녹음이 끝나면 자동으로 인식됩니다<br>
+                4. 반복해서 연습하고 정확도를 높이세요
+            </div>
+
+            <div class="words-container" id="wordsContainer"></div>
+
+            <div class="summary">
+                <div class="summary-title">📊 오늘의 연습 현황</div>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalWords">0</div>
+                        <div class="stat-label">총 단어</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="recordedWords">0</div>
+                        <div class="stat-label">녹음한 단어</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="avgScore">0%</div>
+                        <div class="stat-label">평균 정확도</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <a href="/today/words" class="nav-button">← 단어로</a>
+            <a href="/today" class="nav-button">홈 →</a>
+        </div>
+    </div>
+
+    <script>
+        const wordsData = {words_json};
+        let recordingStats = {{}};
+
+        // Web Speech API 설정
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const synth = window.speechSynthesis;
+
+        function renderWords() {{
+            const container = document.getElementById('wordsContainer');
+            container.innerHTML = '';
+
+            wordsData.forEach((word, idx) => {{
+                const card = document.createElement('div');
+                card.className = 'word-card';
+
+                const wordText = word.word || '';
+                const pronunciation = word.pronunciation || '';
+                const meaning = word.meaning_ko || '';
+
+                card.innerHTML = `
+                    <div class="word-text" onclick="playWord('{wordText}', '{pronunciation}')">{wordText}</div>
+                    <div class="pronunciation">{pronunciation}</div>
+                    <div class="meaning">{meaning}</div>
+                    <div class="button-group">
+                        <button class="btn btn-record" onclick="startRecording('{wordText}', this)">
+                            🎤 녹음하기
+                        </button>
+                        <button class="btn btn-play" onclick="playWord('{wordText}', '{pronunciation}')">
+                            🔊 발음듣기
+                        </button>
+                    </div>
+                    <div class="result" data-word="{wordText}"></div>
+                    <div class="status" data-word="{wordText}"></div>
+                `;
+
+                container.appendChild(card);
+                recordingStats[wordText] = {{ recorded: false, score: 0 }};
+            }});
+
+            document.getElementById('totalWords').textContent = wordsData.length;
+        }}
+
+        function playWord(word, pronunciation) {{
+            if (!synth) {{
+                alert('브라우저가 음성 재생을 지원하지 않습니다');
+                return;
+            }}
+
+            synth.cancel();
+            const utterance = new SpeechSynthesisUtterance(word);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.8;
+            synth.speak(utterance);
+        }}
+
+        function startRecording(word, button) {{
+            if (!SpeechRecognition) {{
+                alert('브라우저가 음성 인식을 지원하지 않습니다. Chrome, Edge, Safari를 사용해주세요.');
+                return;
+            }}
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.continuous = false;
+
+            button.textContent = '🎙️ 녹음 중...';
+            button.classList.add('recording');
+            button.disabled = true;
+
+            recognition.onstart = () => {{
+                const status = document.querySelector(`[data-word="{word}"].status`);
+                status.textContent = '듣고 있습니다...';
+            }};
+
+            recognition.onresult = (event) => {{
+                let recognized = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {{
+                    recognized += event.results[i][0].transcript;
+                }}
+
+                const score = calculateSimilarity(word.toLowerCase(), recognized.toLowerCase());
+                recordingStats[word].recorded = true;
+                recordingStats[word].score = score;
+
+                const result = document.querySelector(`[data-word="{word}"].result`);
+                const status = document.querySelector(`[data-word="{word}"].status`);
+
+                result.classList.add('active');
+                result.innerHTML = `✅ 인식: "${{recognized}}" | 정확도: ${{score}}%`;
+                status.textContent = score >= 80 ? '🎉 좋습니다!' : '다시 시도해보세요';
+
+                updateStats();
+            }};
+
+            recognition.onerror = (event) => {{
+                document.querySelector(`[data-word="{word}"].status`).textContent = '❌ 인식 실패. 다시 시도하세요.';
+            }};
+
+            recognition.onend = () => {{
+                button.textContent = '🎤 녹음하기';
+                button.classList.remove('recording');
+                button.disabled = false;
+            }};
+
+            recognition.start();
+        }}
+
+        function calculateSimilarity(target, recognized) {{
+            const words = recognized.split(' ');
+            for (let word of words) {{
+                if (word.includes(target) || target.includes(word)) {{
+                    return 100;
+                }}
+            }}
+
+            // 부분 매칭
+            let score = 0;
+            for (let i = 0; i < Math.min(target.length, recognized.length); i++) {{
+                if (target[i] === recognized[i]) score++;
+            }}
+            score = Math.round((score / target.length) * 100);
+            return Math.max(0, Math.min(100, score));
+        }}
+
+        function updateStats() {{
+            let recordedCount = 0;
+            let totalScore = 0;
+            let scoredCount = 0;
+
+            for (let word in recordingStats) {{
+                if (recordingStats[word].recorded) {{
+                    recordedCount++;
+                    totalScore += recordingStats[word].score;
+                    scoredCount++;
+                }}
+            }}
+
+            document.getElementById('recordedWords').textContent = recordedCount;
+            if (scoredCount > 0) {{
+                const avgScore = Math.round(totalScore / scoredCount);
+                document.getElementById('avgScore').textContent = avgScore + '%';
+            }}
+        }}
+
+        // 초기화
+        renderWords();
+    </script>
+</body>
+</html>
+"""
+
+    out.write_text(html, encoding="utf-8")
+    return str(out)

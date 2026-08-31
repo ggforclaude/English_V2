@@ -46,6 +46,8 @@ async def main() -> None:
     from reading_page_builder import build_reading_page
     from writing_page_builder import build_writing_page
     from writing_feedback_page_builder import build_writing_feedback_page
+    from pronunciation_page_builder import build_pronunciation_page
+    from stats_page_builder import build_stats_page
     from correction_page_builder import build_correction_page
     from level_tracker import LevelTracker
     from question_generator import generate_all_questions, generate_daily_learning
@@ -223,6 +225,16 @@ async def main() -> None:
         log.info("[8-7] /today/correction 페이지 생성...")
         correction_page = build_correction_page(today=today)
         log.info(f"  ✓ 저장: {correction_page}")
+
+        # 8-8. /today/pronunciation 페이지 생성
+        log.info("[8-8] /today/pronunciation 페이지 생성...")
+        pronunciation_page = build_pronunciation_page(today=today, daily_words=daily_words)
+        log.info(f"  ✓ 저장: {pronunciation_page}")
+
+        # 8-9. /today/stats 페이지 생성
+        log.info("[8-9] /today/stats 페이지 생성...")
+        stats_page = build_stats_page(today=today)
+        log.info(f"  ✓ 저장: {stats_page}")
 
         # 9. /report 페이지 생성 (주 1회)
         if weak_points_report and weak_points_report.get("html_report"):
