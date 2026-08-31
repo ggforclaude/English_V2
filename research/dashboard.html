@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>투자 대시보드</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .header {
+            background: #1a1a2e;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        .tabs {
+            display: flex;
+            background: white;
+            border-bottom: 1px solid #ddd;
+            padding: 0 20px;
+            gap: 20px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 15px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 15px;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            color: #1a1a2e;
+        }
+
+        .tab.active {
+            color: #1a1a2e;
+            border-bottom-color: #1a1a2e;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #1a1a2e;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .indicator-box {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .indicator-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .indicator-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1a1a2e;
+        }
+
+        .indicator-change {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .change-positive {
+            color: #e74c3c;
+        }
+
+        .change-negative {
+            color: #3498db;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table th {
+            background: #f5f5f5;
+            padding: 12px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+        }
+
+        table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 15px;
+        }
+
+        .news-item {
+            background: #f9f9f9;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border-left: 3px solid #1a1a2e;
+        }
+
+        .news-date {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        .news-summary {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .news-toggle {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .news-raw {
+            display: none;
+            background: #fff;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #666;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .news-raw.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                padding: 0 10px;
+                gap: 10px;
+            }
+
+            .tab {
+                padding: 12px 15px;
+                font-size: 13px;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .error {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c00;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 투자 대시보드</h1>
+        <p id="lastUpdate">마지막 업데이트: --</p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" data-tab="latest">최신 일자</button>
+        <button class="tab" data-tab="cumulative">누적 데이터</button>
+        <button class="tab" data-tab="news">뉴스</button>
+    </div>
+
+    <div class="container">
+        <!-- 최신 일자 탭 -->
+        <div id="latest" class="tab-content active">
+            <div class="card">
+                <h3>🏆 오늘의 투자 지표</h3>
+                <div class="grid-2">
+                    <div class="indicator-box">
+                        <div class="indicator-label">USD/KRW</div>
+                        <div class="indicator-value" id="usdkrw">-</div>
+                    </div>
+                    <div class="indicator-box">
+                        <div class="indicator-label">JPY/KRW</div>
+                        <div class="indicator-value" id="jpykrw">-</div>
+                    </div>
+                    <div class="indicator-box">
+                        <div class="indicator-label">VIX (한국)</div>
+                        <div class="indicator-value" id="vix_kr">-</div>
+                    </div>
+                    <div class="indicator-box">
+                        <div class="indicator-label">VIX (미국)</div>
+                        <div class="indicator-value" id="vix_us">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>💰 금 시세 추이 (최근 7일)</h3>
+                <div class="chart-container">
+                    <canvas id="goldChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📈 리서치 보고서 (최근 4일)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>날짜</th>
+                            <th>회사</th>
+                            <th>증권사</th>
+                            <th>투자의견</th>
+                            <th>목표주가</th>
+                        </tr>
+                    </thead>
+                    <tbody id="researchTableBody">
+                        <tr><td colspan="5" style="text-align: center; color: #999;">데이터 로딩 중...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3>🎯 섹터 RSI</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>섹터</th>
+                            <th>RSI</th>
+                            <th>상태</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rsiTableBody">
+                        <tr><td colspan="3" style="text-align: center; color: #999;">데이터 로딩 중...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 누적 데이터 탭 -->
+        <div id="cumulative" class="tab-content">
+            <div class="card">
+                <h3>📊 금 시세 추이 (전체)</h3>
+                <div class="chart-container">
+                    <canvas id="goldChartFull"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📈 섹터 RSI 추이</h3>
+                <div class="chart-container">
+                    <canvas id="rsiChartFull"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>💹 환율 추이</h3>
+                <div class="chart-container">
+                    <canvas id="exchangeChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📋 전체 리서치 보고서</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>날짜</th>
+                            <th>회사</th>
+                            <th>증권사</th>
+                            <th>투자의견</th>
+                            <th>목표주가</th>
+                        </tr>
+                    </thead>
+                    <tbody id="researchTableBodyFull">
+                        <tr><td colspan="5" style="text-align: center; color: #999;">데이터 로딩 중...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3>⚠️ 주목할 투자의견</h3>
+                <div id="extremeOpinionDiv">
+                    <p style="color: #999; text-align: center;">데이터 로딩 중...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 뉴스 탭 -->
+        <div id="news" class="tab-content">
+            <div class="card">
+                <h3>📰 투자 뉴스</h3>
+                <div id="newsContainer">
+                    <p style="color: #999; text-align: center;">데이터 로딩 중...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ──────────────────────────────────────────────────────
+        // Google Sheets 데이터 로드 (PUBLIC 공유 설정 필요)
+        // ──────────────────────────────────────────────────────
+
+        const SHEETS_ID = "YOUR_GOOGLE_SHEETS_ID"; // 실제 ID로 교체 필요
+        const API_KEY = "YOUR_GOOGLE_SHEETS_API_KEY"; // 선택사항
+
+        async function getSheetData(sheetName) {
+            try {
+                // 공개 Google Sheets에서 데이터 가져오기
+                // 형식: https://docs.google.com/spreadsheets/d/{SHEETS_ID}/gviz/query?...
+                const url = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/gviz/query?sheet=${sheetName}&tq=select%20*`;
+                const response = await fetch(url);
+                const data = await response.text();
+
+                // gviz 응답 파싱
+                const jsonData = JSON.parse(data.substring(data.indexOf('{'), data.lastIndexOf('}') + 1));
+                return jsonData;
+            } catch (error) {
+                console.error(`시트 로드 오류 (${sheetName}):`, error);
+                return null;
+            }
+        }
+
+        // ──────────────────────────────────────────────────────
+        // 탭 관리
+        // ──────────────────────────────────────────────────────
+
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.dataset.tab;
+
+                // 모든 탭/콘텐츠 비활성화
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+
+                // 선택한 탭 활성화
+                tab.classList.add('active');
+                document.getElementById(tabName).classList.add('active');
+            });
+        });
+
+        // ──────────────────────────────────────────────────────
+        // 데이터 렌더링 함수들
+        // ──────────────────────────────────────────────────────
+
+        function renderResearch(data) {
+            const tbody = document.getElementById('researchTableBody');
+            if (!data || data.rows.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999;">데이터 없음</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.rows.map(row => `
+                <tr>
+                    <td>${row.c[0]?.v || '-'}</td>
+                    <td>${row.c[1]?.v || '-'}</td>
+                    <td>${row.c[3]?.v || '-'}</td>
+                    <td><strong>${row.c[4]?.v || '-'}</strong></td>
+                    <td>${row.c[5]?.v || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderRSI(data) {
+            const tbody = document.getElementById('rsiTableBody');
+            if (!data || data.rows.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #999;">데이터 없음</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.rows.map(row => {
+                const rsi = parseFloat(row.c[2]?.v || 0);
+                let status = '보통';
+                let statusColor = '#666';
+
+                if (rsi > 70) {
+                    status = '과매수 ⬆';
+                    statusColor = '#e74c3c';
+                } else if (rsi < 30) {
+                    status = '과매도 ⬇';
+                    statusColor = '#3498db';
+                }
+
+                return `
+                    <tr>
+                        <td>${row.c[1]?.v || '-'}</td>
+                        <td><strong>${rsi.toFixed(1)}</strong></td>
+                        <td style="color: ${statusColor};">${status}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderNews(data) {
+            const container = document.getElementById('newsContainer');
+            if (!data || data.rows.length === 0) {
+                container.innerHTML = '<p style="color: #999; text-align: center;">뉴스 없음</p>';
+                return;
+            }
+
+            container.innerHTML = data.rows.map((row, idx) => `
+                <div class="news-item">
+                    <div class="news-date">${row.c[0]?.v || '-'}</div>
+                    <div class="news-summary">${row.c[1]?.v || '-'}</div>
+                    <button class="news-toggle" onclick="toggleRaw(${idx})">원문 보기</button>
+                    <div class="news-raw" id="raw-${idx}">${row.c[2]?.v || '-'}</div>
+                </div>
+            `).join('');
+        }
+
+        function toggleRaw(idx) {
+            document.getElementById(`raw-${idx}`).classList.toggle('show');
+        }
+
+        // ──────────────────────────────────────────────────────
+        // 차트 생성
+        // ──────────────────────────────────────────────────────
+
+        function createGoldChart() {
+            const ctx = document.getElementById('goldChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['일', '월', '화', '수', '목', '금', '토'],
+                    datasets: [{
+                        label: '금 시세 (KRW/g)',
+                        data: [75000, 75200, 75150, 75300, 75400, 75250, 75350],
+                        borderColor: '#f39c12',
+                        backgroundColor: 'rgba(243, 156, 18, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#f39c12',
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: true } },
+                    scales: {
+                        y: { beginAtZero: false }
+                    }
+                }
+            });
+        }
+
+        // ──────────────────────────────────────────────────────
+        // 초기화
+        // ──────────────────────────────────────────────────────
+
+        async function init() {
+            // 임시 테스트 차트 생성
+            createGoldChart();
+
+            document.getElementById('lastUpdate').textContent = `마지막 업데이트: ${new Date().toLocaleString('ko-KR')}`;
+
+            // Google Sheets 데이터 로드 시도
+            console.log('Google Sheets ID가 설정되지 않았습니다. 대시보드 구조만 표시합니다.');
+            console.log('실제 사용을 위해 dashboard.html의 SHEETS_ID를 Google Sheets ID로 교체하세요.');
+        }
+
+        init();
+    </script>
+</body>
+</html>
