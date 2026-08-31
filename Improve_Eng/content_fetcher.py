@@ -451,3 +451,101 @@ JSON 형식:
             "examples": [],
             "common_mistakes": ""
         }
+
+
+async def fetch_daily_words(current_level: str = "B1") -> dict:
+    """매일 외울 10개 단어를 Claude API + Free Dictionary API에서 가져오기."""
+    import anthropic
+    import httpx
+    import json
+
+    client = anthropic.Anthropic()
+    today = date.today().isoformat()
+
+    # 1. Claude로 10개 단어 리스트 생성
+    prompt = f"""
+당신은 영어 교육 전문가입니다. 오늘({today})에 학습할 {current_level} 레벨의 실용적인 영어 단어 10개를 생성해주세요.
+
+요구사항:
+1. 일상에서 자주 사용되는 단어
+2. 다양한 품사 포함 (명사, 동사, 형용사 등)
+3. 단어만 리스트로 반환
+
+JSON 형식:
+{{
+  "words": ["word1", "word2", "word3", ..., "word10"]
+}}
+"""
+
+    words_list = []
+    try:
+        message = client.messages.create(
+            model="claude-opus-4-1-20250805",
+            max_tokens=300,
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        response_text = message.content[0].text
+        start = response_text.find('{')
+        end = response_text.rfind('}') + 1
+        json_str = response_text[start:end]
+        words_list = json.loads(json_str).get("words", [])
+        log.info(f"Generated {len(words_list)} words from Claude")
+    except Exception as e:
+        log.error(f"Failed to generate words list: {e}")
+        return {"words": []}
+
+    # 2. Free Dictionary API에서 각 단어의 정의/발음/예문 조회
+    words_data = []
+    async with httpx.AsyncClient(timeout=10) as http_client:
+        for word in words_list[:10]:
+            try:
+                response = await http_client.get(
+                    f"https://api.dictionaryapi.dev/api/v1/entries/en/{word.lower()}",
+                )
+                if response.status_code == 200:
+                    data = response.json()[0]
+
+                    # 발음
+                    phonetic = data.get("phonetic", "")
+
+                    # 정의 및 예문
+                    meanings = data.get("meanings", [])
+                    definition = ""
+                    example = ""
+                    pos = ""
+                    if meanings:
+                        pos = meanings[0].get("partOfSpeech", "")
+                        defs = meanings[0].get("definitions", [])
+                        if defs:
+                            definition = defs[0].get("definition", "")
+                            example = defs[0].get("example", "")
+
+                    words_data.append({
+                        "word": word,
+                        "pronunciation": phonetic,
+                        "pos": pos,
+                        "meaning_en": definition,
+                        "example_en": example,
+                    })
+                    log.info(f"Fetched {word} from Free Dictionary API")
+                else:
+                    log.warning(f"Free Dictionary API failed for {word} (status {response.status_code})")
+                    words_data.append({
+                        "word": word,
+                        "pronunciation": "",
+                        "pos": "",
+                        "meaning_en": "",
+                        "example_en": "",
+                    })
+            except Exception as e:
+                log.warning(f"Failed to fetch {word}: {e}")
+                words_data.append({
+                    "word": word,
+                    "pronunciation": "",
+                    "pos": "",
+                    "meaning_en": "",
+                    "example_en": "",
+                })
+
+    return {"words": words_data}
