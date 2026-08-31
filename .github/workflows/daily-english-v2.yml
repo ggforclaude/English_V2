@@ -44,6 +44,14 @@ jobs:
           PAGES_BASE_URL: ${{ secrets.PAGES_BASE_URL }}
           GOOGLE_CREDENTIALS_PATH: credentials.json
 
+      - name: Evaluate yesterday's writing
+        run: |
+          cd Improve_Eng
+          python evaluate_writing.py
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        continue-on-error: true
+
       - name: Commit and push generated content
         run: |
           git config --local user.email "action@github.com"

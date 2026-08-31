@@ -45,6 +45,7 @@ async def main() -> None:
     from listening_page_builder import build_listening_page
     from reading_page_builder import build_reading_page
     from writing_page_builder import build_writing_page
+    from writing_feedback_page_builder import build_writing_feedback_page
     from correction_page_builder import build_correction_page
     from level_tracker import LevelTracker
     from question_generator import generate_all_questions, generate_daily_learning
@@ -213,6 +214,11 @@ async def main() -> None:
         )
         log.info(f"  ✓ 저장: {writing_page}")
 
+        # 8-6-1. /today/writing-feedback 페이지 생성
+        log.info("[8-6-1] /today/writing-feedback 페이지 생성...")
+        feedback_page = build_writing_feedback_page(today=today)
+        log.info(f"  ✓ 저장: {feedback_page}")
+
         # 8-7. /today/correction 페이지 생성
         log.info("[8-7] /today/correction 페이지 생성...")
         correction_page = build_correction_page(today=today)
@@ -231,6 +237,16 @@ async def main() -> None:
         tracker.save_today_questions(today, questions)
         log.info("  ✓ 문제 저장 완료")
 
+        # 13. 작문 작성 준비 (사용자가 입력한 작문을 저장)
+        log.info("[13] 작문 저장 공간 준비...")
+        _prepare_writing_storage(today, daily_words, grammar_topic)
+        log.info("  ✓ 작문 저장 준비 완료")
+
+        # 14. 어제 작문 평가 (GitHub Actions에서 실행)
+        log.info("[14] 평가 데이터 체크...")
+        feedback_available = _check_evaluation_feedback(today)
+        log.info(f"  ✓ 평가 피드백: {'있음' if feedback_available else '없음'}")
+
         log.info("=" * 60)
         log.info("✓ 완료 - /today 페이지에서 오늘의 학습을 시작하세요!")
         log.info("=" * 60)
@@ -238,6 +254,56 @@ async def main() -> None:
     except Exception as e:
         log.error(f"❌ 오류 발생: {e}", exc_info=True)
         raise
+
+
+def _prepare_writing_storage(today, daily_words, grammar_topic) -> None:
+    """작문 저장 공간 준비"""
+    import pathlib
+    import json
+
+    base = pathlib.Path(__file__).parent.parent / "docs" / "writing"
+    base.mkdir(parents=True, exist_ok=True)
+
+    # 오늘의 작문 메타데이터 저장 (사용자가 입력할 때 참고)
+    metadata = {
+        "date": str(today),
+        "words": [w.get("word", "") for w in daily_words.get("words", [])],
+        "grammar_topic": grammar_topic.get("topic", ""),
+        "grammar_explanation": grammar_topic.get("explanation_ko", ""),
+    }
+
+    metadata_file = base / "metadata.json"
+    with open(metadata_file, "w", encoding="utf-8") as f:
+        json.dump(metadata, f, ensure_ascii=False, indent=2)
+
+
+def _check_evaluation_feedback(today) -> bool:
+    """어제의 평가 피드백 있는지 확인"""
+    import pathlib
+    import json
+    from datetime import datetime, timedelta
+    import pytz
+
+    KST = pytz.timezone("Asia/Seoul")
+    yesterday = (datetime.now(KST).date()) - timedelta(days=1)
+
+    feedback_file = pathlib.Path(__file__).parent.parent / "docs" / "writing" / "evaluations.json"
+
+    if not feedback_file.exists():
+        return False
+
+    try:
+        with open(feedback_file, "r", encoding="utf-8") as f:
+            evaluations = json.load(f)
+
+        for eval_entry in evaluations:
+            if eval_entry.get("date") == str(yesterday):
+                return True
+
+        return False
+    except Exception as e:
+        log.warning(f"평가 피드백 확인 실패: {e}")
+        return False
 
 
 def _save_report_html(html_content: str) -> str:
