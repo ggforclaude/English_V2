@@ -454,38 +454,50 @@ JSON 형식:
 
 
 async def fetch_vocabulary_from_text(text: str, current_level: str = "B1") -> dict:
-    """읽기 텍스트에서 새로운 어휘를 추출하고 설명을 생성."""
+    """읽기 텍스트에서 핵심 구문/표현을 추출하고 유사 표현과 비교."""
     import anthropic
     import json
 
     client = anthropic.Anthropic()
 
     prompt = f"""
-당신은 영어 교육 전문가입니다. 다음 텍스트에서 {current_level} 수준의 학습자가 배워야 할 새로운 단어 5-8개를 선택하고 각각에 대해 설명해주세요.
+당신은 영어 표현 전문가입니다. 다음 텍스트에서 {current_level} 수준의 학습자가 배워야 할 핵심 구문/표현 3-5개를 선택하고, 각각에 대해 유사하지만 뜻이 다른 표현들과 비교해주세요.
 
 텍스트:
 {text[:500]}
 
 요구사항:
-1. 일상 회화에서 자주 사용되는 단어
-2. 각 단어마다:
-   - 단어
-   - 발음
-   - 의미 (영어)
-   - 의미 (한글)
-   - 예문 (영어)
-   - 텍스트에서 나온 원문 문장
+1. 실제 사용되는 구문/표현 (예: "made of", "take care of" 등)
+2. 각 표현마다:
+   - 주요 표현
+   - 한글 뜻
+   - 영어 설명
+   - 예문 (영어 + 한글)
+   - 유사 표현 2-3개와 각각의:
+     * 유사 표현
+     * 한글 뜻
+     * 영어 설명
+     * 주요 표현과의 차이점
+     * 예문
 
 JSON 형식:
 {{
-  "words": [
+  "expressions": [
     {{
-      "word": "단어",
-      "pronunciation": "/발음/",
-      "meaning_en": "의미 (영어)",
-      "meaning_ko": "의미 (한글)",
-      "example": "예문",
-      "context_sentence": "원문에서 나온 문장"
+      "main": "주요 표현",
+      "meaning_ko": "한글 뜻",
+      "meaning_en": "영어 설명",
+      "example_en": "예문 (영어)",
+      "example_ko": "예문 (한글)",
+      "similar": [
+        {{
+          "expression": "유사 표현",
+          "meaning_ko": "한글 뜻",
+          "meaning_en": "영어 설명",
+          "difference": "주요 표현과의 차이",
+          "example_en": "예문"
+        }}
+      ]
     }}
   ]
 }}
@@ -494,18 +506,18 @@ JSON 형식:
     try:
         message = client.messages.create(
             model="claude-opus-5",
-            max_tokens=1500,
+            max_tokens=2000,
             messages=[{"role": "user", "content": prompt}]
         )
 
-        response_text = message.content[0].text
+        response_text = next((block.text for block in message.content if hasattr(block, 'text')), "")
         start = response_text.find('{')
         end = response_text.rfind('}') + 1
         json_str = response_text[start:end]
         return json.loads(json_str)
     except Exception as e:
-        log.error(f"Failed to extract vocabulary: {e}")
-        return {"words": []}
+        log.error(f"Failed to extract expressions: {e}")
+        return {"expressions": []}
 
 
 async def fetch_daily_words(current_level: str = "B1") -> dict:
