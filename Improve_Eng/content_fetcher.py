@@ -403,7 +403,10 @@ JSON 형식으로 다음과 같이 반환:
 
 
 async def fetch_daily_grammar_topic(current_level: str = "B1") -> dict:
-    """커리큘럼 기반 문법 주제 제시 (매일 다른 주제)."""
+    """커리큘럼 기반 문법 주제 제시 + Claude로 콘텐츠 생성."""
+    import anthropic
+    import json
+    import re
     from grammar_curriculum import get_today_grammar
     from level_tracker import LevelTracker
     from datetime import datetime
@@ -414,13 +417,110 @@ async def fetch_daily_grammar_topic(current_level: str = "B1") -> dict:
     today = datetime.now(kst).date()
     day_number = tracker.get_day_number(today)
 
-    topic = get_today_grammar(day_number)
-    return topic if topic else {
+    curriculum = get_today_grammar(day_number)
+    if not curriculum:
+        return _fallback_grammar()
+
+    topic_name = curriculum.get("topic", "Grammar")
+    topic_en = curriculum.get("topic_en", topic_name)
+
+    prompt = f"""당신은 영어 문법 교사입니다. '{topic_name}' ({topic_en})에 대한 학습 자료를 생성해주세요.
+
+레벨: {current_level}
+
+다음을 정확히 JSON 형식으로만 반환하세요. 마크다운이나 설명 없이 순수 JSON만:
+
+{{
+  "explanation_ko": "한글 설명 (2-3문장, 이 문법이 언제 어떻게 사용되는지)",
+  "explanation_en": "English explanation (2-3 sentences)",
+  "examples": [
+    {{"sentence_en": "I eat breakfast every day.", "sentence_ko": "나는 매일 아침을 먹는다."}},
+    {{"sentence_en": "She doesn't like coffee.", "sentence_ko": "그녀는 커피를 좋아하지 않는다."}},
+    {{"sentence_en": "Do you play tennis?", "sentence_ko": "너는 테니스를 하니?"}}
+  ],
+  "learning_resources": [
+    {{"name": "BBC Learning English - {topic_name}", "url": "https://www.bbc.co.uk/learningenglish/english/course/english-grammar-course"}},
+    {{"name": "Perfect English Grammar - {topic_name}", "url": "https://www.perfectenglishgrammar.com/"}},
+    {{"name": "Khan Academy", "url": "https://www.khanacademy.org/humanities/grammar"}}
+  ],
+  "quiz": [
+    {{
+      "question": "객관식 문제 1 (한글 또는 영어로)",
+      "options": ["선지1", "선지2", "선지3", "선지4"],
+      "correct": 0,
+      "explanation": "정답 설명 (한글)"
+    }},
+    {{
+      "question": "객관식 문제 2",
+      "options": ["선지1", "선지2", "선지3", "선지4"],
+      "correct": 1,
+      "explanation": "정답 설명"
+    }},
+    {{
+      "question": "객관식 문제 3",
+      "options": ["선지1", "선지2", "선지3", "선지4"],
+      "correct": 2,
+      "explanation": "정답 설명"
+    }}
+  ]
+}}"""
+
+    try:
+        client = anthropic.Anthropic()
+        message = client.messages.create(
+            model="claude-opus-5",
+            max_tokens=2000,
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        response_text = next((block.text for block in message.content if hasattr(block, 'text')), "")
+
+        # 마크다운 제거
+        response_text = re.sub(r'```json\n?', '', response_text)
+        response_text = re.sub(r'```\n?', '', response_text)
+
+        start = response_text.find('{')
+        end = response_text.rfind('}') + 1
+
+        if start == -1 or end <= 0:
+            log.error("No valid JSON found in grammar response")
+            return _fallback_grammar()
+
+        json_str = response_text[start:end]
+        data = json.loads(json_str)
+
+        # 커리큘럼 기본 정보와 합치기
+        result = {
+            "id": curriculum.get("id", "unknown"),
+            "topic": topic_name,
+            "level": current_level,
+            "explanation_en": data.get("explanation_en", ""),
+            "explanation_ko": data.get("explanation_ko", ""),
+            "examples": data.get("examples", []),
+            "source": {"name": "Claude AI", "url": ""},
+            "additional_resources": data.get("learning_resources", []),
+            "quiz": data.get("quiz", [])
+        }
+
+        log.info(f"Generated grammar content for {topic_name}")
+        return result
+
+    except json.JSONDecodeError as e:
+        log.error(f"Failed to parse grammar JSON: {e}")
+        return _fallback_grammar()
+    except Exception as e:
+        log.error(f"Failed to generate grammar content: {e}")
+        return _fallback_grammar()
+
+
+def _fallback_grammar() -> dict:
+    """문법 생성 실패 시 fallback."""
+    return {
         "id": "unknown",
         "topic": "Grammar Topic",
-        "level": current_level,
-        "explanation_en": "",
-        "explanation_ko": "",
+        "level": "B1",
+        "explanation_en": "Grammar lesson will be available soon.",
+        "explanation_ko": "문법 학습 자료를 준비 중입니다.",
         "examples": [],
         "source": {"name": "BBC Learning English", "url": "https://www.bbc.co.uk/learningenglish/"},
         "additional_resources": [],
