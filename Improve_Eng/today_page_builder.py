@@ -327,6 +327,7 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
         <div class="sections">
             <!-- 1. 단어 (Anki) -->
             <div class="section">
+                <a href="/today/words" style="text-decoration: none; color: inherit; display: block; height: 100%;">
                 <div class="section-title">
                     <span class="section-emoji">📝</span>
                     <span>단어 (20분) - Anki SRS</span>
@@ -357,28 +358,35 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
                     <p style="margin-top: 15px; font-size: 0.85em; color: #666;">
                         Anki 앱(또는 AnkiDroid/AnkiWeb)에서 오늘의 복습을 진행하세요.
                     </p>
+                    <p style="margin-top: 15px; color: #667eea; font-weight: bold;">→ 자세히 보기</p>
                 </div>
+                </a>
             </div>
 
             <!-- 1-1. 새로운 어휘 (매일 생성) -->
             <div class="section">
+                <a href="/today/vocab" style="text-decoration: none; color: inherit; display: block; height: 100%;">
                 <div class="section-title">
                     <span class="section-emoji">✨</span>
                     <span>오늘의 새로운 어휘</span>
                 </div>
                 <div class="section-content">
                     {_render_vocabulary_section(daily_vocabulary)}
+                    <p style="margin-top: 15px; color: #667eea; font-weight: bold;">→ 자세히 보기</p>
                 </div>
+                </a>
             </div>
 
             <!-- 2. 문법 (20분) -->
             <div class="section">
+                <a href="/today/grammar" style="text-decoration: none; color: inherit; display: block; height: 100%;">
                 <div class="section-title">
                     <span class="section-emoji">✏️</span>
                     <span>문법 (20분) - 새로운 주제</span>
                 </div>
                 <div class="section-content">
                     {_render_grammar_topic_section(grammar_topic)}
+                    <p style="margin-top: 15px; color: #667eea; font-weight: bold;">→ 자세히 보기</p>
                     <div class="external-links">
                         <a href="https://www.bbc.co.uk/learningenglish/english/features/learningenglish-grammar" target="_blank">
                             BBC Grammar →
@@ -388,10 +396,12 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
                         </a>
                     </div>
                 </div>
+                </a>
             </div>
 
             <!-- 3. 듣기 (20분) - VOA -->
             <div class="section">
+                <a href="/today/listening" style="text-decoration: none; color: inherit; display: block; height: 100%;">
                 <div class="section-title">
                     <span class="section-emoji">🎧</span>
                     <span>듣기 (20분) - VOA Learning English</span>
@@ -410,6 +420,8 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
                         그 다음 자막을 켜고 1회 더 들으세요.
                     </div>
 
+                    <p style="margin-top: 15px; color: #667eea; font-weight: bold;">→ 자세히 보기</p>
+
                     <div class="external-links">
                         <a href="{voa_content.get('link', 'https://www.voaspecialenglish.com')}" target="_blank">
                             원본 기사 →
@@ -419,10 +431,12 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
                         </a>
                     </div>
                 </div>
+                </a>
             </div>
 
             <!-- 4. 출력 (25분) - 에세이 + 교정 -->
             <div class="section">
+                <a href="/today/writing" style="text-decoration: none; color: inherit; display: block; height: 100%;">
                 <div class="section-title">
                     <span class="section-emoji">💬</span>
                     <span>출력 (25분) - 미니 에세이</span>
@@ -446,15 +460,19 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
                         작성 후 Claude 또는 Grammarly로 교정받으세요.
                     </p>
 
+                    <p style="margin-top: 15px; color: #667eea; font-weight: bold;">→ 자세히 보기</p>
+
                     <div class="external-links">
                         <a href="https://claude.ai" target="_blank">Claude 교정 →</a>
                         <a href="https://app.grammarly.com/" target="_blank">Grammarly →</a>
                     </div>
                 </div>
+                </a>
             </div>
 
             <!-- 5. 다독 (5분) - 오늘의 아티클 + 권장 도서 -->
             <div class="section">
+                <a href="/today/reading" style="text-decoration: none; color: inherit; display: block; height: 100%;">
                 <div class="section-title">
                     <span class="section-emoji">📖</span>
                     <span>다독 (5분) - 오늘의 읽기</span>
@@ -475,6 +493,8 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
                         </ul>
                     </div>
 
+                    <p style="margin-top: 15px; color: #667eea; font-weight: bold;">→ 자세히 보기</p>
+
                     <div class="external-links">
                         <a href="https://www.oup.com/elt/bookworms" target="_blank">
                             Oxford Bookworms →
@@ -484,12 +504,17 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
                         </a>
                     </div>
                 </div>
-            </section>
+                </a>
+            </div>
         </div>
 
         <footer>
             <p>근거 기반 영어 학습 커리큘럼 v2.0</p>
             {_render_report_link(report_available)}
+            <div class="external-links" style="margin-top: 15px; justify-content: center;">
+                <a href="/today/pronunciation" style="border: 1px solid #667eea;">🎤 발음 평가</a>
+                <a href="/today/stats" style="border: 1px solid #667eea;">📊 학습 통계</a>
+            </div>
             <p style="font-size: 0.9em; color: #999; margin-top: 15px;">
                 매일 이 페이지를 방문하면 그날의 학습 콘텐츠가 자동으로 업데이트됩니다.
             </p>
