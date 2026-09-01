@@ -261,7 +261,7 @@ Return ONLY valid JSON (no markdown):
     try:
         import re
         resp = _client.messages.create(
-            model="claude-sonnet-4-6",
+            model="claude-sonnet-5",
             max_tokens=2500,
             messages=[{"role": "user", "content": prompt}],
         )
@@ -392,7 +392,7 @@ async def generate_wrong_analysis(wrong_items: list[dict]) -> str:
 <div class="wi"><span class="tag">[영역]</span> <b>핵심</b>: 설명...</div>"""
 
     resp = _client.messages.create(
-        model="claude-sonnet-4-6",
+        model="claude-sonnet-5",
         max_tokens=400,
         messages=[{"role": "user", "content": prompt}],
     )
@@ -442,7 +442,7 @@ JSON으로 반환 (다른 텍스트 없이):
 
     try:
         resp = _client.messages.create(
-            model="claude-sonnet-4-6",
+            model="claude-sonnet-5",
             max_tokens=4000,
             messages=[{"role": "user", "content": prompt}],
         )
