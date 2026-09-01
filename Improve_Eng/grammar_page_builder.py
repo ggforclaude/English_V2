@@ -37,6 +37,7 @@ def _save_grammar_html(today: date, grammar_topic: dict) -> str:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/English_V2/">
     <title>오늘의 문법 - Improve English</title>
     <style>
         * {{

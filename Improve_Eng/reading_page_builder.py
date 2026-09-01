@@ -40,6 +40,7 @@ def _save_reading_html(today: date, reading_article: dict) -> str:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/English_V2/">
     <title>오늘의 읽기 - Improve English</title>
     <style>
         * {{

@@ -48,6 +48,7 @@ def _save_writing_html(
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/English_V2/">
     <title>오늘의 작문 - Improve English</title>
     <style>
         * {{

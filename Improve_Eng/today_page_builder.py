@@ -57,6 +57,7 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/English_V2/">
     <title>오늘의 영어 학습 - {today_str}</title>
     <style>
         * {{

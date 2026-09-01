@@ -39,6 +39,7 @@ def _save_words_html(
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/English_V2/">
     <title>오늘의 10개 단어 - Improve English</title>
     <style>
         * {{

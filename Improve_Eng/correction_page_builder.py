@@ -23,6 +23,7 @@ def _save_correction_html(today: date) -> str:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/English_V2/">
     <title>작문 교정 - Improve English</title>
     <style>
         * {{

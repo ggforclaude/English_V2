@@ -31,6 +31,7 @@ def _save_listening_html(today: date, listening_content: dict) -> str:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/English_V2/">
     <title>오늘의 듣기 - Improve English</title>
     <style>
         * {{
