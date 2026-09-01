@@ -400,9 +400,9 @@ async def generate_wrong_analysis(wrong_items: list[dict]) -> str:
 
 
 async def generate_detailed_wrong_analysis(wrong_items: list[dict]) -> dict:
-    """다음날 상세 학습 피드백. Returns {"html": str, "telegram": str}."""
+    """다음날 상세 학습 피드백. Returns {"html": str}."""
     if not wrong_items:
-        return {"html": "", "telegram": ""}
+        return {"html": ""}
 
     items_text = "\n".join(
         f"Q{i+1}. [{DOMAIN_KR.get(item['domain'], item['domain'])}·{item['level']}]\n"
@@ -453,7 +453,7 @@ JSON으로 반환 (다른 텍스트 없이):
         items = data.get("items", [])
     except Exception as e:
         log.warning(f"detailed_wrong_analysis 생성 실패: {e}")
-        return {"html": "", "telegram": ""}
+        return {"html": ""}
 
     html_parts = []
     for item in items:
@@ -471,20 +471,7 @@ JSON으로 반환 (다른 텍스트 없이):
 </div>""")
     html = "\n".join(html_parts)
 
-    tg_parts = []
-    for item in items:
-        ex_lines = "\n".join(f"  • {ex}" for ex in item.get("examples", []))
-        tg_parts.append(
-            f"<b>Q{item.get('q_num', '')}. [{item.get('domain', '')}] {item.get('summary', '')}</b>\n\n"
-            f"📌 <b>핵심 개념</b>\n{item.get('concept', '')}\n\n"
-            f"📐 <b>규칙</b>\n{item.get('rule', '')}\n\n"
-            f"💬 <b>예시</b>\n{ex_lines}\n\n"
-            f"⚠️ <b>실수 패턴</b>\n{item.get('common_mistakes', '')}\n\n"
-            f"🧠 <b>암기팁</b>\n{item.get('tip', '')}"
-        )
-    telegram = "\n\n" + "─" * 30 + "\n\n".join(tg_parts)
-
-    return {"html": html, "telegram": telegram}
+    return {"html": html}
 
 
 # ── 영역별 문제 생성 ──────────────────────────────────────────────────────────
