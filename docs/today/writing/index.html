@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
             background: white;
             border-radius: 10px;
@@ -30,7 +30,7 @@
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 30px;
+            padding: 40px 30px;
             text-align: center;
         }
 
@@ -44,215 +44,286 @@
             opacity: 0.9;
         }
 
-        .content {
-            padding: 30px;
-        }
-
-        .main-grid {
+        .main-content {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
-            margin-bottom: 30px;
+            padding: 40px;
         }
 
-        .writing-section {
-            grid-column: 1 / -1;
-        }
-
-        .reference-section {
+        .sidebar {
             background: #f8f9fa;
-            border: 2px solid #e9ecef;
             border-radius: 8px;
-            padding: 20px;
+            padding: 25px;
         }
 
-        .section-title {
-            font-size: 1.2em;
+        .sidebar-title {
+            font-size: 1.3em;
             font-weight: bold;
             color: #667eea;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .content-item {
+            margin-bottom: 25px;
+        }
+
+        .content-label {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .content-value {
+            background: white;
+            padding: 12px;
+            border-radius: 5px;
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.6;
+            border-left: 3px solid #667eea;
         }
 
         .words-list {
             display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .word-tag {
+            background: #667eea;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .writing-section {
+            display: flex;
             flex-direction: column;
-            gap: 12px;
-        }
-
-        .word-item {
-            background: white;
-            padding: 12px;
-            border-radius: 5px;
-            border-left: 3px solid #667eea;
-        }
-
-        .word-text {
-            font-weight: bold;
-            color: #667eea;
-            font-size: 1.05em;
-        }
-
-        .word-meaning {
-            color: #666;
-            font-size: 0.9em;
-            margin-top: 3px;
-        }
-
-        .grammar-box {
-            background: white;
-            border: 2px solid #667eea;
-            border-radius: 5px;
-            padding: 15px;
-        }
-
-        .grammar-topic {
-            font-weight: bold;
-            color: #667eea;
-            font-size: 1.05em;
-            margin-bottom: 8px;
-        }
-
-        .grammar-explanation {
-            color: #666;
-            font-size: 0.9em;
-            line-height: 1.5;
-        }
-
-        .writing-area {
-            margin-bottom: 20px;
         }
 
         .writing-label {
+            font-size: 1.3em;
             font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
-            display: block;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
         }
 
-        textarea {
+        .input-instructions {
+            background: #e7f0ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .writing-input {
             width: 100%;
-            min-height: 200px;
+            height: 200px;
             padding: 15px;
             border: 2px solid #e9ecef;
             border-radius: 8px;
-            font-family: inherit;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             font-size: 1em;
+            line-height: 1.6;
             resize: vertical;
             transition: border-color 0.3s;
         }
 
-        textarea:focus {
+        .writing-input:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .char-count {
+        .input-count {
             text-align: right;
+            font-size: 0.85em;
             color: #999;
-            font-size: 0.9em;
-            margin-top: 5px;
-        }
-
-        .tips {
-            background: #e7f3ff;
-            border-left: 4px solid #2196f3;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-
-        .tips-title {
-            font-weight: bold;
-            color: #1976d2;
-            margin-bottom: 8px;
-        }
-
-        .tips-list {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        .tips-list li {
-            padding: 5px 0;
-            color: #333;
-            font-size: 0.95em;
-            position: relative;
-            padding-left: 20px;
-        }
-
-        .tips-list li:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #2196f3;
-            font-weight: bold;
+            margin-top: 8px;
         }
 
         .button-group {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             margin-top: 20px;
         }
 
         .btn {
-            padding: 15px 40px;
+            padding: 12px 25px;
             border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            font-size: 1em;
+            border-radius: 6px;
             cursor: pointer;
+            font-weight: bold;
+            font-size: 0.95em;
             transition: all 0.3s;
         }
 
-        .btn-submit {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .btn-evaluate {
+            background: #667eea;
             color: white;
-            flex: 1;
+            flex-grow: 1;
         }
 
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        .btn-evaluate:hover {
+            background: #5568d3;
         }
 
-        .btn-submit:active {
-            transform: translateY(0);
+        .btn-evaluate:disabled {
+            background: #ccc;
+            cursor: not-allowed;
         }
 
-        .btn-reset {
-            background: #e9ecef;
-            color: #333;
-            flex: 1;
+        .btn-clear {
+            background: #6c757d;
+            color: white;
         }
 
-        .btn-reset:hover {
-            background: #dee2e6;
+        .btn-clear:hover {
+            background: #5a6268;
         }
 
-        .status {
+        .loading {
             display: none;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 20px;
             text-align: center;
+            padding: 20px;
+            color: #667eea;
             font-weight: bold;
         }
 
-        .status.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+        .loading.active {
             display: block;
         }
 
-        .status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+        .evaluation-result {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .evaluation-result.active {
             display: block;
+        }
+
+        .score-section {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .score-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .score-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .score-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .score-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s ease;
+        }
+
+        .corrections-section {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .corrections-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.05em;
+        }
+
+        .correction-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+
+        .correction-wrong {
+            color: #dc3545;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .correction-arrow {
+            color: #999;
+            margin: 0 8px;
+            font-size: 0.9em;
+        }
+
+        .correction-right {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 0.95em;
+        }
+
+        .correction-explanation {
+            color: #666;
+            font-size: 0.85em;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .feedback-section {
+            background: #e7f0ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .feedback-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
         }
 
         .navigation {
@@ -275,20 +346,26 @@
         }
 
         .nav-button:hover {
-            background: #764ba2;
+            background: #5568d3;
         }
 
         @media (max-width: 768px) {
-            .main-grid {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .score-section {
                 grid-template-columns: 1fr;
             }
 
-            .button-group {
-                flex-direction: column;
+            .header {
+                padding: 25px 15px;
             }
 
-            textarea {
-                min-height: 250px;
+            .header h1 {
+                font-size: 2em;
             }
         }
     </style>
@@ -297,162 +374,222 @@
     <div class="container">
         <div class="header">
             <h1>✍️ 오늘의 작문</h1>
-            <p>배운 단어와 문법을 사용해서 작문해보세요</p>
+            <p>배운 내용으로 문장을 만들어보세요</p>
         </div>
 
-        <div class="content">
-            <div class="main-grid">
-                <div class="reference-section">
-                    <div class="section-title">📚 오늘의 단어 참고</div>
-                    <div class="words-list" id="wordsReference">
-                        <!-- 단어가 동적으로 생성됩니다 -->
+        <div class="main-content">
+            <!-- 왼쪽: 오늘 배운 내용 -->
+            <div class="sidebar">
+                <div class="sidebar-title">📚 오늘 배운 것</div>
+
+                <div class="content-item">
+                    <div class="content-label">단어 (5개)</div>
+                    <div class="words-list">
+                        <span class="word-tag">word 1</span>
+                        <span class="word-tag">word 2</span>
+                        <span class="word-tag">word 3</span>
                     </div>
                 </div>
 
-                <div class="reference-section">
-                    <div class="section-title">📖 오늘의 문법 참고</div>
-                    <div class="grammar-box" id="grammarReference">
-                        <!-- 문법이 동적으로 생성됩니다 -->
+                <div class="content-item">
+                    <div class="content-label">문법</div>
+                    <div class="content-value">
+                        <strong>단순 현재형 - 기본</strong><br>
+                        단순 현재형은 현재의 습관, 일반적인 사실, 반복되는 행동을 나타냅니다.
+                    </div>
+                </div>
+
+                <div class="content-item">
+                    <div class="content-label">💡 팁</div>
+                    <div class="content-value">
+                        • 배운 단어를 최소 3개 이상 포함하세요<br>
+                        • 배운 문법을 사용해보세요<br>
+                        • 3-5문장 정도로 작성하세요<br>
+                        • 주저하지 말고 자유롭게 쓰세요
                     </div>
                 </div>
             </div>
 
+            <!-- 오른쪽: 작문 입력 + 평가 -->
             <div class="writing-section">
-                <div class="tips">
-                    <div class="tips-title">💡 작문 팁</div>
-                    <ul class="tips-list">
-                        <li>오늘 배운 단어와 문법을 적어도 3개 이상 사용해보세요</li>
-                        <li>3-5 문장 정도의 짧은 문장으로 시작하세요</li>
-                        <li>철저한 문법보다는 의사소통이 목표입니다</li>
-                        <li>틀리는 것을 두려워하지 마세요. 실수가 학습입니다!</li>
-                    </ul>
+                <div class="writing-label">작문 입력</div>
+
+                <div class="input-instructions">
+                    📝 오늘 배운 단어와 문법을 사용하여 3-5개 문장을 작성하세요.
+                    예: "Today I enjoyed learning gerunds. I am studying English with consistency..."
                 </div>
 
-                <div class="writing-area">
-                    <label class="writing-label">작문 입력</label>
-                    <textarea
-                        id="writingInput"
-                        placeholder="여기에 작문을 입력하세요. 오늘 배운 단어와 문법을 사용해서 2-5개의 문장을 작성해주세요."
-                    ></textarea>
-                    <div class="char-count">
-                        <span id="charCount">0</span> / 500 자
-                    </div>
+                <textarea id="writingInput" class="writing-input" placeholder="여기에 작문을 입력하세요..."></textarea>
+                <div class="input-count">
+                    <span id="charCount">0</span> / 500자
                 </div>
 
                 <div class="button-group">
-                    <button class="btn btn-submit" onclick="submitWriting()">📤 제출 & 교정받기</button>
-                    <button class="btn btn-reset" onclick="resetWriting()">🔄 초기화</button>
+                    <button class="btn btn-evaluate" id="saveBtn">저장하기</button>
+                    <button class="btn btn-clear" id="clearBtn">초기화</button>
                 </div>
 
-                <div class="status" id="status"></div>
-            </div>
+                <div class="loading" id="loading">
+                    평가 중입니다... ⏳
+                </div>
 
-            <div class="navigation">
-                <a href="/today/reading" class="nav-button">← 읽기로</a>
-                <a href="/today" class="nav-button">대시보드</a>
+                <!-- 평가 결과 -->
+                <div class="evaluation-result" id="evaluationResult">
+                    <div class="score-section">
+                        <div class="score-card">
+                            <div class="score-label">학습 내용 포함도</div>
+                            <div class="score-value" id="contentScore">0%</div>
+                            <div class="score-bar">
+                                <div class="score-fill" id="contentFill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                        <div class="score-card">
+                            <div class="score-label">영어 정확성</div>
+                            <div class="score-value" id="accuracyScore">0%</div>
+                            <div class="score-bar">
+                                <div class="score-fill" id="accuracyFill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="corrections-section" id="correctionsSection">
+                        <div class="corrections-title">🔍 교정 사항</div>
+                        <div id="correctionsList"></div>
+                    </div>
+
+                    <div class="feedback-section" id="feedbackSection">
+                        <div class="feedback-title">💬 피드백</div>
+                        <div id="feedbackContent"></div>
+                    </div>
+                </div>
             </div>
+        </div>
+
+        <div class="navigation">
+            <a href="/today/reading" class="nav-button">← 읽기로</a>
+            <a href="/today" class="nav-button">홈 →</a>
         </div>
     </div>
 
     <script>
-        const wordsData = [];
-        const grammarData = {
-  "topic": "Grammar Topic",
-  "level": "B1",
-  "explanation_en": "",
-  "explanation_ko": "",
-  "examples": [],
-  "common_mistakes": ""
-};
-        const textInput = document.getElementById('writingInput');
+        const writingInput = document.getElementById('writingInput');
+        const saveBtn = document.getElementById('saveBtn');
+        const clearBtn = document.getElementById('clearBtn');
         const charCount = document.getElementById('charCount');
-        const statusBox = document.getElementById('status');
+        const loading = document.getElementById('loading');
+        const evaluationResult = document.getElementById('evaluationResult');
 
-        // 단어 참고 렌더링
-        const wordsRef = document.getElementById('wordsReference');
-        if (wordsData.length > 0) {
-            wordsData.slice(0, 5).forEach(word => {
-                const item = document.createElement('div');
-                item.className = 'word-item';
-                item.innerHTML = `
-                    <div class="word-text">${word.word}</div>
-                    <div class="word-meaning">${word.meaning_en}</div>
-                `;
-                wordsRef.appendChild(item);
-            });
-        } else {
-            wordsRef.innerHTML = '<p style="color: #999;">단어가 없습니다.</p>';
-        }
+        const wordsList = ["arrange", "opportunity", "reliable", "improve", "schedule", "confident", "advice", "manage", "convenient", "recently"];
+        const grammarData = {"id": "simple_present_1", "topic": "단순 현재형 - 기본", "level": "A1", "description": "단순 현재형 - 기본을(를) 학습합니다.", "explanation_ko": "단순 현재형은 현재의 습관, 일반적인 사실, 반복되는 행동을 나타냅니다.", "explanation_en": "Simple Present describes habits, facts, and regular actions in the present.", "examples": [{"sentence_en": "Example sentence 1.", "sentence_ko": "예시 문장 1."}, {"sentence_en": "Example sentence 2.", "sentence_ko": "예시 문장 2."}, {"sentence_en": "Example sentence 3.", "sentence_ko": "예시 문장 3."}], "source": {"name": "BBC Learning English", "url": "https://www.bbc.co.uk/learningenglish/"}, "additional_resources": [{"name": "Perfect English Grammar", "url": "https://www.perfectenglishgrammar.com/"}, {"name": "British Council", "url": "https://learnenglish.britishcouncil.org/"}, {"name": "EnglishClub", "url": "https://www.englishclub.com/"}], "quiz": [{"question": "Question 1?", "options": ["Option A", "Option B", "Option C", "Option D"], "correct": 0, "explanation": "Answer explanation."}, {"question": "Question 2?", "options": ["Option A", "Option B", "Option C", "Option D"], "correct": 1, "explanation": "Answer explanation."}, {"question": "Question 3?", "options": ["Option A", "Option B", "Option C", "Option D"], "correct": 2, "explanation": "Answer explanation."}]};
 
-        // 문법 참고 렌더링
-        const grammarRef = document.getElementById('grammarReference');
-        if (grammarData.topic) {
-            grammarRef.innerHTML = `
-                <div class="grammar-topic">${grammarData.topic}</div>
-                <div class="grammar-explanation">${grammarData.explanation_ko || grammarData.explanation_en}</div>
-            `;
-        }
-
-        // 글자 수 카운팅
-        textInput.addEventListener('input', function() {
-            charCount.textContent = this.value.length;
-            if (this.value.length > 500) {
-                this.value = this.value.substring(0, 500);
-                charCount.textContent = '500';
-            }
+        // 문자 수 카운트
+        writingInput.addEventListener('input', () => {
+            charCount.textContent = writingInput.value.length;
         });
 
-        // 작문 제출
-        function submitWriting() {
-            const writing = textInput.value.trim();
+        // 초기화
+        clearBtn.addEventListener('click', () => {
+            writingInput.value = '';
+            charCount.textContent = '0';
+            evaluationResult.classList.remove('active');
+        });
 
-            if (!writing) {
-                showStatus('작문을 입력해주세요!', 'error');
+        // 저장
+        saveBtn.addEventListener('click', () => {
+            const text = writingInput.value.trim();
+            if (!text) {
+                alert('작문을 입력해주세요.');
                 return;
             }
 
-            if (writing.split('.').length < 2) {
-                showStatus('최소 2개 이상의 문장을 작성해주세요!', 'error');
+            if (text.length < 30) {
+                alert('최소 30자 이상 작성해주세요.');
                 return;
             }
 
             // localStorage에 저장
-            localStorage.setItem('userWriting', writing);
-            localStorage.setItem('writingDate', new Date().toISOString());
+            const today = new Date().toISOString().split('T')[0];
+            const writingData = {
+                date: today,
+                text: text,
+                words: wordsList,
+                grammar: grammarData,
+                savedAt: new Date().toISOString()
+            };
 
-            showStatus('✅ 작문이 저장되었습니다. 교정 페이지로 이동합니다...', 'success');
+            localStorage.setItem('todayWriting', JSON.stringify(writingData));
 
-            // 1초 후 교정 페이지로 이동
-            setTimeout(() => {
-                window.location.href = '/today/correction';
-            }, 1500);
-        }
-
-        // 작문 초기화
-        function resetWriting() {
-            if (textInput.value && !confirm('작성하신 내용을 모두 삭제하시겠습니까?')) {
-                return;
+            // 피드백 메시지 표시
+            const feedbackSection = document.getElementById('feedbackSection');
+            if (feedbackSection) {
+                feedbackSection.innerHTML = `
+                    <div class="feedback-title">✅ 저장 완료</div>
+                    <div style="color: #28a745; line-height: 1.6;">
+                        작문이 저장되었습니다! 🎉<br><br>
+                        <strong>평가 일정:</strong> 매일 아침 04:00 KST에 자동으로 평가됩니다.<br>
+                        평가 결과는 내일 이 페이지에서 확인할 수 있습니다.<br><br>
+                        💡 <strong>팁:</strong> 매일 꾸준히 작문하면 표현력이 빠르게 향상됩니다!
+                    </div>
+                `;
+                document.getElementById('evaluationResult').classList.add('active');
             }
-            textInput.value = '';
-            charCount.textContent = '0';
-            statusBox.textContent = '';
-            statusBox.className = 'status';
-        }
 
-        // 상태 메시지 표시
-        function showStatus(message, type) {
-            statusBox.textContent = message;
-            statusBox.className = `status ${type}`;
-        }
-
-        // 페이지 로드 시 저장된 내용이 있으면 복원
-        window.addEventListener('load', function() {
-            const saved = localStorage.getItem('userWriting');
-            if (saved) {
-                // 사용자가 의도적으로 새로 쓰려고 이 페이지에 온 것이므로 복원하지 않음
-                // (correction 페이지에서만 사용)
-            }
+            alert('작문이 저장되었습니다! 내일 아침에 평가받을 수 있습니다.');
         });
+
+        function displayEvaluation(result) {
+            const contentScore = result.content_score || 0;
+            const accuracyScore = result.accuracy_score || 0;
+
+            // 점수 표시
+            document.getElementById('contentScore').textContent = contentScore + '%';
+            document.getElementById('accuracyScore').textContent = accuracyScore + '%';
+            document.getElementById('contentFill').style.width = contentScore + '%';
+            document.getElementById('accuracyFill').style.width = accuracyScore + '%';
+
+            // 교정 사항
+            const correctionsList = document.getElementById('correctionsList');
+            correctionsList.innerHTML = '';
+
+            if (result.corrections && result.corrections.length > 0) {
+                result.corrections.forEach(correction => {
+                    const item = document.createElement('div');
+                    item.className = 'correction-item';
+                    item.innerHTML = `
+                        <div class="correction-wrong">❌ ${correction.wrong}</div>
+                        <div>
+                            <span class="correction-arrow">→</span>
+                            <span class="correction-right">✓ ${correction.correct}</span>
+                        </div>
+                        <div class="correction-explanation">${correction.explanation}</div>
+                    `;
+                    correctionsList.appendChild(item);
+                });
+            } else {
+                correctionsList.innerHTML = '<div style="color: #28a745; font-weight: bold;">완벽합니다! 🎉</div>';
+            }
+
+            // 피드백
+            const feedbackContent = document.getElementById('feedbackContent');
+            feedbackContent.textContent = result.feedback || '';
+
+            // 결과 표시
+            evaluationResult.classList.add('active');
+        }
+
+        // 단어 태그 동적 생성
+        function renderWords() {
+            const wordsContainer = document.querySelector('.words-list');
+            wordsContainer.innerHTML = '';
+            wordsList.slice(0, 5).forEach((word, idx) => {
+                const tag = document.createElement('span');
+                tag.className = 'word-tag';
+                tag.textContent = word;
+                wordsContainer.appendChild(tag);
+            });
+        }
+
+        renderWords();
     </script>
 </body>
 </html>

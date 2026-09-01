@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             background: white;
             border-radius: 10px;
@@ -30,195 +30,352 @@
         .header {
             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             color: white;
-            padding: 30px;
+            padding: 40px 30px;
             text-align: center;
         }
 
         .header h1 {
             font-size: 2.5em;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         .header p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-
-        .source {
-            font-size: 0.95em;
-            background: rgba(255,255,255,0.2);
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            margin-top: 10px;
-        }
-
-        .content {
-            padding: 30px;
-        }
-
-        .section {
-            margin-bottom: 30px;
-        }
-
-        .section-title {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #11998e;
+            font-size: 1.05em;
+            opacity: 0.95;
             margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 3px solid #11998e;
         }
 
-        .article-info {
-            background: #f0f9f7;
-            border-left: 4px solid #11998e;
-            padding: 20px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-
-        .article-title {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #11998e;
-            margin-bottom: 10px;
-        }
-
-        .article-meta {
-            color: #666;
+        .meta {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
             font-size: 0.95em;
-            margin-bottom: 10px;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .level-badge {
             display: inline-block;
-            background: #38ef7d;
-            color: white;
+            background: rgba(255,255,255,0.3);
             padding: 5px 15px;
             border-radius: 20px;
-            font-size: 0.85em;
             font-weight: bold;
+            font-size: 0.85em;
         }
 
-        .article-summary {
-            background: white;
-            border: 2px solid #e9ecef;
+        .source-link {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
             border-radius: 5px;
-            padding: 20px;
-            line-height: 1.8;
+            text-decoration: none;
+            color: white;
+            transition: background 0.3s;
+            font-size: 0.9em;
+        }
+
+        .source-link:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .tab-button {
+            padding: 15px 30px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1.05em;
+            font-weight: bold;
+            color: #999;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.3s;
+        }
+
+        .tab-button.active {
+            color: #11998e;
+            border-bottom-color: #11998e;
+        }
+
+        .tab-button:hover {
+            color: #11998e;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .article-text {
+            line-height: 2;
+            font-size: 1.05em;
             color: #333;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
 
-        .reading-tips {
-            background: #e8f5e9;
-            border-left: 4px solid #38ef7d;
-            padding: 20px;
-            border-radius: 5px;
-            margin-bottom: 20px;
+        .article-text h2 {
+            color: #11998e;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #38ef7d;
+            padding-bottom: 10px;
         }
 
-        .tips-title {
+        .article-text p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .article-text strong {
+            color: #11998e;
+            font-weight: 600;
+        }
+
+        .vocabulary-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 30px;
+            margin-top: 40px;
+        }
+
+        .section-title {
+            font-size: 1.4em;
             font-weight: bold;
             color: #11998e;
-            margin-bottom: 10px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #38ef7d;
         }
 
-        .tips-list {
-            list-style: none;
-            padding-left: 0;
+        .vocabulary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
         }
 
-        .tips-list li {
-            padding: 8px 0;
-            color: #333;
-            position: relative;
-            padding-left: 25px;
-        }
-
-        .tips-list li:before {
-            content: "→";
-            position: absolute;
-            left: 0;
-            color: #38ef7d;
-            font-weight: bold;
-        }
-
-        .cta-button {
-            display: inline-block;
-            padding: 15px 40px;
-            background: #11998e;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            font-size: 1.05em;
-            transition: all 0.3s;
-            margin: 10px 10px 10px 0;
-        }
-
-        .cta-button:hover {
-            background: #0d7c6f;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.3);
-        }
-
-        .recommended-books {
-            background: #f0f9f7;
-            border: 2px solid #11998e;
+        .vocab-card {
+            background: white;
+            border: 2px solid #e9ecef;
             border-radius: 8px;
             padding: 20px;
-            margin-bottom: 20px;
+            transition: all 0.3s;
         }
 
-        .books-title {
+        .vocab-card:hover {
+            border-color: #11998e;
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.1);
+        }
+
+        .vocab-word {
+            font-weight: bold;
+            color: #11998e;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+
+        .vocab-meaning {
+            color: #666;
+            font-size: 0.95em;
+            margin-bottom: 12px;
+        }
+
+        .vocab-example {
+            background: #f0f8f7;
+            padding: 10px;
+            border-radius: 5px;
+            font-style: italic;
+            font-size: 0.9em;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .learning-points {
+            background: #f0f8f7;
+            border-left: 4px solid #38ef7d;
+            padding: 20px;
+            margin-top: 25px;
+            border-radius: 5px;
+        }
+
+        .learning-points-title {
             font-weight: bold;
             color: #11998e;
             margin-bottom: 15px;
-            font-size: 1.1em;
+            font-size: 1.05em;
         }
 
-        .books-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+        .learning-points-list {
+            list-style-position: inside;
+            color: #666;
         }
 
-        .book-card {
+        .learning-points-list li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .quiz-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 30px;
+            margin-top: 40px;
+        }
+
+        .quiz-question {
             background: white;
-            border: 1px solid #e9ecef;
-            border-radius: 5px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .question-number {
+            color: #11998e;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+
+        .question-text {
+            font-size: 1.05em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
             padding: 15px;
-            text-align: center;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
             transition: all 0.3s;
         }
 
-        .book-card:hover {
-            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.1);
+        .option:hover {
             border-color: #11998e;
+            background: #f0f8f7;
         }
 
-        .book-title {
+        .option input[type="radio"] {
+            margin-right: 15px;
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+        }
+
+        .option-text {
+            flex-grow: 1;
+            font-size: 0.95em;
+        }
+
+        .option.correct {
+            border-color: #28a745;
+            background: #e8f5e9;
+        }
+
+        .option.incorrect {
+            border-color: #dc3545;
+            background: #ffebee;
+        }
+
+        .explanation-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-size: 0.95em;
+            color: #333;
+        }
+
+        .explanation-box strong {
+            color: #856404;
+        }
+
+        .quiz-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
             font-weight: bold;
-            color: #11998e;
-            margin-bottom: 5px;
+            transition: all 0.3s;
+            font-size: 0.95em;
         }
 
-        .book-author {
-            color: #666;
-            font-size: 0.9em;
-            margin-bottom: 10px;
+        .btn-submit {
+            background: #11998e;
+            color: white;
+            flex-grow: 1;
         }
 
-        .book-level {
-            display: inline-block;
-            background: #e0f2f1;
-            color: #11998e;
-            padding: 3px 10px;
-            border-radius: 3px;
-            font-size: 0.85em;
+        .btn-submit:hover {
+            background: #0e7a6e;
+        }
+
+        .btn-reset {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background: #5a6268;
+        }
+
+        .score-display {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2em;
             font-weight: bold;
+            margin-bottom: 20px;
+            display: none;
         }
 
         .navigation {
@@ -241,16 +398,39 @@
         }
 
         .nav-button:hover {
-            background: #0d7c6f;
+            background: #0e7a6e;
         }
 
         @media (max-width: 768px) {
-            .books-grid {
-                grid-template-columns: 1fr;
+            .content {
+                padding: 20px;
+            }
+
+            .header {
+                padding: 25px 15px;
             }
 
             .header h1 {
-                font-size: 1.8em;
+                font-size: 2em;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab-button {
+                flex: 1 1 50%;
+                padding: 12px 15px;
+                font-size: 0.95em;
+            }
+
+            .vocabulary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .meta {
+                flex-direction: column;
+                gap: 10px;
             }
         }
     </style>
@@ -258,87 +438,348 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📚 오늘의 읽기</h1>
-            <p>다양한 주제로 읽기 실력을 키우세요</p>
-            <div class="source">📰 BBC Learning English</div>
+            <h1>📖 오늘의 읽기</h1>
+            <p>The Benefits of Learning Multiple Languages</p>
+            <div class="meta">
+                <div class="meta-item">
+                    <span class="level-badge">난이도: B1</span>
+                </div>
+                <div class="meta-item">
+                    ⏱️ 5 minutes
+                </div>
+            </div>
+            <a href="https://www.bbc.co.uk/learningenglish/" target="_blank" class="source-link">
+                📌 원본 사이트: BBC Learning English
+            </a>
         </div>
 
         <div class="content">
-            <div class="article-info">
-                <div class="article-title">Daily Reading Article</div>
-                <div class="article-meta">BBC Learning English</div>
-                <span class="level-badge">Level: B1</span>
+            <!-- 탭 -->
+            <div class="tabs">
+                <button class="tab-button active" onclick="switchTab(event, 'english')">
+                    🇬🇧 English
+                </button>
+                <button class="tab-button" onclick="switchTab(event, 'korean')">
+                    🇰🇷 한글 번역
+                </button>
             </div>
 
-            
-            <div class="article-summary">
-                <strong>📖 요약:</strong><br><br>
-                BBC Learning English 웹사이트 방문
-            </div>
+            <!-- 영어 탭 -->
+            <div id="english" class="tab-content active">
+                <div class="article-text">
+                    The Benefits of Learning Multiple Languages
 
-            <a href="https://www.bbc.co.uk/learningenglish" class="cta-button" target="_blank">📖 원문 읽기 →</a>
-            
+In our increasingly connected world, speaking multiple languages has become more valuable than ever. Whether for career advancement, personal growth, or cultural understanding, learning new languages opens doors to countless opportunities.
 
-            <div class="reading-tips">
-                <div class="tips-title">💡 효과적인 읽기 팁</div>
-                <ul class="tips-list">
-                    <li>먼저 제목과 첫 문단만 읽고 내용을 예측해보세요</li>
-                    <li>모르는 단어는 사전을 먼저 찾지 말고 문맥으로 유추하세요</li>
-                    <li>전체 내용을 빠르게 읽은 후 모르는 부분을 다시 읽으세요</li>
-                    <li>읽은 내용을 자신의 말로 요약해보세요</li>
-                </ul>
-            </div>
+**Career Advantages**
 
-            <div class="recommended-books">
-                <div class="books-title">📕 추천 도서 (비슷한 난이도)</div>
-                <div class="books-grid" id="booksGrid">
-                    <!-- 책 카드가 동적으로 생성됩니다 -->
+Companies today are looking for employees who can communicate with international clients and partners. Bilingual workers often earn higher salaries and have access to more job opportunities. In fields like tourism, diplomacy, and international business, language skills are essential.
+
+**Cognitive Benefits**
+
+Research shows that learning languages improves brain function. It enhances memory, concentration, and problem-solving abilities. Multilingual people often perform better in tasks requiring attention and multitasking. Learning languages also delays cognitive decline in older age.
+
+**Cultural Understanding**
+
+Language is not just a communication tool; it's a window into culture. When you learn a language, you gain insight into different ways of thinking and living. This helps you become more empathetic and open-minded. It allows you to enjoy literature, films, and music in their original language.
+
+**Personal Growth**
+
+Learning languages builds confidence and self-esteem. It challenges your brain and keeps you mentally active. Many learners report that acquiring a new language is one of their most rewarding achievements.
+
+**Making It Practical**
+
+Start small with languages that interest you. Use apps, take classes, or find language exchange partners. Immerse yourself in the language through films, podcasts, and books. The key is consistency and regular practice.
+
+**Conclusion**
+
+In a globalized world, speaking multiple languages is no longer a luxury—it's a practical skill. Whether you want to advance your career, travel more comfortably, or simply understand the world better, learning languages is an investment in yourself.
                 </div>
             </div>
 
-            <div class="navigation">
-                <a href="/today/listening" class="nav-button">← 듣기로</a>
-                <a href="/today/writing" class="nav-button">작문 →</a>
+            <!-- 한글 탭 -->
+            <div id="korean" class="tab-content">
+                <div class="article-text">
+                    # 여러 언어를 배우면 좋은 점
+
+갈수록 긴밀하게 연결되는 세상에서 여러 언어를 구사하는 능력은 그 어느 때보다 큰 가치를 지니게 되었습니다. 커리어 발전을 위해서든, 개인적인 성장이나 문화적 이해를 위해서든, 새로운 언어를 배우는 일은 수많은 기회의 문을 열어줍니다.
+
+**커리어 측면의 이점**
+
+오늘날 기업들은 해외 고객 및 파트너와 소통할 수 있는 인재를 찾고 있습니다. 두 가지 언어를 구사하는 직원은 대체로 더 높은 연봉을 받고, 더 많은 취업 기회를 누립니다. 관광, 외교, 국제 비즈니스 같은 분야에서 어학 능력은 필수입니다.
+
+**인지적 이점**
+
+연구에 따르면 언어 학습은 뇌 기능을 향상시킵니다. 기억력과 집중력, 문제 해결 능력이 좋아지죠. 여러 언어를 구사하는 사람은 주의력과 멀티태스킹이 필요한 과제에서 더 나은 수행 능력을 보이는 경우가 많습니다. 또한 언어 학습은 노년기의 인지 기능 저하를 늦춰주기도 합니다.
+
+**문화에 대한 이해**
+
+언어는 단순한 의사소통 수단이 아니라 문화를 들여다보는 창입니다. 언어를 배우면 서로 다른 사고방식과 삶의 방식을 이해하게 됩니다. 이는 더 공감할 줄 알고 열린 마음을 가진 사람이 되는 데 도움이 됩니다. 나아가 문학과 영화, 음악을 원어 그대로 즐길 수 있게 됩니다.
+
+**개인적 성장**
+
+언어 학습은 자신감과 자존감을 높여줍니다. 두뇌를 자극하고 정신적으로 활력을 유지하게 해주죠. 실제로 많은 학습자가 새로운 언어를 익힌 경험을 인생에서 가장 보람 있는 성취 중 하나로 꼽습니다.
+
+**실천에 옮기기**
+
+관심 있는 언어부터 가볍게 시작해 보세요. 앱을 활용하거나 수업을 듣거나, 언어 교환 파트너를 찾아보는 것도 좋습니다. 영화와 팟캐스트, 책을 통해 그 언어에 푹 빠져보세요. 핵심은 꾸준함과 규칙적인 연습입니다.
+
+**맺음말**
+
+세계화된 세상에서 여러 언어를 구사하는 능력은 더 이상 사치가 아니라 실용적인 기술입니다. 커리어를 발전시키고 싶든, 좀 더 편하게 여행하고 싶든, 아니면 그저 세상을 더 깊이 이해하고 싶든, 언어를 배우는 일은 곧 자기 자신에 대한 투자입니다.
+                </div>
             </div>
+
+            <!-- 어휘 섹션 -->
+            <div class="vocabulary-section">
+                <div class="section-title">📚 주요 표현</div>
+                <div class="vocabulary-grid" id="vocabularyGrid"></div>
+            </div>
+
+            <!-- 학습 포인트 -->
+            <div class="learning-points">
+            <div class="learning-points-title">✨ 학습 포인트</div>
+            <ul class="learning-points-list" id="learningPointsList"></ul>
+            </div>
+
+            <!-- 이해도 확인 퀴즈 -->
+            <div class="quiz-section">
+            <div class="section-title">❓ 이해도 확인</div>
+            <div class="score-display" id="scoreDisplay"></div>
+            <form id="quizForm">
+            
+                <div class="quiz-question" data-question="0">
+                    <div class="question-number">문제 1</div>
+                    <div class="question-text">According to the article, what is one career advantage of being bilingual?</div>
+                    <div class="options">
+            
+                        <label class="option">
+                            <input type="radio" name="q0" value="0">
+                            <span class="option-text">Bilingual workers always become managers</span>
+                        </label>
+                
+                        <label class="option">
+                            <input type="radio" name="q0" value="1">
+                            <span class="option-text">Bilingual workers often earn higher salaries</span>
+                        </label>
+                
+                        <label class="option">
+                            <input type="radio" name="q0" value="2">
+                            <span class="option-text">Bilingual workers work shorter hours</span>
+                        </label>
+                
+                        <label class="option">
+                            <input type="radio" name="q0" value="3">
+                            <span class="option-text">Bilingual workers don't need training</span>
+                        </label>
+                
+                    </div>
+                </div>
+            
+                <div class="quiz-question" data-question="1">
+                    <div class="question-number">문제 2</div>
+                    <div class="question-text">What cognitive benefit is NOT mentioned in the article?</div>
+                    <div class="options">
+            
+                        <label class="option">
+                            <input type="radio" name="q1" value="0">
+                            <span class="option-text">Improved memory</span>
+                        </label>
+                
+                        <label class="option">
+                            <input type="radio" name="q1" value="1">
+                            <span class="option-text">Better concentration</span>
+                        </label>
+                
+                        <label class="option">
+                            <input type="radio" name="q1" value="2">
+                            <span class="option-text">Increased height</span>
+                        </label>
+                
+                        <label class="option">
+                            <input type="radio" name="q1" value="3">
+                            <span class="option-text">Better problem-solving</span>
+                        </label>
+                
+                    </div>
+                </div>
+            
+                <div class="quiz-question" data-question="2">
+                    <div class="question-number">문제 3</div>
+                    <div class="question-text">Why is language described as 'a window into culture'?</div>
+                    <div class="options">
+            
+                        <label class="option">
+                            <input type="radio" name="q2" value="0">
+                            <span class="option-text">Because windows are made of glass</span>
+                        </label>
+                
+                        <label class="option">
+                            <input type="radio" name="q2" value="1">
+                            <span class="option-text">Because it helps you see windows in other countries</span>
+                        </label>
+                
+                        <label class="option">
+                            <input type="radio" name="q2" value="2">
+                            <span class="option-text">Because it gives insight into different ways of thinking and living</span>
+                        </label>
+                
+                        <label class="option">
+                            <input type="radio" name="q2" value="3">
+                            <span class="option-text">Because language can be used to build houses</span>
+                        </label>
+                
+                    </div>
+                </div>
+            
+                <div class="quiz-question" data-question="3">
+                    <div class="question-number">문제 4</div>
+                    <div class="question-text">What does the article suggest as the key to learning languages?</div>
+                    <div class="options">
+            
+                        <label class="option">
+                            <input type="radio" name="q3" value="0">
+                            <span class="option-text">Studying for 8 hours a day</span>
+                        </label>
+                
+                        <label class="option">
+                            <input type="radio" name="q3" value="1">
+                            <span class="option-text">Only learning one language at a time</span>
+                        </label>
+                
+                        <label class="option">
+                            <input type="radio" name="q3" value="2">
+                            <span class="option-text">Consistency and regular practice</span>
+                        </label>
+                
+                        <label class="option">
+                            <input type="radio" name="q3" value="3">
+                            <span class="option-text">Learning only from textbooks</span>
+                        </label>
+                
+                    </div>
+                </div>
+            
+            </form>
+            <div class="quiz-buttons">
+                <button class="btn btn-submit" id="submitBtn">제출</button>
+                <button class="btn btn-reset" id="resetBtn">다시 풀기</button>
+            </div>
+            </div>
+        
+        </div>
+
+        <div class="navigation">
+            <a href="/today/listening" class="nav-button">← 듣기로</a>
+            <a href="/today" class="nav-button">홈 →</a>
         </div>
     </div>
 
     <script>
-        // 추천 도서 데이터
-        const recommendedBooks = [
-            {
-                title: "The Hobbit",
-                author: "J.R.R. Tolkien",
-                level: "B1"
-            },
-            {
-                title: "Charlotte's Web",
-                author: "E.B. White",
-                level: "A2"
-            },
-            {
-                title: "The Great Gatsby",
-                author: "F. Scott Fitzgerald",
-                level: "B2"
-            },
-            {
-                title: "Animal Farm",
-                author: "George Orwell",
-                level: "B1"
-            }
-        ];
+        const vocabularyData = [{"word": "multilingual", "meaning": "다국어를 할 수 있는", "example": "She is a multilingual speaker."}, {"word": "advancement", "meaning": "진전, 승진", "example": "Career advancement requires new skills."}, {"word": "cognitive", "meaning": "인지의, 인식의", "example": "Cognitive abilities improve with practice."}, {"word": "concentration", "meaning": "집중력", "example": "Deep concentration helps learning."}, {"word": "multitasking", "meaning": "다중작업", "example": "Bilingual people are good at multitasking."}, {"word": "empathetic", "meaning": "공감하는", "example": "An empathetic person understands others' feelings."}, {"word": "immerse", "meaning": "몰두하다, 빠져들다", "example": "Immerse yourself in English films."}, {"word": "consistency", "meaning": "일관성, 꾸준함", "example": "Consistency is key to success."}];
+        const questionsData = [{"question": "According to the article, what is one career advantage of being bilingual?", "options": ["Bilingual workers always become managers", "Bilingual workers often earn higher salaries", "Bilingual workers work shorter hours", "Bilingual workers don't need training"], "correct": 1, "explanation": "The article states 'Bilingual workers often earn higher salaries and have access to more job opportunities.'"}, {"question": "What cognitive benefit is NOT mentioned in the article?", "options": ["Improved memory", "Better concentration", "Increased height", "Better problem-solving"], "correct": 2, "explanation": "The article mentions memory, concentration, and problem-solving, but NOT height. That would be a physical change, not cognitive."}, {"question": "Why is language described as 'a window into culture'?", "options": ["Because windows are made of glass", "Because it helps you see windows in other countries", "Because it gives insight into different ways of thinking and living", "Because language can be used to build houses"], "correct": 2, "explanation": "The article explains: 'Language is not just a communication tool; it's a window into culture... you gain insight into different ways of thinking and living.'"}, {"question": "What does the article suggest as the key to learning languages?", "options": ["Studying for 8 hours a day", "Only learning one language at a time", "Consistency and regular practice", "Learning only from textbooks"], "correct": 2, "explanation": "The article states: 'The key is consistency and regular practice.'"}];
+        const learningPointsData = ["직장에서의 언어 사용 장점", "뇌 기능 향상 효과", "문화 이해와 공감 능력", "개인 성장과 자신감 증진", "효과적인 학습 전략"];
 
-        const booksGrid = document.getElementById('booksGrid');
-        recommendedBooks.forEach(book => {
-            const card = document.createElement('div');
-            card.className = 'book-card';
-            card.innerHTML = `
-                <div class="book-title">${book.title}</div>
-                <div class="book-author">${book.author}</div>
-                <div class="book-level">Level: ${book.level}</div>
-            `;
-            booksGrid.appendChild(card);
+        // 탭 전환
+        function switchTab(event, tabName) {
+            event.preventDefault();
+
+            // 모든 탭 비활성화
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(button => button.classList.remove('active'));
+
+            // 선택된 탭 활성화
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // 어휘 렌더링
+        function renderVocabulary(data) {
+            const grid = document.getElementById('vocabularyGrid');
+            if (!grid) return;
+
+            data.forEach(vocab => {
+                const card = document.createElement('div');
+                card.className = 'vocab-card';
+                card.innerHTML = `
+                    <div class="vocab-word">${vocab.word}</div>
+                    <div class="vocab-meaning">${vocab.meaning}</div>
+                    <div class="vocab-example">"${vocab.example}"</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // 학습 포인트 렌더링
+        function renderLearningPoints(data) {
+            const list = document.getElementById('learningPointsList');
+            if (!list) return;
+
+            data.forEach(point => {
+                const li = document.createElement('li');
+                li.textContent = point;
+                list.appendChild(li);
+            });
+        }
+
+        // 퀴즈 제출
+        document.getElementById('submitBtn')?.addEventListener('click', () => {
+            const form = document.getElementById('quizForm');
+            if (!form) return;
+
+            let correct = 0;
+            let answered = 0;
+
+            questionsData.forEach((question, qIdx) => {
+                const selected = document.querySelector(`input[name="q${qIdx}"]:checked`);
+                if (selected) {
+                    answered++;
+                    const selectedIdx = parseInt(selected.value);
+                    const isCorrect = selectedIdx === question.correct;
+                    const questionDiv = document.querySelector(`[data-question="${qIdx}"]`);
+
+                    if (isCorrect) {
+                        correct++;
+                        questionDiv.classList.add('correct');
+                    } else {
+                        questionDiv.classList.add('incorrect');
+                    }
+
+                    // 정답 표시
+                    const options = questionDiv.querySelectorAll('.option');
+                    options[question.correct].classList.add('correct');
+
+                    // 설명 표시
+                    let explanation = document.createElement('div');
+                    explanation.className = 'explanation-box';
+                    explanation.innerHTML = `<strong>설명:</strong> ${question.explanation}`;
+                    questionDiv.appendChild(explanation);
+
+                    // 모든 옵션 비활성화
+                    options.forEach(opt => opt.style.pointerEvents = 'none');
+                }
+            });
+
+            if (answered === questionsData.length) {
+                const percentage = Math.round((correct / questionsData.length) * 100);
+                const scoreDisplay = document.getElementById('scoreDisplay');
+                scoreDisplay.innerHTML = `정답: ${correct}/${questionsData.length} (${percentage}%)`;
+                scoreDisplay.style.display = 'block';
+                document.getElementById('submitBtn').disabled = true;
+            }
         });
+
+        // 다시 풀기
+        document.getElementById('resetBtn')?.addEventListener('click', () => {
+            location.reload();
+        });
+
+        // 초기화
+        renderVocabulary(vocabularyData);
+        renderLearningPoints(learningPointsData);
     </script>
 </body>
 </html>

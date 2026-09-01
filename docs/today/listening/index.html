@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             background: white;
             border-radius: 10px;
@@ -30,143 +30,241 @@
         .header {
             background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
             color: white;
-            padding: 30px;
+            padding: 40px 30px;
             text-align: center;
         }
 
         .header h1 {
             font-size: 2.5em;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         .header p {
             font-size: 1.1em;
-            opacity: 0.9;
-        }
-
-        .source {
-            font-size: 0.95em;
-            background: rgba(255,255,255,0.2);
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            margin-top: 10px;
+            opacity: 0.95;
         }
 
         .content {
-            padding: 30px;
+            padding: 40px;
         }
 
-        .section {
-            margin-bottom: 30px;
+        .listening-section {
+            margin-bottom: 50px;
         }
 
-        .section-title {
-            font-size: 1.3em;
-            font-weight: bold;
-            color: #fa709a;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
             border-bottom: 3px solid #fa709a;
         }
 
-        .audio-player {
+        .section-icon {
+            font-size: 2.5em;
+            margin-right: 20px;
+        }
+
+        .section-info h2 {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .section-info p {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .difficulty-badge {
+            display: inline-block;
+            background: #fa709a;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+
+        .difficulty-badge.beginner {
+            background: #4CAF50;
+        }
+
+        .difficulty-badge.intermediate {
+            background: #2196F3;
+        }
+
+        .player-container {
             background: #f8f9fa;
             border: 2px solid #e9ecef;
             border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .player-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.05em;
         }
 
         audio {
             width: 100%;
             margin-bottom: 15px;
-            border-radius: 5px;
+            height: 40px;
         }
 
-        .audio-info {
+        .player-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             color: #666;
-            font-size: 0.95em;
-            margin-bottom: 10px;
+            font-size: 0.9em;
+            padding: 10px 0;
+            border-top: 1px solid #e9ecef;
+            padding-top: 15px;
         }
 
-        .transcript {
-            background: #f0f4ff;
-            border-left: 4px solid #fa709a;
-            padding: 20px;
-            border-radius: 5px;
-            line-height: 1.8;
-            color: #333;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .transcript-title {
-            font-weight: bold;
-            color: #fa709a;
-            margin-bottom: 15px;
-        }
-
-        .word-note {
-            background: white;
-            padding: 15px;
-            border-radius: 5px;
-            border-left: 3px solid #fee140;
-            margin-top: 20px;
-            font-size: 0.95em;
-            color: #666;
-            line-height: 1.6;
-        }
-
-        .learning-tips {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 20px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-
-        .tips-title {
-            font-weight: bold;
-            color: #1976d2;
-            margin-bottom: 10px;
-        }
-
-        .tips-list {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        .tips-list li {
-            padding: 8px 0;
-            color: #333;
-            position: relative;
-            padding-left: 25px;
-        }
-
-        .tips-list li:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #2196f3;
-            font-weight: bold;
-        }
-
-        .external-link {
+        .source-link {
             display: inline-block;
-            padding: 12px 30px;
             background: #fa709a;
             color: white;
-            text-decoration: none;
+            padding: 8px 15px;
             border-radius: 5px;
-            font-weight: bold;
-            margin-top: 15px;
+            text-decoration: none;
+            font-size: 0.9em;
             transition: background 0.3s;
         }
 
-        .external-link:hover {
-            background: #f04060;
+        .source-link:hover {
+            background: #f55b7a;
+        }
+
+        .script-toggle {
+            background: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .script-header {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            color: #333;
+            transition: background 0.3s;
+        }
+
+        .script-header:hover {
+            background: #e9ecef;
+        }
+
+        .script-toggle-icon {
+            font-size: 1.3em;
+            transition: transform 0.3s;
+        }
+
+        .script-toggle.open .script-toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .script-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            padding: 0 20px;
+        }
+
+        .script-toggle.open .script-content {
+            max-height: 500px;
+            transition: max-height 0.3s ease-in;
+        }
+
+        .script-text {
+            padding: 20px 0;
+            line-height: 1.8;
+        }
+
+        .script-ko {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 1em;
+        }
+
+        .script-en {
+            color: #666;
+            font-size: 0.95em;
+            font-style: italic;
+            border-top: 2px solid #f0f0f0;
+            padding-top: 20px;
+        }
+
+        .vocabulary-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .vocabulary-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .vocabulary-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .vocab-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 12px;
+            font-size: 0.9em;
+        }
+
+        .vocab-word {
+            font-weight: bold;
+            color: #fa709a;
+            margin-bottom: 5px;
+        }
+
+        .vocab-meaning {
+            color: #666;
+        }
+
+        .learning-points {
+            background: #f8f9fa;
+            border-left: 4px solid #fa709a;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        .learning-points-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .learning-points-list {
+            list-style-position: inside;
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .learning-points-list li {
+            margin-bottom: 8px;
         }
 
         .navigation {
@@ -189,26 +287,34 @@
         }
 
         .nav-button:hover {
-            background: #f04060;
-        }
-
-        .empty-message {
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            color: #856404;
-            padding: 20px;
-            border-radius: 5px;
-            text-align: center;
-            margin-bottom: 20px;
+            background: #f55b7a;
         }
 
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.8em;
+            .content {
+                padding: 20px;
             }
 
-            .transcript {
-                max-height: 300px;
+            .header {
+                padding: 25px 15px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .section-icon {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+
+            .vocabulary-list {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -217,49 +323,209 @@
     <div class="container">
         <div class="header">
             <h1>🎧 오늘의 듣기</h1>
-            <p>VOA Learning English (Fallback)</p>
-            <div class="source">📻 VOA Learning English</div>
+            <p>음원 듣고 스크립트로 확인하세요</p>
         </div>
 
         <div class="content">
-            <div class="learning-tips">
-                <div class="tips-title">💡 효과적인 듣기 팁</div>
-                <ul class="tips-list">
-                    <li>먼저 자막 없이 한 번 들어보세요</li>
-                    <li>모르는 단어는 나중에 확인하고 계속 들으세요</li>
-                    <li>같은 내용을 여러 번 반복해서 들으세요</li>
-                    <li>가능하면 따라 말해보세요 (Shadowing)</li>
-                </ul>
-            </div>
+            <!-- 초급 섹션 -->
+            <div class="listening-section">
+                <div class="section-header">
+                    <div class="section-icon">🟢</div>
+                    <div class="section-info">
+                        <div>
+                            <h2>Daily English Conversation - Meeting a Friend</h2>
+                            <p>일상 회화</p>
+                            <span class="difficulty-badge beginner">Beginner (A1-A2)</span>
+                        </div>
+                    </div>
+                </div>
 
-            
-            <div class="empty-message">
-                <strong>⚠️ 오디오가 준비되지 않았습니다</strong><br>
-                원본 페이지에서 듣기 자료를 확인하세요.
-                <br><a href="https://www.voaspecialenglish.com" class="external-link" target="_blank" style="margin: 10px auto; display: inline-block;">원본 페이지 방문</a>
-            </div>
-            
+                <div class="player-container">
+                    <div class="player-title">🎵 음원</div>
+                    <audio controls>
+                        <source src="https://www.englishclub.com/listening/easy-listening.html" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                    <div class="player-info">
+                        <span>⏱️ 1 minute</span>
+                        <a href="https://www.englishclub.com/" target="_blank" class="source-link">
+                            📌 Learn English with EnglishClub
+                        </a>
+                    </div>
+                </div>
 
-            
-            <div class="section">
-                <div class="section-title">📝 스크립트</div>
-                <div class="transcript">
-                    <div class="transcript-title">전문</div>
-                    Daily English learning from Voice of America.
+                <!-- 스크립트 토글 -->
+                <div class="script-toggle" onclick="toggleScript(this)">
+                    <div class="script-header">
+                        <span>📝 스크립트 보기</span>
+                        <span class="script-toggle-icon">▼</span>
+                    </div>
+                    <div class="script-content">
+                        <div class="script-text">
+                            <div class="script-ko">A: 안녕! 오늘 하루 어땠어?
+B: 안녕! 좋았어. 너는?
+A: 나도 좋았어. 내일 뭐 할 거야?
+B: 내일은 친구들을 만날 거야. 너도 올래?
+A: 좋아! 몇 시에 만나?
+B: 오후 3시쯤 어때?
+A: 좋아. 그럼 내일 봐!
+B: 응, 내일 봐!</div>
+                            <div class="script-en">A: Hi! How was your day?
+B: Hi! It was good. How about you?
+A: It was good too. What are you doing tomorrow?
+B: Tomorrow I'm meeting friends. Do you want to join?
+A: Sure! What time?
+B: How about 3 o'clock in the afternoon?
+A: Sounds good. See you tomorrow!
+B: Yes, see you tomorrow!</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 어휘 -->
+                <div class="vocabulary-section">
+                <div class="vocabulary-title">📚 주요 표현</div>
+                <div class="vocabulary-list" id="beginnerVocab"></div>
+                </div>
+
+                <!-- 학습 포인트 -->
+                <div class="learning-points">
+                <div class="learning-points-title">✨ 학습 포인트</div>
+                <ul class="learning-points-list" id="beginnerPoints"></ul>
                 </div>
             </div>
-            
 
-            <div class="word-note">
-                <strong>💬 학습 팁:</strong> 스크립트와 함께 다시 한 번 들어보세요.
-                이번에는 발음, 강세, 억양에 주목하세요.
-            </div>
+            <hr style="border: none; border-top: 2px solid #e9ecef; margin: 50px 0;">
 
-            <div class="navigation">
-                <a href="/today/grammar" class="nav-button">← 문법으로</a>
-                <a href="/today/reading" class="nav-button">읽기 →</a>
+            <!-- 뉴스 섹션 -->
+            <div class="listening-section">
+                <div class="section-header">
+                    <div class="section-icon">🔵</div>
+                    <div class="section-info">
+                        <div>
+                            <h2>VOA Learning English - Technology and Education</h2>
+                            <p>기술과 교육</p>
+                            <span class="difficulty-badge intermediate">Intermediate (B1-B2)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="player-container">
+                    <div class="player-title">🎵 음원</div>
+                    <audio controls>
+                        <source src="https://learningenglish.voanews.com/a/learningenglish/" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                    <div class="player-info">
+                        <span>⏱️ 4 minutes 32 seconds</span>
+                        <a href="https://learningenglish.voanews.com/" target="_blank" class="source-link">
+                            📌 VOA Learning English
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 스크립트 토글 -->
+                <div class="script-toggle" onclick="toggleScript(this)">
+                    <div class="script-header">
+                        <span>📝 스크립트 보기</span>
+                        <span class="script-toggle-icon">▼</span>
+                    </div>
+                    <div class="script-content">
+                        <div class="script-text">
+                            <div class="script-ko">현대 기술이 교육을 어떻게 변화시키고 있는지 살펴봅시다.
+
+온라인 학습 플랫폼들이 전 세계 학생들에게 새로운 기회를 제공하고 있습니다.
+코로나 팬데믹 이후, 많은 학교들이 디지털 도구를 사용하기 시작했습니다.
+
+인공지능 기술은 개인화된 학습을 가능하게 합니다.
+학생들은 자신의 속도에 맞춰 배울 수 있습니다.
+
+하지만 모든 학생이 이러한 기술에 접근할 수 있는 것은 아닙니다.
+개발도상국의 많은 학생들은 여전히 인터넷 접근이 어렵습니다.
+
+교육 기술의 미래는 모든 사람에게 동등한 기회를 제공하는 것입니다.</div>
+                            <div class="script-en">Let's look at how modern technology is changing education.
+
+Online learning platforms are providing new opportunities to students around the world.
+Since the coronavirus pandemic, many schools have started using digital tools.
+
+Artificial intelligence technology makes personalized learning possible.
+Students can learn at their own pace.
+
+However, not all students have access to these technologies.
+Many students in developing countries still find it difficult to access the Internet.
+
+The future of educational technology is providing equal opportunities for everyone.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 어휘 -->
+                <div class="vocabulary-section">
+                <div class="vocabulary-title">📚 주요 표현</div>
+                <div class="vocabulary-list" id="newsVocab"></div>
+                </div>
+
+                <!-- 학습 포인트 -->
+                <div class="learning-points">
+                <div class="learning-points-title">✨ 학습 포인트</div>
+                <ul class="learning-points-list" id="newsPoints"></ul>
+                </div>
             </div>
         </div>
+
+        <div class="navigation">
+            <a href="/today/vocab" class="nav-button">← 표현으로</a>
+            <a href="/today" class="nav-button">홈 →</a>
+        </div>
     </div>
+
+    <script>
+        const beginnerVocabData = [{"word": "How was your day?", "meaning": "오늘 하루 어땠어?", "type": "phrase"}, {"word": "meet", "meaning": "만나다", "type": "verb"}, {"word": "join", "meaning": "참여하다, 합류하다", "type": "verb"}, {"word": "afternoon", "meaning": "오후", "type": "noun"}, {"word": "tomorrow", "meaning": "내일", "type": "adverb"}];
+        const newsVocabData = [{"word": "technology", "meaning": "기술", "type": "noun"}, {"word": "platform", "meaning": "플랫폼", "type": "noun"}, {"word": "opportunity", "meaning": "기회", "type": "noun"}, {"word": "pandemic", "meaning": "팬데믹, 대유행", "type": "noun"}, {"word": "digital tool", "meaning": "디지털 도구", "type": "phrase"}, {"word": "artificial intelligence", "meaning": "인공지능", "type": "phrase"}, {"word": "personalized learning", "meaning": "개인화된 학습", "type": "phrase"}, {"word": "at their own pace", "meaning": "자신의 속도로", "type": "phrase"}, {"word": "access", "meaning": "접근하다", "type": "verb"}, {"word": "equal opportunity", "meaning": "동등한 기회", "type": "phrase"}];
+
+        // 스크립트 토글 함수
+        function toggleScript(element) {
+            element.classList.toggle('open');
+        }
+
+        // 어휘 렌더링
+        function renderVocabulary(data, elementId) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            data.forEach(vocab => {
+                const div = document.createElement('div');
+                div.className = 'vocab-item';
+                div.innerHTML = `
+                    <div class="vocab-word">${vocab.word}</div>
+                    <div class="vocab-meaning">${vocab.meaning}</div>
+                `;
+                element.appendChild(div);
+            });
+        }
+
+        // 학습 포인트 렌더링
+        function renderLearningPoints(data, elementId) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            data.forEach(point => {
+                const li = document.createElement('li');
+                li.textContent = point;
+                element.appendChild(li);
+            });
+        }
+
+        // 초기화
+        renderVocabulary(beginnerVocabData, 'beginnerVocab');
+        renderVocabulary(newsVocabData, 'newsVocab');
+
+        const beginnerPoints = ["일상적인 인사말", "미래 계획 표현하기 (What are you doing tomorrow?)", "시간 제안하기 (How about 3 o'clock?)", "약속 확정하기 (See you tomorrow!)"];
+        const newsPoints = ["기술 관련 주요 단어 학습", "현재 진행형 (is changing, are providing)", "부정사 표현 (to provide, to access)", "뉴스 속 복합 문장 이해", "교육 관련 용어 습득"];
+
+        renderLearningPoints(beginnerPoints, 'beginnerPoints');
+        renderLearningPoints(newsPoints, 'newsPoints');
+    </script>
 </body>
 </html>

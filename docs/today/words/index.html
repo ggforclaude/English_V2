@@ -50,10 +50,50 @@
             margin-top: 10px;
         }
 
+        /* 탭 시스템 */
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            padding: 0;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: white;
+        }
+
         .content {
             padding: 30px;
         }
 
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 학습 탭 스타일 */
         .words-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -68,6 +108,9 @@
             padding: 20px;
             transition: all 0.3s ease;
             cursor: pointer;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
         }
 
         .word-card:hover {
@@ -112,6 +155,7 @@
             border-radius: 20px;
             font-size: 0.85em;
             margin-bottom: 10px;
+            width: fit-content;
         }
 
         .word-card.flipped .word-pos {
@@ -123,7 +167,7 @@
             font-size: 1em;
             color: #333;
             margin-bottom: 10px;
-            line-height: 1.5;
+            flex-grow: 1;
         }
 
         .word-card.flipped .word-definition {
@@ -134,10 +178,10 @@
             background: white;
             padding: 10px;
             border-left: 3px solid #667eea;
-            font-size: 0.95em;
+            font-size: 0.9em;
             color: #666;
             font-style: italic;
-            margin-top: 10px;
+            margin-top: auto;
         }
 
         .word-card.flipped .word-example {
@@ -155,6 +199,156 @@
 
         .word-card.flipped .hint {
             color: rgba(255,255,255,0.6);
+        }
+
+        /* 퀴즈 탭 스타일 */
+        .quiz-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .quiz-question {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .question-type {
+            font-size: 0.9em;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .question-text {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1em;
+            border: 2px solid #e9ecef;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-check {
+            background: #667eea;
+            color: white;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn-check:hover {
+            background: #764ba2;
+        }
+
+        .btn-next {
+            background: #e9ecef;
+            color: #333;
+            width: 100%;
+        }
+
+        .btn-next:hover {
+            background: #dee2e6;
+        }
+
+        .result {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .result.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .progress {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
         }
 
         .navigation {
@@ -180,26 +374,28 @@
             background: #764ba2;
         }
 
-        .progress {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #666;
-        }
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
 
-        .progress-bar {
-            width: 100%;
-            height: 10px;
-            background: #e9ecef;
-            border-radius: 5px;
-            overflow: hidden;
-            margin: 10px 0;
-        }
+            .tab-btn {
+                border-right: 3px solid transparent;
+                border-bottom: none;
+            }
 
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            width: 0%;
-            transition: width 0.3s;
+            .tab-btn.active {
+                border-right-color: #667eea;
+                border-bottom-color: transparent;
+            }
+
+            .words-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -207,35 +403,170 @@
     <div class="container">
         <div class="header">
             <h1>📚 오늘의 10개 단어</h1>
-            <p>클릭해서 정의/예문을 확인하세요</p>
-            <div class="date">2026년 08월 31일</div>
+            <p>단어를 배우고 퀴즈로 확인하세요</p>
+            <div class="date">2026년 09월 01일</div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab(event, 'study')">📚 학습</button>
+            <button class="tab-btn" onclick="switchTab(event, 'quiz')">❓ 퀴즈</button>
         </div>
 
         <div class="content">
-            <div class="progress">
-                <p>학습 진행도: <span id="learned">0</span> / 0</p>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress"></div>
+            <!-- 학습 탭 -->
+            <div id="study" class="tab-content active">
+                <div class="progress">
+                    <p>학습 진행도: <span id="learned">0</span> / 10</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress"></div>
+                    </div>
+                </div>
+
+                <div class="words-grid" id="wordsGrid">
+                    <!-- 카드가 여기에 동적으로 생성됩니다 -->
                 </div>
             </div>
 
-            <div class="words-grid" id="wordsGrid">
-                <!-- 카드가 여기에 동적으로 생성됩니다 -->
+            <!-- 퀴즈 탭 -->
+            <div id="quiz" class="tab-content">
+                <div class="quiz-header">
+                    <h2>단어 암기 퀴즈</h2>
+                    <p>배운 단어를 확인해보세요</p>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="stat-number" id="correctCount">0</div>
+                        <div class="stat-label">정답</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="totalCount">0</div>
+                        <div class="stat-label">총 문제</div>
+                    </div>
+                </div>
+
+                <div class="progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="quizProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="quiz-container">
+                    <div class="quiz-question" id="quizArea">
+                        <!-- 퀴즈 콘텐츠가 여기에 생성됩니다 -->
+                    </div>
+                </div>
             </div>
 
             <div class="navigation">
-                <a href="/today" class="nav-button">← 돌아가기</a>
+                <a href="/today" class="nav-button">← 대시보드</a>
                 <a href="/today/vocab" class="nav-button">어휘 →</a>
             </div>
         </div>
     </div>
 
     <script>
-        const wordsData = [];
-        const grid = document.getElementById('wordsGrid');
+        const wordsData = [
+  {
+    "word": "arrange",
+    "pronunciation": "",
+    "pos": "",
+    "meaning_en": "",
+    "example_en": ""
+  },
+  {
+    "word": "opportunity",
+    "pronunciation": "",
+    "pos": "",
+    "meaning_en": "",
+    "example_en": ""
+  },
+  {
+    "word": "reliable",
+    "pronunciation": "",
+    "pos": "",
+    "meaning_en": "",
+    "example_en": ""
+  },
+  {
+    "word": "improve",
+    "pronunciation": "",
+    "pos": "",
+    "meaning_en": "",
+    "example_en": ""
+  },
+  {
+    "word": "schedule",
+    "pronunciation": "",
+    "pos": "",
+    "meaning_en": "",
+    "example_en": ""
+  },
+  {
+    "word": "confident",
+    "pronunciation": "",
+    "pos": "",
+    "meaning_en": "",
+    "example_en": ""
+  },
+  {
+    "word": "advice",
+    "pronunciation": "",
+    "pos": "",
+    "meaning_en": "",
+    "example_en": ""
+  },
+  {
+    "word": "manage",
+    "pronunciation": "",
+    "pos": "",
+    "meaning_en": "",
+    "example_en": ""
+  },
+  {
+    "word": "convenient",
+    "pronunciation": "",
+    "pos": "",
+    "meaning_en": "",
+    "example_en": ""
+  },
+  {
+    "word": "recently",
+    "pronunciation": "",
+    "pos": "",
+    "meaning_en": "",
+    "example_en": ""
+  }
+];
         const learned = new Set();
+        let quizState = {
+            currentIndex: 0,
+            answers: {},
+            correctCount: 0,
+            totalCount: 0
+        };
 
-        // 카드 생성
+        // 탭 전환
+        function switchTab(event, tabName) {
+            // 모든 탭 비활성화
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => tab.classList.remove('active'));
+
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => btn.classList.remove('active'));
+
+            // 선택된 탭 활성화
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            // 퀴즈 탭이면 초기화
+            if (tabName === 'quiz') {
+                initQuiz();
+            }
+        }
+
+        // 학습 탭: 카드 생성
+        const grid = document.getElementById('wordsGrid');
         wordsData.forEach((word, index) => {
             const card = document.createElement('div');
             card.className = 'word-card';
@@ -265,7 +596,124 @@
             document.getElementById('learned').textContent = learned.size;
             const percent = (learned.size / wordsData.length) * 100;
             document.getElementById('progress').style.width = percent + '%';
+            localStorage.setItem('wordsLearned_' + new Date().toISOString().split('T')[0], JSON.stringify(Array.from(learned)));
         }
+
+        // 퀴즈 탭
+        function initQuiz() {
+            quizState.currentIndex = 0;
+            quizState.answers = {};
+            quizState.correctCount = 0;
+            quizState.totalCount = wordsData.length;
+            document.getElementById('correctCount').textContent = '0';
+            document.getElementById('totalCount').textContent = wordsData.length;
+            showQuizQuestion();
+        }
+
+        function showQuizQuestion() {
+            if (quizState.currentIndex >= wordsData.length) {
+                showQuizResult();
+                return;
+            }
+
+            const word = wordsData[quizState.currentIndex];
+            const questionType = quizState.currentIndex % 2 === 0 ? 'en-to-ko' : 'ko-to-en';
+
+            let questionHTML = `
+                <div class="question-type">
+                    문제 ${quizState.currentIndex + 1} / ${wordsData.length}
+                </div>
+            `;
+
+            if (questionType === 'en-to-ko') {
+                questionHTML += `
+                    <div class="question-text">"${word.word}"의 한글 뜻은?</div>
+                    <input type="text" class="answer-input" id="answerInput" placeholder="한글 뜻을 입력하세요" autofocus>
+                `;
+            } else {
+                questionHTML += `
+                    <div class="question-text">"${word.meaning_ko || word.meaning_en}"의 영단어는?</div>
+                    <input type="text" class="answer-input" id="answerInput" placeholder="영단어를 입력하세요" autofocus>
+                `;
+            }
+
+            questionHTML += `
+                <button class="btn btn-check" onclick="checkAnswer('${questionType}')">정답 확인</button>
+                <div id="resultArea"></div>
+            `;
+
+            document.getElementById('quizArea').innerHTML = questionHTML;
+
+            const progress = ((quizState.currentIndex + 1) / wordsData.length) * 100;
+            document.getElementById('quizProgress').style.width = progress + '%';
+
+            // Enter 키로 제출
+            document.getElementById('answerInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkAnswer(questionType);
+                }
+            });
+        }
+
+        function checkAnswer(questionType) {
+            const word = wordsData[quizState.currentIndex];
+            const userAnswer = document.getElementById('answerInput').value.toLowerCase().trim();
+            let isCorrect = false;
+
+            if (questionType === 'en-to-ko') {
+                const correctAnswers = [word.meaning_ko, word.meaning_en].map(a => a.toLowerCase());
+                isCorrect = correctAnswers.some(ans => ans.includes(userAnswer) || userAnswer.includes(ans));
+            } else {
+                isCorrect = word.word.toLowerCase() === userAnswer;
+            }
+
+            if (isCorrect) {
+                quizState.correctCount++;
+                document.getElementById('correctCount').textContent = quizState.correctCount;
+            }
+
+            const resultArea = document.getElementById('resultArea');
+            resultArea.innerHTML = `
+                <div class="result ${isCorrect ? 'correct' : 'incorrect'}">
+                    ${isCorrect ? '✓ 정답입니다!' : '✗ 틀렸습니다'}
+                </div>
+                <div style="margin-bottom: 15px; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+                    <strong>정답:</strong> ${questionType === 'en-to-ko' ? word.meaning_ko : word.word}
+                </div>
+                <button class="btn btn-next" onclick="nextQuestion()">다음 문제</button>
+            `;
+
+            quizState.answers[quizState.currentIndex] = isCorrect;
+        }
+
+        function nextQuestion() {
+            quizState.currentIndex++;
+            showQuizQuestion();
+        }
+
+        function showQuizResult() {
+            const accuracy = Math.round((quizState.correctCount / quizState.totalCount) * 100);
+            const resultHTML = `
+                <div style="text-align: center; padding: 30px;">
+                    <h2>퀴즈 완료!</h2>
+                    <div class="stats">
+                        <div class="stat-box">
+                            <div class="stat-number">${quizState.correctCount}</div>
+                            <div class="stat-label">정답</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">${accuracy}%</div>
+                            <div class="stat-label">정확도</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-check" onclick="initQuiz()">다시 풀기</button>
+                </div>
+            `;
+            document.getElementById('quizArea').innerHTML = resultHTML;
+        }
+
+        // 초기 진도 로드
+        window.addEventListener('load', updateProgress);
     </script>
 </body>
 </html>
