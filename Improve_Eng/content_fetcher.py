@@ -519,7 +519,7 @@ JSON 형식:
             messages=[{"role": "user", "content": prompt}]
         )
 
-        response_text = message.content[0].text
+        response_text = next((block.text for block in message.content if hasattr(block, 'text')), "")
         start = response_text.find('{')
         end = response_text.rfind('}') + 1
         json_str = response_text[start:end]
