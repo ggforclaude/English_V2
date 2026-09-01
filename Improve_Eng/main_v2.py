@@ -259,6 +259,11 @@ async def main() -> None:
         feedback_available = _check_evaluation_feedback(today)
         log.info(f"  ✓ 평가 피드백: {'있음' if feedback_available else '없음'}")
 
+        # 15. 콘텐츠 아카이빙 (매일 자동 보관)
+        log.info("[15] 학습 콘텐츠 아카이빙...")
+        _archive_daily_content(today)
+        log.info("  ✓ 아카이빙 완료")
+
         log.info("=" * 60)
         log.info("✓ 완료 - /today 페이지에서 오늘의 학습을 시작하세요!")
         log.info("=" * 60)
@@ -326,6 +331,43 @@ def _save_report_html(html_content: str) -> str:
     out = base / "index.html"
     out.write_text(html_content, encoding="utf-8")
     return str(out)
+
+
+def _archive_daily_content(today) -> None:
+    """오늘의 학습 콘텐츠를 날짜별로 아카이빙"""
+    import pathlib
+    import shutil
+    from datetime import date
+
+    archive_base = pathlib.Path(__file__).parent.parent / "docs" / "archive"
+    archive_base.mkdir(parents=True, exist_ok=True)
+
+    # 오늘 날짜로 된 아카이브 폴더 생성
+    today_archive = archive_base / today.strftime("%Y-%m-%d")
+    today_archive.mkdir(parents=True, exist_ok=True)
+
+    # 각 섹션별 페이지 복사
+    sections = [
+        "words", "vocab", "grammar", "listening", "reading",
+        "writing", "pronunciation", "stats", "correction", "writing-feedback"
+    ]
+
+    today_dir = pathlib.Path(__file__).parent.parent / "docs" / "today"
+
+    for section in sections:
+        src = today_dir / section / "index.html"
+        dst = today_archive / f"{section}.html"
+
+        if src.exists():
+            shutil.copy2(src, dst)
+        else:
+            log.debug(f"아카이브: {section} 페이지 없음")
+
+    # 메인 페이지도 복사
+    src = today_dir / "index.html"
+    dst = today_archive / "main.html"
+    if src.exists():
+        shutil.copy2(src, dst)
 
 
 def _estimate_questions_correct(tracker, today) -> int:

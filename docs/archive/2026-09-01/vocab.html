@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/English_V2/">
+    <title>오늘의 표현 - Improve English</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .source {
+            font-size: 0.95em;
+            background: rgba(255,255,255,0.2);
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 10px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .article-info {
+            background: #f8f9fa;
+            border-left: 4px solid #f5576c;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 5px;
+        }
+
+        .article-info h3 {
+            color: #f5576c;
+            margin-bottom: 5px;
+        }
+
+        .article-info p {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .expressions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .expression-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .expression-card:hover {
+            border-color: #f5576c;
+            box-shadow: 0 5px 20px rgba(245, 87, 108, 0.1);
+        }
+
+        .main-expression {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 20px;
+        }
+
+        .expression-text {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #f5576c;
+            margin-right: 15px;
+        }
+
+        .expression-meaning {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .expression-description {
+            background: #fdf8f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 3px solid #f5576c;
+        }
+
+        .description-title {
+            font-weight: bold;
+            color: #f5576c;
+            margin-bottom: 8px;
+        }
+
+        .description-text {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .expression-example {
+            background: white;
+            border: 1px solid #e9ecef;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .example-label {
+            font-weight: bold;
+            color: #f5576c;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+
+        .example-en {
+            color: #333;
+            font-style: italic;
+            margin-bottom: 5px;
+        }
+
+        .example-ko {
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .similar-expressions {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .similar-title {
+            font-weight: bold;
+            color: #f5576c;
+            margin-bottom: 15px;
+            font-size: 1.05em;
+        }
+
+        .similar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+        }
+
+        .similar-box {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid #f5576c;
+        }
+
+        .similar-expression {
+            font-weight: bold;
+            color: #f5576c;
+            margin-bottom: 8px;
+            font-size: 1.05em;
+        }
+
+        .similar-meaning {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .difference {
+            background: white;
+            padding: 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .difference-label {
+            font-weight: bold;
+            color: #f5576c;
+            font-size: 0.8em;
+            margin-bottom: 3px;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .navigation {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .nav-button {
+            display: inline-block;
+            padding: 12px 30px;
+            margin: 0 10px;
+            background: #f5576c;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .nav-button:hover {
+            background: #d63447;
+        }
+
+        @media (max-width: 768px) {
+            .similar-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .expression-text {
+                font-size: 1.3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📖 오늘의 표현</h1>
+            <p>유사하지만 다른 표현들을 비교하며 배우세요</p>
+            <div class="source">📚 BBC Learning English</div>
+        </div>
+
+        <div class="content">
+            <div class="article-info">
+                <h3>오늘의 읽기 자료</h3>
+                <p>The Benefits of Learning Multiple Languages</p>
+            </div>
+
+            <div class="expressions-list" id="expressionsList">
+                <!-- 표현이 여기에 동적으로 생성됩니다 -->
+            </div>
+
+            <div class="navigation">
+                <a href="today/words" class="nav-button">← 단어로</a>
+                <a href="today/grammar" class="nav-button">문법 →</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const expressionsData = [
+  {
+    "main": "open doors to",
+    "meaning_ko": "~에 대한 기회를 열어주다",
+    "meaning_en": "to create new opportunities or possibilities for someone",
+    "example_en": "Learning new languages opens doors to countless opportunities.",
+    "example_ko": "새로운 언어를 배우는 것은 수많은 기회의 문을 열어준다.",
+    "similar": [
+      {
+        "expression": "pave the way for",
+        "meaning_ko": "~을 위한 길을 닦다",
+        "difference": "'open doors to'는 즉시 이용 가능한 기회가 생기는 느낌이고, 'pave the way for'는 미래의 일이 가능해지도록 준비 과정을 마련한다는 뜻이다."
+      },
+      {
+        "expression": "lead to",
+        "meaning_ko": "~로 이어지다",
+        "difference": "'lead to'는 단순한 결과나 인과관계를 나타내며 긍정·부정 모두에 쓰이지만, 'open doors to'는 항상 긍정적인 기회에만 쓰인다."
+      }
+    ]
+  },
+  {
+    "main": "have access to",
+    "meaning_ko": "~을 이용할[접할] 수 있다",
+    "meaning_en": "to have the right or opportunity to use or obtain something",
+    "example_en": "Bilingual workers have access to more job opportunities.",
+    "example_ko": "이중 언어 구사자는 더 많은 일자리 기회를 접할 수 있다.",
+    "similar": [
+      {
+        "expression": "be available to",
+        "meaning_ko": "~에게 이용 가능하다",
+        "difference": "'have access to'는 사람이 주어가 되어 능동적으로 이용할 수 있음을 뜻하고, 'be available to'는 사물이 주어가 되어 제공되는 상태를 나타낸다."
+      },
+      {
+        "expression": "be able to use",
+        "meaning_ko": "~을 사용할 수 있다",
+        "difference": "'be able to use'는 단순한 능력을 말하지만, 'have access to'는 권한이나 기회가 주어져 접근할 수 있다는 의미가 강하다."
+      }
+    ]
+  },
+  {
+    "main": "be looking for",
+    "meaning_ko": "~을 찾고 있다, 구하고 있다",
+    "meaning_en": "to be trying to find or hire someone or something",
+    "example_en": "Companies today are looking for employees who can communicate with international clients.",
+    "example_ko": "오늘날 기업들은 국제 고객들과 소통할 수 있는 직원을 찾고 있다.",
+    "similar": [
+      {
+        "expression": "seek",
+        "meaning_ko": "구하다, 찾다",
+        "difference": "'seek'는 격식체 문어 표현으로 채용 공고 등에 쓰이고, 'be looking for'는 일상 대화에서 자주 쓰이는 구어적 표현이다."
+      },
+      {
+        "expression": "search for",
+        "meaning_ko": "~을 수색하다, 탐색하다",
+        "difference": "'search for'는 잃어버린 것을 철저히 뒤져 찾는 물리적 행위에 가깝고, 'be looking for'는 원하는 조건의 대상을 구한다는 폭넓은 의미로 쓰인다."
+      }
+    ]
+  }
+];
+        const expressionsList = document.getElementById('expressionsList');
+
+        if (expressionsData.length === 0) {
+            expressionsList.innerHTML = '<div class="empty-message">오늘의 표현이 준비되지 않았습니다. 잠시 후 다시 시도해주세요.</div>';
+        } else {
+            expressionsData.forEach((expr, index) => {
+                const card = document.createElement('div');
+                card.className = 'expression-card';
+
+                let html = `
+                    <div class="main-expression">
+                        <div class="expression-text">"${expr.main}"</div>
+                    </div>
+
+                    <div class="expression-description">
+                        <div class="description-title">뜻</div>
+                        <div class="description-text">${expr.meaning_ko}</div>
+                        <div class="description-text" style="margin-top: 5px; font-size: 0.9em; color: #999;">(${expr.meaning_en})</div>
+                    </div>
+
+                    <div class="expression-example">
+                        <div class="example-label">예시</div>
+                        <div class="example-en">"${expr.example_en}"</div>
+                        <div class="example-ko">${expr.example_ko}</div>
+                    </div>
+                `;
+
+                // 유사 표현
+                if (expr.similar && expr.similar.length > 0) {
+                    html += `
+                        <div class="similar-expressions">
+                            <div class="similar-title">📌 유사 표현과의 차이</div>
+                            <div class="similar-grid">
+                    `;
+
+                    expr.similar.forEach(sim => {
+                        html += `
+                            <div class="similar-box">
+                                <div class="similar-expression">"${sim.expression}"</div>
+                                <div class="similar-meaning">${sim.meaning_ko}</div>
+                                <div class="difference">
+                                    <div class="difference-label">차이점:</div>
+                                    ${sim.difference}
+                                </div>
+                                <div class="example-en" style="margin-top: 8px; font-size: 0.85em;">"${sim.example_en}"</div>
+                            </div>
+                        `;
+                    });
+
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = html;
+                expressionsList.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>
