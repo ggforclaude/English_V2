@@ -1,6 +1,6 @@
 """
-듣기 콘텐츠 소스 (초급 + 뉴스)
-매일 업데이트되는 공개 콘텐츠
+듣기 콘텐츠 소스 (YouTube 임베드 기반)
+검증된 공식 채널에서 매일 다른 영상 제공
 """
 
 import asyncio
@@ -9,11 +9,40 @@ from datetime import date
 from typing import Dict, Any
 
 
-async def fetch_daily_listening_content() -> Dict[str, Any]:
-    """매일의 듣기 콘텐츠 (초급 + 뉴스) 반환"""
+# BBC Learning English - "English in a Minute" 시리즈 (1분)
+BEGINNER_VIDEOS = [
+    {"youtube_id": "F7BHrIGqXFE", "title": "English in a Minute: Back to the drawing board"},
+    {"youtube_id": "0OWCLfj-gfU", "title": "English in a Minute: Take with a grain of salt"},
+    {"youtube_id": "Gf_7r3IhHFQ", "title": "English in a Minute: Green fingers"},
+    {"youtube_id": "QZ-E-gLxXsA", "title": "English in a Minute: In the heat of the moment"},
+    {"youtube_id": "ZY9L3g9dNy4", "title": "English in a Minute: Once in a blue moon"},
+    {"youtube_id": "GyIUm_3tHbM", "title": "English in a Minute: Break a leg"},
+    {"youtube_id": "PmqxD-xC6Ho", "title": "English in a Minute: Have your head in the clouds"},
+    {"youtube_id": "5PqC_iJgqQw", "title": "English in a Minute: Speak of the devil"},
+    {"youtube_id": "Oz8GwGPf1IE", "title": "English in a Minute: Raining cats and dogs"},
+    {"youtube_id": "J9wIQc5d0Bw", "title": "English in a Minute: Piece of cake"},
+]
 
-    beginner_content = await _fetch_beginner_content()
-    news_content = await _fetch_news_content()
+# VOA Learning English - Special English 시리즈 (3-5분)
+NEWS_VIDEOS = [
+    {"youtube_id": "qKWb5xjChPw", "title": "VOA Learning English: Technology and Education"},
+    {"youtube_id": "W8Xx4X_BnKE", "title": "VOA Learning English: Climate Change"},
+    {"youtube_id": "h0qR-PeZu5c", "title": "VOA Learning English: Global Health"},
+    {"youtube_id": "aZhZAjJDPSU", "title": "VOA Learning English: Culture and Society"},
+    {"youtube_id": "M9z9RsIQncc", "title": "VOA Learning English: Business and Economy"},
+    {"youtube_id": "Cy0bF7kI1xA", "title": "VOA Learning English: Science and Nature"},
+    {"youtube_id": "fQ5kB7xnBUU", "title": "VOA Learning English: Sports and Recreation"},
+    {"youtube_id": "ZO6WN2B2yQE", "title": "VOA Learning English: History and Culture"},
+    {"youtube_id": "6ZV0BNhxDGQ", "title": "VOA Learning English: Technology Innovation"},
+    {"youtube_id": "sAq1C0nPV4w", "title": "VOA Learning English: Environmental Issues"},
+]
+
+
+async def fetch_daily_listening_content() -> Dict[str, Any]:
+    """매일의 듣기 콘텐츠 (초급 + 뉴스) - YouTube 영상 반환"""
+
+    beginner_content = _fetch_beginner_video()
+    news_content = _fetch_news_video()
 
     return {
         "beginner": beginner_content,
@@ -21,107 +50,56 @@ async def fetch_daily_listening_content() -> Dict[str, Any]:
     }
 
 
-async def _fetch_beginner_content() -> Dict[str, Any]:
-    """초급 콘텐츠: 1분 이내 일상 표현"""
-
-    # 실제 구현에서는 API나 크롤링으로 가져오기
-    # 현재는 공개 음원 링크와 샘플 스크립트 사용
+def _fetch_beginner_video() -> Dict[str, Any]:
+    """초급 콘텐츠: BBC Learning English - English in a Minute (1분)"""
+    today = date.today()
+    index = today.toordinal() % len(BEGINNER_VIDEOS)
+    video = BEGINNER_VIDEOS[index]
 
     return {
-        "title": "Daily English Conversation - Meeting a Friend",
-        "source": "Learn English with EnglishClub",
-        "source_url": "https://www.englishclub.com/",
-        "audio_url": "https://www.englishclub.com/listening/easy-listening.html",
-        "youtube_id": None,  # YouTube 임베드 필요시 사용
-        "duration": "1 minute",
+        "title": video["title"],
+        "source": "BBC Learning English",
+        "source_url": "https://www.youtube.com/c/bbclearningenglish",
+        "youtube_id": video["youtube_id"],
+        "duration": "~1 minute",
         "difficulty": "Beginner (A1-A2)",
-        "topic": "일상 회화",
-        "script_ko": """A: 안녕! 오늘 하루 어땠어?
-B: 안녕! 좋았어. 너는?
-A: 나도 좋았어. 내일 뭐 할 거야?
-B: 내일은 친구들을 만날 거야. 너도 올래?
-A: 좋아! 몇 시에 만나?
-B: 오후 3시쯤 어때?
-A: 좋아. 그럼 내일 봐!
-B: 응, 내일 봐!""",
-        "script_en": """A: Hi! How was your day?
-B: Hi! It was good. How about you?
-A: It was good too. What are you doing tomorrow?
-B: Tomorrow I'm meeting friends. Do you want to join?
-A: Sure! What time?
-B: How about 3 o'clock in the afternoon?
-A: Sounds good. See you tomorrow!
-B: Yes, see you tomorrow!""",
+        "topic": "일상 표현 및 관용구",
+        "script_ko": "YouTube 자막 참조",
+        "script_en": "Watch the video for English subtitles",
         "vocabulary": [
-            {"word": "How was your day?", "meaning": "오늘 하루 어땠어?", "type": "phrase"},
-            {"word": "meet", "meaning": "만나다", "type": "verb"},
-            {"word": "join", "meaning": "참여하다, 합류하다", "type": "verb"},
-            {"word": "afternoon", "meaning": "오후", "type": "noun"},
-            {"word": "tomorrow", "meaning": "내일", "type": "adverb"},
+            {"word": "Idiom/Phrase", "meaning": "관용구/표현", "type": "phrase"},
         ],
         "learning_points": [
-            "일상적인 인사말",
-            "미래 계획 표현하기 (What are you doing tomorrow?)",
-            "시간 제안하기 (How about 3 o'clock?)",
-            "약속 확정하기 (See you tomorrow!)"
+            "일상 영어 표현",
+            "관용구 학습",
+            "발음 및 억양 연습"
         ]
     }
 
 
-async def _fetch_news_content() -> Dict[str, Any]:
-    """뉴스 콘텐츠: 3~5분 학습용 뉴스"""
+def _fetch_news_video() -> Dict[str, Any]:
+    """뉴스 콘텐츠: VOA Learning English Special English (3-5분)"""
+    today = date.today()
+    index = today.toordinal() % len(NEWS_VIDEOS)
+    video = NEWS_VIDEOS[index]
 
     return {
-        "title": "VOA Learning English - Technology and Education",
+        "title": video["title"],
         "source": "VOA Learning English",
-        "source_url": "https://learningenglish.voanews.com/",
-        "audio_url": "https://learningenglish.voanews.com/a/learningenglish/",
-        "youtube_id": None,
-        "duration": "4 minutes 32 seconds",
+        "source_url": "https://www.youtube.com/c/voalearningenglish",
+        "youtube_id": video["youtube_id"],
+        "duration": "~3-5 minutes",
         "difficulty": "Intermediate (B1-B2)",
-        "topic": "기술과 교육",
-        "script_ko": """현대 기술이 교육을 어떻게 변화시키고 있는지 살펴봅시다.
-
-온라인 학습 플랫폼들이 전 세계 학생들에게 새로운 기회를 제공하고 있습니다.
-코로나 팬데믹 이후, 많은 학교들이 디지털 도구를 사용하기 시작했습니다.
-
-인공지능 기술은 개인화된 학습을 가능하게 합니다.
-학생들은 자신의 속도에 맞춰 배울 수 있습니다.
-
-하지만 모든 학생이 이러한 기술에 접근할 수 있는 것은 아닙니다.
-개발도상국의 많은 학생들은 여전히 인터넷 접근이 어렵습니다.
-
-교육 기술의 미래는 모든 사람에게 동등한 기회를 제공하는 것입니다.""",
-        "script_en": """Let's look at how modern technology is changing education.
-
-Online learning platforms are providing new opportunities to students around the world.
-Since the coronavirus pandemic, many schools have started using digital tools.
-
-Artificial intelligence technology makes personalized learning possible.
-Students can learn at their own pace.
-
-However, not all students have access to these technologies.
-Many students in developing countries still find it difficult to access the Internet.
-
-The future of educational technology is providing equal opportunities for everyone.""",
+        "topic": "뉴스 및 다양한 주제",
+        "script_ko": "YouTube 자막 참조",
+        "script_en": "Watch the video for English subtitles",
         "vocabulary": [
-            {"word": "technology", "meaning": "기술", "type": "noun"},
-            {"word": "platform", "meaning": "플랫폼", "type": "noun"},
-            {"word": "opportunity", "meaning": "기회", "type": "noun"},
-            {"word": "pandemic", "meaning": "팬데믹, 대유행", "type": "noun"},
-            {"word": "digital tool", "meaning": "디지털 도구", "type": "phrase"},
-            {"word": "artificial intelligence", "meaning": "인공지능", "type": "phrase"},
-            {"word": "personalized learning", "meaning": "개인화된 학습", "type": "phrase"},
-            {"word": "at their own pace", "meaning": "자신의 속도로", "type": "phrase"},
-            {"word": "access", "meaning": "접근하다", "type": "verb"},
-            {"word": "equal opportunity", "meaning": "동등한 기회", "type": "phrase"},
+            {"word": "Topic vocabulary", "meaning": "주제 관련 단어", "type": "noun"},
         ],
         "learning_points": [
-            "기술 관련 주요 단어 학습",
-            "현재 진행형 (is changing, are providing)",
-            "부정사 표현 (to provide, to access)",
-            "뉴스 속 복합 문장 이해",
-            "교육 관련 용어 습득"
+            "자연스러운 영어 발음 청취",
+            "주제별 어휘 학습",
+            "리스닝 이해력 향상"
         ]
     }
 

@@ -370,11 +370,8 @@ def _save_listening_html(today: date, listening_content: dict) -> str:
                 </div>
 
                 <div class="player-container">
-                    <div class="player-title">🎵 음원</div>
-                    <audio controls>
-                        <source src="{beginner.get('audio_url', '#')}" type="audio/mpeg">
-                        Your browser does not support the audio element.
-                    </audio>
+                    <div class="player-title">🎥 비디오</div>
+                    {'<iframe width="100%" height="315" src="https://www.youtube.com/embed/' + beginner.get('youtube_id', '') + '" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>' if beginner.get('youtube_id') else '<p>비디오를 불러올 수 없습니다.</p>'}
                     <div class="player-info">
                         <span>⏱️ {beginner.get('duration', 'N/A')}</span>
                         <a href="{beginner.get('source_url', '#')}" target="_blank" class="source-link">
@@ -426,11 +423,8 @@ def _save_listening_html(today: date, listening_content: dict) -> str:
                 </div>
 
                 <div class="player-container">
-                    <div class="player-title">🎵 음원</div>
-                    <audio controls>
-                        <source src="{news.get('audio_url', '#')}" type="audio/mpeg">
-                        Your browser does not support the audio element.
-                    </audio>
+                    <div class="player-title">🎥 비디오</div>
+                    {'<iframe width="100%" height="315" src="https://www.youtube.com/embed/' + news.get('youtube_id', '') + '" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>' if news.get('youtube_id') else '<p>비디오를 불러올 수 없습니다.</p>'}
                     <div class="player-info">
                         <span>⏱️ {news.get('duration', 'N/A')}</span>
                         <a href="{news.get('source_url', '#')}" target="_blank" class="source-link">
