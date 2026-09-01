@@ -200,15 +200,26 @@ def _save_words_html(
             color: white;
         }}
 
+        .word-meaning-ko {{
+            font-size: 1.1em;
+            color: #e74c3c;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }}
+
+        .word-card.flipped .word-meaning-ko {{
+            color: #ffebee;
+        }}
+
         .word-definition {{
-            font-size: 1em;
-            color: #333;
+            font-size: 0.95em;
+            color: #555;
             margin-bottom: 10px;
             flex-grow: 1;
         }}
 
         .word-card.flipped .word-definition {{
-            color: white;
+            color: rgba(255,255,255,0.9);
         }}
 
         .word-example {{
@@ -540,7 +551,8 @@ def _save_words_html(
                 <div class="word-title">${{word.word}}</div>
                 <div class="word-pronunciation">${{word.pronunciation || 'N/A'}}</div>
                 ${{word.pos ? `<div class="word-pos">${{word.pos}}</div>` : ''}}
-                <div class="word-definition">${{word.meaning_en || '(정의 없음)'}}</div>
+                <div class="word-meaning-ko"><strong>한글:</strong> ${{word.meaning_ko || '(뜻 없음)'}}</div>
+                <div class="word-definition"><strong>영어:</strong> ${{word.meaning_en || '(정의 없음)'}}</div>
                 ${{word.example_en ? `<div class="word-example">"${{word.example_en}}"</div>` : ''}}
                 <div class="hint">클릭해서 다시 보기</div>
             `;
@@ -623,14 +635,15 @@ def _save_words_html(
 
         function checkAnswer(questionType) {{
             const word = wordsData[quizState.currentIndex];
-            const userAnswer = document.getElementById('answerInput').value.toLowerCase().trim();
+            const userAnswer = document.getElementById('answerInput').value.toLowerCase().replace(/\s+/g, ' ').trim();
             let isCorrect = false;
 
             if (questionType === 'en-to-ko') {{
-                const correctAnswers = [word.meaning_ko, word.meaning_en].map(a => a.toLowerCase());
+                const correctAnswers = [word.meaning_ko, word.meaning_en].map(a => a.toLowerCase().replace(/\s+/g, ' ').trim());
                 isCorrect = correctAnswers.some(ans => ans.includes(userAnswer) || userAnswer.includes(ans));
             }} else {{
-                isCorrect = word.word.toLowerCase() === userAnswer;
+                const normalizedWord = word.word.toLowerCase().replace(/\s+/g, ' ').trim();
+                isCorrect = normalizedWord === userAnswer;
             }}
 
             if (isCorrect) {{
