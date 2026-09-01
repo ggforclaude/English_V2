@@ -164,15 +164,26 @@
             color: white;
         }
 
+        .word-meaning-ko {
+            font-size: 1.1em;
+            color: #e74c3c;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .word-card.flipped .word-meaning-ko {
+            color: #ffebee;
+        }
+
         .word-definition {
-            font-size: 1em;
-            color: #333;
+            font-size: 0.95em;
+            color: #555;
             margin-bottom: 10px;
             flex-grow: 1;
         }
 
         .word-card.flipped .word-definition {
-            color: white;
+            color: rgba(255,255,255,0.9);
         }
 
         .word-example {
@@ -469,20 +480,20 @@
     <script>
         const wordsData = [
   {
-    "word": "reliable",
-    "pronunciation": "/rɪˈlaɪəbəl/",
-    "pos": "adjective",
-    "meaning_en": "able to be trusted to do what you expect or need",
-    "meaning_ko": "믿을 수 있는, 신뢰할 만한",
-    "example_en": "She is a reliable friend who always keeps her promises."
-  },
-  {
     "word": "arrange",
     "pronunciation": "/əˈreɪndʒ/",
     "pos": "verb",
     "meaning_en": "to plan or organize something in advance",
-    "meaning_ko": "준비하다, 마련하다, 정리하다",
-    "example_en": "I will arrange a meeting with the manager tomorrow."
+    "meaning_ko": "준비하다, 정리하다, 마련하다",
+    "example_en": "I will arrange a meeting with the team on Friday."
+  },
+  {
+    "word": "reliable",
+    "pronunciation": "/rɪˈlaɪəbəl/",
+    "pos": "adjective",
+    "meaning_en": "able to be trusted to do something well or correctly",
+    "meaning_ko": "믿을 수 있는, 신뢰할 만한",
+    "example_en": "She is a reliable friend who always keeps her promises."
   },
   {
     "word": "opportunity",
@@ -490,23 +501,15 @@
     "pos": "noun",
     "meaning_en": "a chance to do something good or useful",
     "meaning_ko": "기회",
-    "example_en": "This job gives me the opportunity to travel abroad."
+    "example_en": "This job is a great opportunity to learn new skills."
   },
   {
-    "word": "gradually",
-    "pronunciation": "/ˈɡrædʒuəli/",
+    "word": "eventually",
+    "pronunciation": "/ɪˈventʃuəli/",
     "pos": "adverb",
-    "meaning_en": "slowly over a period of time",
-    "meaning_ko": "점차적으로, 서서히",
-    "example_en": "The weather is gradually getting colder."
-  },
-  {
-    "word": "confident",
-    "pronunciation": "/ˈkɒnfɪdənt/",
-    "pos": "adjective",
-    "meaning_en": "feeling sure about your own ability or about a situation",
-    "meaning_ko": "자신감 있는, 확신하는",
-    "example_en": "He feels confident about passing the exam."
+    "meaning_en": "in the end, especially after a long time",
+    "meaning_ko": "결국, 마침내",
+    "example_en": "After many tries, he eventually passed the driving test."
   },
   {
     "word": "afford",
@@ -517,36 +520,44 @@
     "example_en": "We can't afford a new car this year."
   },
   {
-    "word": "advantage",
-    "pronunciation": "/ədˈvɑːntɪdʒ/",
-    "pos": "noun",
-    "meaning_en": "something that helps you or makes a situation better",
-    "meaning_ko": "장점, 이점",
-    "example_en": "One advantage of living here is the cheap rent."
-  },
-  {
-    "word": "recommend",
-    "pronunciation": "/ˌrekəˈmend/",
-    "pos": "verb",
-    "meaning_en": "to tell someone that something is good and they should try it",
-    "meaning_ko": "추천하다, 권하다",
-    "example_en": "Can you recommend a good restaurant near here?"
-  },
-  {
-    "word": "familiar",
-    "pronunciation": "/fəˈmɪliə/",
+    "word": "crowded",
+    "pronunciation": "/ˈkraʊdɪd/",
     "pos": "adjective",
-    "meaning_en": "well known to you because you have seen or heard it before",
-    "meaning_ko": "익숙한, 친숙한",
-    "example_en": "Her voice sounds familiar, but I can't remember her name."
+    "meaning_en": "full of people or things in a small space",
+    "meaning_ko": "붐비는, 혼잡한",
+    "example_en": "The train was very crowded this morning."
   },
   {
-    "word": "eventually",
-    "pronunciation": "/ɪˈventʃuəli/",
+    "word": "advice",
+    "pronunciation": "/ədˈvaɪs/",
+    "pos": "noun",
+    "meaning_en": "an opinion about what someone should do",
+    "meaning_ko": "조언, 충고",
+    "example_en": "My teacher gave me some useful advice about studying."
+  },
+  {
+    "word": "improve",
+    "pronunciation": "/ɪmˈpruːv/",
+    "pos": "verb",
+    "meaning_en": "to make something better or to become better",
+    "meaning_ko": "향상시키다, 개선되다",
+    "example_en": "Reading every day will improve your English."
+  },
+  {
+    "word": "hardly",
+    "pronunciation": "/ˈhɑːdli/",
     "pos": "adverb",
-    "meaning_en": "in the end, especially after a long time",
-    "meaning_ko": "결국, 마침내",
-    "example_en": "After many tries, he eventually found a job."
+    "meaning_en": "almost not at all",
+    "meaning_ko": "거의 ~않다",
+    "example_en": "I could hardly hear him because of the noise."
+  },
+  {
+    "word": "convenient",
+    "pronunciation": "/kənˈviːniənt/",
+    "pos": "adjective",
+    "meaning_en": "easy to use or suitable for your needs",
+    "meaning_ko": "편리한, 알맞은",
+    "example_en": "The store near my house is very convenient."
   }
 ];
         const learned = new Set();
@@ -585,7 +596,8 @@
                 <div class="word-title">${word.word}</div>
                 <div class="word-pronunciation">${word.pronunciation || 'N/A'}</div>
                 ${word.pos ? `<div class="word-pos">${word.pos}</div>` : ''}
-                <div class="word-definition">${word.meaning_en || '(정의 없음)'}</div>
+                <div class="word-meaning-ko"><strong>한글:</strong> ${word.meaning_ko || '(뜻 없음)'}</div>
+                <div class="word-definition"><strong>영어:</strong> ${word.meaning_en || '(정의 없음)'}</div>
                 ${word.example_en ? `<div class="word-example">"${word.example_en}"</div>` : ''}
                 <div class="hint">클릭해서 다시 보기</div>
             `;
@@ -668,14 +680,15 @@
 
         function checkAnswer(questionType) {
             const word = wordsData[quizState.currentIndex];
-            const userAnswer = document.getElementById('answerInput').value.toLowerCase().trim();
+            const userAnswer = document.getElementById('answerInput').value.toLowerCase().replace(/\s+/g, ' ').trim();
             let isCorrect = false;
 
             if (questionType === 'en-to-ko') {
-                const correctAnswers = [word.meaning_ko, word.meaning_en].map(a => a.toLowerCase());
+                const correctAnswers = [word.meaning_ko, word.meaning_en].map(a => a.toLowerCase().replace(/\s+/g, ' ').trim());
                 isCorrect = correctAnswers.some(ans => ans.includes(userAnswer) || userAnswer.includes(ans));
             } else {
-                isCorrect = word.word.toLowerCase() === userAnswer;
+                const normalizedWord = word.word.toLowerCase().replace(/\s+/g, ' ').trim();
+                isCorrect = normalizedWord === userAnswer;
             }
 
             if (isCorrect) {
