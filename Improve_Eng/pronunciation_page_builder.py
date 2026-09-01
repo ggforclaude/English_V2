@@ -363,19 +363,19 @@ def _save_pronunciation_html(today: date, daily_words: dict) -> str:
                 const meaning = word.meaning_ko || '';
 
                 card.innerHTML = `
-                    <div class="word-text" onclick="playWord('{wordText}', '{pronunciation}')">{wordText}</div>
-                    <div class="pronunciation">{pronunciation}</div>
-                    <div class="meaning">{meaning}</div>
+                    <div class="word-text" onclick="playWord('${wordText}', '${pronunciation}')">${wordText}</div>
+                    <div class="pronunciation">${pronunciation}</div>
+                    <div class="meaning">${meaning}</div>
                     <div class="button-group">
-                        <button class="btn btn-record" onclick="startRecording('{wordText}', this)">
+                        <button class="btn btn-record" onclick="startRecording('${wordText}', this)">
                             🎤 녹음하기
                         </button>
-                        <button class="btn btn-play" onclick="playWord('{wordText}', '{pronunciation}')">
+                        <button class="btn btn-play" onclick="playWord('${wordText}', '${pronunciation}')">
                             🔊 발음듣기
                         </button>
                     </div>
-                    <div class="result" data-word="{wordText}"></div>
-                    <div class="status" data-word="{wordText}"></div>
+                    <div class="result" data-word="${wordText}"></div>
+                    <div class="status" data-word="${wordText}"></div>
                 `;
 
                 container.appendChild(card);

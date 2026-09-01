@@ -167,14 +167,37 @@ async def _evaluate_with_claude(writing_data: dict) -> dict:
         # JSON 추출
         start = response_text.find('{')
         end = response_text.rfind('}') + 1
-        json_str = response_text[start:end]
 
+        if start == -1 or end <= 0:
+            log.error("Claude 응답에서 유효한 JSON을 찾을 수 없음")
+            return {
+                "content_score": 0,
+                "accuracy_score": 0,
+                "corrections": [],
+                "feedback": "평가 데이터를 파싱할 수 없습니다",
+                "text": text,
+                "evaluated_at": datetime.now(KST).isoformat(),
+                "status": "parse_error"
+            }
+
+        json_str = response_text[start:end]
         evaluation = json.loads(json_str)
         evaluation["text"] = text  # 원문 저장
         evaluation["evaluated_at"] = datetime.now(KST).isoformat()
 
         return evaluation
 
+    except json.JSONDecodeError as e:
+        log.error(f"JSON 파싱 실패: {e}")
+        return {
+            "content_score": 0,
+            "accuracy_score": 0,
+            "corrections": [],
+            "feedback": f"JSON 파싱 오류: {e}",
+            "text": text,
+            "evaluated_at": datetime.now(KST).isoformat(),
+            "status": "parse_error"
+        }
     except Exception as e:
         log.error(f"Claude API 호출 실패: {e}")
         return {

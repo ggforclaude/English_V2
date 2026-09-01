@@ -387,8 +387,16 @@ JSON 형식으로 다음과 같이 반환:
         response_text = next((block.text for block in message.content if hasattr(block, 'text')), "")
         start = response_text.find('{')
         end = response_text.rfind('}') + 1
+
+        if start == -1 or end <= 0:
+            log.error("No valid JSON found in vocabulary response")
+            return {"words": []}
+
         json_str = response_text[start:end]
         return json.loads(json_str)
+    except json.JSONDecodeError as e:
+        log.error(f"Failed to parse vocabulary JSON: {e}")
+        return {"words": []}
     except Exception as e:
         log.error(f"Failed to generate vocabulary: {e}")
         return {"words": []}
@@ -480,8 +488,16 @@ JSON 형식:
         response_text = next((block.text for block in message.content if hasattr(block, 'text')), "")
         start = response_text.find('{')
         end = response_text.rfind('}') + 1
+
+        if start == -1 or end <= 0:
+            log.error("No valid JSON found in expressions response")
+            return {"expressions": []}
+
         json_str = response_text[start:end]
         return json.loads(json_str)
+    except json.JSONDecodeError as e:
+        log.error(f"Failed to parse expressions JSON: {e}")
+        return {"expressions": []}
     except Exception as e:
         log.error(f"Failed to extract expressions: {e}")
         return {"expressions": []}
@@ -522,9 +538,17 @@ JSON 형식:
         response_text = next((block.text for block in message.content if hasattr(block, 'text')), "")
         start = response_text.find('{')
         end = response_text.rfind('}') + 1
+
+        if start == -1 or end <= 0:
+            log.error("No valid JSON found in words response")
+            return {"words": []}
+
         json_str = response_text[start:end]
         words_list = json.loads(json_str).get("words", [])
         log.info(f"Generated {len(words_list)} words from Claude")
+    except json.JSONDecodeError as e:
+        log.error(f"Failed to parse words JSON: {e}")
+        return {"words": []}
     except Exception as e:
         log.error(f"Failed to generate words list: {e}")
         return {"words": []}
