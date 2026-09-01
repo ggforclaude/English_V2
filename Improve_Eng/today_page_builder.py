@@ -251,7 +251,7 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
 
         <div class="sections">
             <!-- 1. 단어 -->
-            <a href="/today/words" class="section-card">
+            <a href="today/words" class="section-card">
                 <div>
                     <div class="section-header">
                         <span class="section-emoji">📝</span>
@@ -267,7 +267,7 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
             </a>
 
             <!-- 2. 어휘 -->
-            <a href="/today/vocab" class="section-card">
+            <a href="today/vocab" class="section-card">
                 <div>
                     <div class="section-header">
                         <span class="section-emoji">✨</span>
@@ -283,7 +283,7 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
             </a>
 
             <!-- 3. 문법 -->
-            <a href="/today/grammar" class="section-card">
+            <a href="today/grammar" class="section-card">
                 <div>
                     <div class="section-header">
                         <span class="section-emoji">✏️</span>
@@ -299,7 +299,7 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
             </a>
 
             <!-- 4. 듣기 -->
-            <a href="/today/listening" class="section-card">
+            <a href="today/listening" class="section-card">
                 <div>
                     <div class="section-header">
                         <span class="section-emoji">🎧</span>
@@ -315,7 +315,7 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
             </a>
 
             <!-- 5. 읽기 -->
-            <a href="/today/reading" class="section-card">
+            <a href="today/reading" class="section-card">
                 <div>
                     <div class="section-header">
                         <span class="section-emoji">📖</span>
@@ -331,7 +331,7 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
             </a>
 
             <!-- 6. 작문 -->
-            <a href="/today/writing" class="section-card">
+            <a href="today/writing" class="section-card">
                 <div>
                     <div class="section-header">
                         <span class="section-emoji">✍️</span>
@@ -347,7 +347,7 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
             </a>
 
             <!-- 7. 발음 -->
-            <a href="/today/pronunciation" class="section-card">
+            <a href="today/pronunciation" class="section-card">
                 <div>
                     <div class="section-header">
                         <span class="section-emoji">🎤</span>
@@ -363,7 +363,7 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
             </a>
 
             <!-- 8. 통계 -->
-            <a href="/today/stats" class="section-card">
+            <a href="today/stats" class="section-card">
                 <div>
                     <div class="section-header">
                         <span class="section-emoji">📊</span>
@@ -385,8 +385,8 @@ def _render_today_page(today, day_number, anki_stats, voa_content, grammar_conte
                 각 섹션을 클릭하여 오늘의 학습을 시작하세요. 매일 새로운 콘텐츠가 생성됩니다.
             </p>
             <div class="extra-links">
-                <a href="/today/writing-feedback">📝 어제 작문 피드백</a>
-                <a href="/today/correction">✅ 오답 분석</a>
+                <a href="today/writing-feedback">📝 어제 작문 피드백</a>
+                <a href="today/correction">✅ 오답 분석</a>
             </div>
         </footer>
     </div>

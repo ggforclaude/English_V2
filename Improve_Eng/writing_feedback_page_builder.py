@@ -353,7 +353,7 @@ def _save_feedback_html(today: date) -> str:
             <div class="no-writing">
                 <h2>📋 아직 평가할 작문이 없습니다</h2>
                 <p>어제 작문이 없거나 아직 평가되지 않았습니다.</p>
-                <p>✍️ <a href="/today/writing" style="color: #667eea; font-weight: bold; text-decoration: none;">오늘의 작문</a>을 작성하고 저장해보세요!</p>
+                <p>✍️ <a href="today/writing" style="color: #667eea; font-weight: bold; text-decoration: none;">오늘의 작문</a>을 작성하고 저장해보세요!</p>
             </div>
         """
     else:
@@ -426,8 +426,8 @@ def _save_feedback_html(today: date) -> str:
         </div>
 
         <div class="navigation">
-            <a href="/today/writing" class="nav-button">← 오늘 작문하기</a>
-            <a href="/today" class="nav-button">홈 →</a>
+            <a href="today/writing" class="nav-button">← 오늘 작문하기</a>
+            <a href="today" class="nav-button">홈 →</a>
         </div>
     </div>
 </body>

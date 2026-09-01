@@ -496,8 +496,8 @@ def _save_words_html(
             </div>
 
             <div class="navigation">
-                <a href="/today" class="nav-button">← 대시보드</a>
-                <a href="/today/vocab" class="nav-button">어휘 →</a>
+                <a href="today" class="nav-button">← 대시보드</a>
+                <a href="today/vocab" class="nav-button">어휘 →</a>
             </div>
         </div>
     </div>

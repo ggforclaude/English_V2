@@ -268,8 +268,8 @@ def _save_correction_html(today: date) -> str:
             </div>
 
             <div class="navigation">
-                <a href="/today/writing" class="nav-button">← 다시 작문하기</a>
-                <a href="/today" class="nav-button">대시보드</a>
+                <a href="today/writing" class="nav-button">← 다시 작문하기</a>
+                <a href="today" class="nav-button">대시보드</a>
             </div>
         </div>
     </div>
@@ -286,7 +286,7 @@ def _save_correction_html(today: date) -> str:
                     contentArea.innerHTML = `
                         <div class="empty-state">
                             <h3>작문 데이터를 찾을 수 없습니다</h3>
-                            <p>먼저 <a href="/today/writing">작문 페이지</a>에서 작문을 입력해주세요.</p>
+                            <p>먼저 <a href="today/writing">작문 페이지</a>에서 작문을 입력해주세요.</p>
                         </div>
                     `;
                     return;

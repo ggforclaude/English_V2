@@ -572,8 +572,8 @@ def _save_reading_html(today: date, reading_article: dict) -> str:
         </div>
 
         <div class="navigation">
-            <a href="/today/listening" class="nav-button">← 듣기로</a>
-            <a href="/today" class="nav-button">홈 →</a>
+            <a href="today/listening" class="nav-button">← 듣기로</a>
+            <a href="today" class="nav-button">홈 →</a>
         </div>
     </div>
 

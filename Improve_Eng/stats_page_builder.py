@@ -521,7 +521,7 @@ def _save_stats_html(today: date) -> str:
         </div>
 
         <div class="navigation">
-            <a href="/today" class="nav-button">← 홈으로</a>
+            <a href="today" class="nav-button">← 홈으로</a>
         </div>
     </div>
 

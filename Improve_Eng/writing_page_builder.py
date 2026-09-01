@@ -512,8 +512,8 @@ def _save_writing_html(
         </div>
 
         <div class="navigation">
-            <a href="/today/reading" class="nav-button">← 읽기로</a>
-            <a href="/today" class="nav-button">홈 →</a>
+            <a href="today/reading" class="nav-button">← 읽기로</a>
+            <a href="today" class="nav-button">홈 →</a>
         </div>
     </div>
 

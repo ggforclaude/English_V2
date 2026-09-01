@@ -524,8 +524,8 @@ def _save_grammar_html(today: date, grammar_topic: dict) -> str:
         </div>
 
         <div class="navigation">
-            <a href="/today/words" class="nav-button">← 단어로</a>
-            <a href="/today" class="nav-button">홈 →</a>
+            <a href="today/words" class="nav-button">← 단어로</a>
+            <a href="today" class="nav-button">홈 →</a>
         </div>
     </div>
 

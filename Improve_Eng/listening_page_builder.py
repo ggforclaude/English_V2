@@ -468,8 +468,8 @@ def _save_listening_html(today: date, listening_content: dict) -> str:
         </div>
 
         <div class="navigation">
-            <a href="/today/vocab" class="nav-button">← 표현으로</a>
-            <a href="/today" class="nav-button">홈 →</a>
+            <a href="today/vocab" class="nav-button">← 표현으로</a>
+            <a href="today" class="nav-button">홈 →</a>
         </div>
     </div>
 

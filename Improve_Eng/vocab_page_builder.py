@@ -312,8 +312,8 @@ def _save_vocab_html(
             </div>
 
             <div class="navigation">
-                <a href="/today/words" class="nav-button">← 단어로</a>
-                <a href="/today/grammar" class="nav-button">문법 →</a>
+                <a href="today/words" class="nav-button">← 단어로</a>
+                <a href="today/grammar" class="nav-button">문법 →</a>
             </div>
         </div>
     </div>
