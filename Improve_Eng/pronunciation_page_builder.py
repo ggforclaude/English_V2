@@ -397,7 +397,7 @@ def _save_pronunciation_html(today: date, daily_words: dict) -> str:
     </div>
 
     <script>
-        const wordsData = {0};
+        const wordsData = {words_json};
         let recordingStats = {{}};
         let currentTab = 'words';
 
