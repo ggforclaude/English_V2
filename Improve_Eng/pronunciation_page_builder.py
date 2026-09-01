@@ -459,7 +459,12 @@ def _save_pronunciation_html(today: date, daily_words: dict) -> str:
                         🎤 녹음하기
                     </button>
                     <button class="btn btn-play" onclick="playText('${{text}}')">
-                        🔊 재생
+                        🔊 표준발음
+                    </button>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-play" id="playback_${{id}}" onclick="playRecording('${{id}}')" style="display:none;">
+                        🎙️ 내 발음 듣기
                     </button>
                 </div>
                 <div class="status" data-id="${{id}}"></div>
@@ -482,15 +487,14 @@ def _save_pronunciation_html(today: date, daily_words: dict) -> str:
             synth.speak(utterance);
         }}
 
+        let mediaRecorder;
+        let audioChunks = {{}};
+
         function startRecording(id, button, text) {{
             if (!SpeechRecognition) {{
                 alert('Chrome, Edge, Safari를 사용해주세요.');
                 return;
             }}
-
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'en-US';
-            recognition.continuous = false;
 
             button.textContent = '🎙️ 녹음 중...';
             button.classList.add('recording');
@@ -499,35 +503,84 @@ def _save_pronunciation_html(today: date, daily_words: dict) -> str:
             const statusEl = document.querySelector(`[data-id="${{id}}"].status`);
             statusEl.textContent = '듣고 있습니다...';
 
-            recognition.onresult = (event) => {{
-                let recognized = '';
-                for (let i = event.resultIndex; i < event.results.length; i++) {{
-                    recognized += event.results[i][0].transcript;
-                }}
+            // MediaRecorder로 실제 음성 녹음
+            navigator.mediaDevices.getUserMedia({{ audio: true }})
+                .then(stream => {{
+                    audioChunks[id] = [];
+                    mediaRecorder = new MediaRecorder(stream);
 
-                const score = calculateSimilarity(text.toLowerCase(), recognized.toLowerCase());
-                recordingStats[id].recorded = true;
-                recordingStats[id].score = score;
+                    mediaRecorder.ondataavailable = (event) => {{
+                        audioChunks[id].push(event.data);
+                    }};
 
-                const resultEl = document.querySelector(`[data-id="${{id}}"].result`);
-                resultEl.classList.add('active');
-                resultEl.innerHTML = `✅ 인식: "${{recognized}}" | 정확도: ${{score}}%`;
-                statusEl.textContent = score >= 80 ? '🎉 좋습니다!' : '다시 시도해보세요';
+                    mediaRecorder.onstop = () => {{
+                        stream.getTracks().forEach(track => track.stop());
+                    }};
 
-                updateStats();
-            }};
+                    mediaRecorder.start();
 
-            recognition.onerror = () => {{
-                statusEl.textContent = '❌ 인식 실패. 다시 시도하세요.';
-            }};
+                    // SpeechRecognition으로 음성 인식
+                    const recognition = new SpeechRecognition();
+                    recognition.lang = 'en-US';
+                    recognition.continuous = false;
 
-            recognition.onend = () => {{
-                button.textContent = '🎤 녹음하기';
-                button.classList.remove('recording');
-                button.disabled = false;
-            }};
+                    recognition.onresult = (event) => {{
+                        let recognized = '';
+                        for (let i = event.resultIndex; i < event.results.length; i++) {{
+                            recognized += event.results[i][0].transcript;
+                        }}
 
-            recognition.start();
+                        const score = calculateSimilarity(text.toLowerCase(), recognized.toLowerCase());
+                        recordingStats[id].recorded = true;
+                        recordingStats[id].score = score;
+
+                        const resultEl = document.querySelector(`[data-id="${{id}}"].result`);
+                        resultEl.classList.add('active');
+                        resultEl.innerHTML = `✅ 인식: "${{recognized}}" | 정확도: ${{score}}%`;
+                        statusEl.textContent = score >= 80 ? '🎉 좋습니다!' : '다시 시도해보세요';
+
+                        mediaRecorder.stop();
+
+                        // "내 발음 듣기" 버튼 표시
+                        const playbackBtn = document.getElementById(`playback_${{id}}`);
+                        if (playbackBtn) {{
+                            playbackBtn.style.display = 'block';
+                        }}
+
+                        updateStats();
+                    }};
+
+                    recognition.onerror = () => {{
+                        statusEl.textContent = '❌ 인식 실패. 다시 시도하세요.';
+                        mediaRecorder.stop();
+                    }};
+
+                    recognition.onend = () => {{
+                        button.textContent = '🎤 녹음하기';
+                        button.classList.remove('recording');
+                        button.disabled = false;
+                    }};
+
+                    recognition.start();
+                }})
+                .catch(error => {{
+                    statusEl.textContent = '❌ 마이크 접근 권한 필요';
+                    button.textContent = '🎤 녹음하기';
+                    button.classList.remove('recording');
+                    button.disabled = false;
+                }});
+        }}
+
+        function playRecording(id) {{
+            if (!audioChunks[id] || audioChunks[id].length === 0) {{
+                alert('녹음된 음성이 없습니다.');
+                return;
+            }}
+
+            const audioBlob = new Blob(audioChunks[id], {{ type: 'audio/wav' }});
+            const audioUrl = URL.createObjectURL(audioBlob);
+            const audio = new Audio(audioUrl);
+            audio.play();
         }}
 
         function calculateSimilarity(target, recognized) {{
