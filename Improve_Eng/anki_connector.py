@@ -43,9 +43,9 @@ class AnkiConnector:
             if self.is_available:
                 log.info(f"[Anki] AnkiConnect connected at {self.anki_url}")
             else:
-                log.warning("[Anki] AnkiConnect available but version check failed")
+                log.debug("[Anki] AnkiConnect available but version check failed")
         except Exception as e:
-            log.warning(f"[Anki] AnkiConnect not available: {e}")
+            log.debug(f"[Anki] AnkiConnect not available: {e}")
             self.is_available = False
 
     async def get_today_cards(self) -> dict:

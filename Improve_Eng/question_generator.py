@@ -265,7 +265,7 @@ Return ONLY valid JSON (no markdown):
             max_tokens=2500,
             messages=[{"role": "user", "content": prompt}],
         )
-        raw = resp.content[0].text.strip()
+        raw = next((block.text for block in resp.content if hasattr(block, 'text')), "").strip()
 
         # 마크다운 코드 블록 제거
         raw = re.sub(r'```json\n?', '', raw)
