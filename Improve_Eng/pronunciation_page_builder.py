@@ -343,8 +343,8 @@ def _save_pronunciation_html(today: date, daily_words: dict) -> str:
     </div>
 
     <script>
-        const wordsData = %s;
-        let recordingStats = {};
+        const wordsData = {0};
+        let recordingStats = {{}};
 
         // Web Speech API 설정
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -494,5 +494,5 @@ def _save_pronunciation_html(today: date, daily_words: dict) -> str:
 </html>
 """
 
-    out.write_text(html % (words_json,), encoding="utf-8")
+    out.write_text(html.format(words_json), encoding="utf-8")
     return str(out)
