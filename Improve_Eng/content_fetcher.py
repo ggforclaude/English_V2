@@ -288,7 +288,7 @@ def _fetch_from_source(source: dict) -> dict:
         }
 
     except Exception as e:
-        log.warning(f"[{source['name']}] 수집 실패: {e} → Claude가 자체 생성")
+        log.info(f"[{source['name']}] RSS 피드 부재: {e} → Claude 대체 콘텐츠 생성으로 진행")
         return {"source": source["name"], "title": "Daily Practice", "url": "", "audio_url": "", "text": ""}
 
 
@@ -432,51 +432,77 @@ async def fetch_vocabulary_from_text(text: str, current_level: str = "B1") -> di
     """읽기 텍스트에서 핵심 구문/표현을 추출하고 유사 표현과 비교."""
     import anthropic
     import json
+    import re
 
     client = anthropic.Anthropic()
 
-    prompt = f"""
-당신은 영어 표현 전문가입니다. 다음 텍스트에서 {current_level} 수준의 학습자가 배워야 할 핵심 구문/표현 3-5개를 선택하고, 각각에 대해 유사하지만 뜻이 다른 표현들과 비교해주세요.
+    prompt = f"""당신은 영어 표현 전문가입니다. 다음 텍스트에서 {current_level} 수준의 학습자가 배워야 할 핵심 구문/표현 3개를 선택해주세요.
 
 텍스트:
 {text[:500]}
 
-요구사항:
-1. 실제 사용되는 구문/표현 (예: "made of", "take care of" 등)
-2. 각 표현마다:
-   - 주요 표현
-   - 한글 뜻
-   - 영어 설명
-   - 예문 (영어 + 한글)
-   - 유사 표현 2-3개와 각각의:
-     * 유사 표현
-     * 한글 뜻
-     * 영어 설명
-     * 주요 표현과의 차이점
-     * 예문
+다음 JSON 형식으로만 반환하세요. 마크다운이나 설명 없이 순수 JSON만:
 
-JSON 형식:
-{{
-  "expressions": [
-    {{
-      "main": "주요 표현",
-      "meaning_ko": "한글 뜻",
-      "meaning_en": "영어 설명",
-      "example_en": "예문 (영어)",
-      "example_ko": "예문 (한글)",
-      "similar": [
-        {{
-          "expression": "유사 표현",
-          "meaning_ko": "한글 뜻",
-          "meaning_en": "영어 설명",
-          "difference": "주요 표현과의 차이",
-          "example_en": "예문"
-        }}
-      ]
-    }}
-  ]
-}}
-"""
+{{"expressions": [{{"main": "표현", "meaning_ko": "뜻", "meaning_en": "영어설명", "example_en": "예문", "example_ko": "한글번역", "similar": [{{"expression": "유사표현", "meaning_ko": "뜻", "difference": "차이"}}]}}]}}"""
+
+    try:
+        message = client.messages.create(
+            model="claude-opus-5",
+            max_tokens=1500,
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        response_text = next((block.text for block in message.content if hasattr(block, 'text')), "")
+
+        # 마크다운 코드 블록 제거
+        response_text = re.sub(r'```json\n?', '', response_text)
+        response_text = re.sub(r'```\n?', '', response_text)
+
+        start = response_text.find('{')
+        end = response_text.rfind('}') + 1
+
+        if start == -1 or end <= 0:
+            log.error("No valid JSON found in expressions response")
+            return {"expressions": []}
+
+        json_str = response_text[start:end]
+        result = json.loads(json_str)
+        log.info(f"Extracted {len(result.get('expressions', []))} expressions")
+        return result
+    except json.JSONDecodeError as e:
+        log.error(f"Failed to parse expressions JSON: {e}")
+        return {"expressions": []}
+    except Exception as e:
+        log.error(f"Failed to extract expressions: {e}")
+        return {"expressions": []}
+
+
+async def fetch_daily_words(current_level: str = "B1") -> dict:
+    """Claude API로 10개 단어 + 발음 + 정의 + 예문 한 번에 생성."""
+    import anthropic
+    import json
+
+    client = anthropic.Anthropic()
+    today = date.today().isoformat()
+
+    prompt = f"""당신은 영어 교육 전문가입니다. 오늘({today})에 학습할 {current_level} 레벨의 실용적인 영어 단어 10개를 생성해주세요.
+
+각 단어는 다음 정보를 포함해야 합니다:
+- word: 영어 단어
+- pronunciation: IPA 발음기호 (예: /ˈpɜːfɪkt/)
+- pos: 품사 (noun, verb, adjective, adverb 등)
+- meaning_en: 영어 정의 (한 문장)
+- meaning_ko: 한국어 뜻
+- example_en: 영어 예문
+
+요구사항:
+1. 일상에서 자주 사용되는 단어
+2. 다양한 품사 포함
+3. 초보자도 이해할 수 있는 정의와 예문
+
+다음 JSON 형식으로만 반환하세요. 설명이나 마크다운 없이 순수 JSON만:
+
+{{"words": [{{"word": "example", "pronunciation": "/ɪɡˈzæmpəl/", "pos": "noun", "meaning_en": "a thing characteristic of its kind or illustrating a general rule", "meaning_ko": "예시, 본보기", "example_en": "Can you give me an example?"}}]}}"""
 
     try:
         message = client.messages.create(
@@ -490,120 +516,19 @@ JSON 형식:
         end = response_text.rfind('}') + 1
 
         if start == -1 or end <= 0:
-            log.error("No valid JSON found in expressions response")
-            return {"expressions": []}
-
-        json_str = response_text[start:end]
-        return json.loads(json_str)
-    except json.JSONDecodeError as e:
-        log.error(f"Failed to parse expressions JSON: {e}")
-        return {"expressions": []}
-    except Exception as e:
-        log.error(f"Failed to extract expressions: {e}")
-        return {"expressions": []}
-
-
-async def fetch_daily_words(current_level: str = "B1") -> dict:
-    """매일 외울 10개 단어를 Claude API + Free Dictionary API에서 가져오기."""
-    import anthropic
-    import httpx
-    import json
-
-    client = anthropic.Anthropic()
-    today = date.today().isoformat()
-
-    # 1. Claude로 10개 단어 리스트 생성
-    prompt = f"""
-당신은 영어 교육 전문가입니다. 오늘({today})에 학습할 {current_level} 레벨의 실용적인 영어 단어 10개를 생성해주세요.
-
-요구사항:
-1. 일상에서 자주 사용되는 단어
-2. 다양한 품사 포함 (명사, 동사, 형용사 등)
-3. 단어만 리스트로 반환
-
-JSON 형식:
-{{
-  "words": ["word1", "word2", "word3", ..., "word10"]
-}}
-"""
-
-    words_list = []
-    try:
-        message = client.messages.create(
-            model="claude-opus-5",
-            max_tokens=300,
-            messages=[{"role": "user", "content": prompt}]
-        )
-
-        response_text = next((block.text for block in message.content if hasattr(block, 'text')), "")
-        start = response_text.find('{')
-        end = response_text.rfind('}') + 1
-
-        if start == -1 or end <= 0:
             log.error("No valid JSON found in words response")
             return {"words": []}
 
         json_str = response_text[start:end]
-        words_list = json.loads(json_str).get("words", [])
-        log.info(f"Generated {len(words_list)} words from Claude")
+        data = json.loads(json_str)
+        words_data = data.get("words", [])
+
+        log.info(f"Generated {len(words_data)} words from Claude with full details")
+        return {"words": words_data}
+
     except json.JSONDecodeError as e:
         log.error(f"Failed to parse words JSON: {e}")
         return {"words": []}
     except Exception as e:
-        log.error(f"Failed to generate words list: {e}")
+        log.error(f"Failed to generate words: {e}")
         return {"words": []}
-
-    # 2. Free Dictionary API에서 각 단어의 정의/발음/예문 조회
-    words_data = []
-    async with httpx.AsyncClient(timeout=10) as http_client:
-        for word in words_list[:10]:
-            try:
-                response = await http_client.get(
-                    f"https://api.dictionaryapi.dev/api/v1/entries/en/{word.lower()}",
-                )
-                if response.status_code == 200:
-                    data = response.json()[0]
-
-                    # 발음
-                    phonetic = data.get("phonetic", "")
-
-                    # 정의 및 예문
-                    meanings = data.get("meanings", [])
-                    definition = ""
-                    example = ""
-                    pos = ""
-                    if meanings:
-                        pos = meanings[0].get("partOfSpeech", "")
-                        defs = meanings[0].get("definitions", [])
-                        if defs:
-                            definition = defs[0].get("definition", "")
-                            example = defs[0].get("example", "")
-
-                    words_data.append({
-                        "word": word,
-                        "pronunciation": phonetic,
-                        "pos": pos,
-                        "meaning_en": definition,
-                        "example_en": example,
-                    })
-                    log.info(f"Fetched {word} from Free Dictionary API")
-                else:
-                    log.warning(f"Free Dictionary API failed for {word} (status {response.status_code})")
-                    words_data.append({
-                        "word": word,
-                        "pronunciation": "",
-                        "pos": "",
-                        "meaning_en": "",
-                        "example_en": "",
-                    })
-            except Exception as e:
-                log.warning(f"Failed to fetch {word}: {e}")
-                words_data.append({
-                    "word": word,
-                    "pronunciation": "",
-                    "pos": "",
-                    "meaning_en": "",
-                    "example_en": "",
-                })
-
-    return {"words": words_data}

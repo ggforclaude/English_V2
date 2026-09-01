@@ -259,15 +259,26 @@ Return ONLY valid JSON (no markdown):
 }}"""
 
     try:
+        import re
         resp = _client.messages.create(
             model="claude-sonnet-4-6",
-            max_tokens=2000,
+            max_tokens=2500,
             messages=[{"role": "user", "content": prompt}],
         )
-        raw   = resp.content[0].text.strip()
+        raw = resp.content[0].text.strip()
+
+        # 마크다운 코드 블록 제거
+        raw = re.sub(r'```json\n?', '', raw)
+        raw = re.sub(r'```\n?', '', raw)
+
         start = raw.find("{")
         end   = raw.rfind("}") + 1
-        data  = json.loads(raw[start:end])
+
+        if start == -1 or end <= 0:
+            raise ValueError("No JSON found in response")
+
+        json_str = raw[start:end]
+        data = json.loads(json_str)
         data["listening"] = {
             "title":     listen_title,
             "source":    listen_source,
@@ -277,6 +288,7 @@ Return ONLY valid JSON (no markdown):
             "script_kr": listening_script.get("script_kr", ""),
             "key_vocab": listening_script.get("key_vocab", ""),
         }
+        log.info(f"Generated daily learning content successfully")
         return data
     except Exception as e:
         log.warning(f"daily_learning 생성 실패: {e}")
