@@ -430,6 +430,65 @@ def _save_feedback_html(today: date) -> str:
             <a href="today" class="nav-button">홈 →</a>
         </div>
     </div>
+
+    <script>
+        // localStorage에서 어제 작문 찾기
+        function loadYesterdayWriting() {{
+            try {{
+                const allDrafts = localStorage.getItem('allDrafts');
+                if (!allDrafts) return null;
+
+                const draftsList = JSON.parse(allDrafts);
+                const today = new Date();
+                const kstOffset = 9 * 60 * 60 * 1000;
+
+                // 어제 날짜 (KST 기준)
+                const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000 + kstOffset);
+                const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+                return draftsList.find(d => d.date === yesterdayStr);
+            }} catch (e) {{
+                console.error('localStorage 읽기 실패:', e);
+                return null;
+            }}
+        }}
+
+        // 페이지 로드 시 localStorage 작문 확인
+        window.addEventListener('DOMContentLoaded', () => {{
+            const noWritingDiv = document.querySelector('.no-writing');
+
+            if (noWritingDiv) {{
+                const userWriting = loadYesterdayWriting();
+
+                if (userWriting && userWriting.text) {{
+                    // localStorage에 어제 작문이 있으면 표시
+                    noWritingDiv.innerHTML = `
+                        <h2>✍️ 로컬에 저장된 작문</h2>
+                        <p style="color: #999; font-size: 0.9em;">평가는 아직 진행 중입니다. 내일 아침 04:00 KST 이후에 평가 결과를 확인할 수 있습니다.</p>
+
+                        <div style="background: #f8f9fa; border: 2px solid #667eea; border-radius: 8px; padding: 20px; margin-top: 20px; text-align: left;">
+                            <div style="font-size: 0.85em; color: #999; margin-bottom: 10px;">📄 저장된 작문:</div>
+                            <div style="background: white; padding: 15px; border-radius: 4px; line-height: 1.8; color: #333;">
+                                ${{userWriting.text}}
+                            </div>
+                            <div style="font-size: 0.85em; color: #999; margin-top: 12px;">
+                                💾 저장 시간: ${{new Date(userWriting.savedAt).toLocaleString('ko-KR')}}
+                            </div>
+                        </div>
+
+                        <div style="background: #e7f0ff; border-left: 4px solid #667eea; padding: 15px; border-radius: 4px; margin-top: 20px;">
+                            <div style="font-weight: bold; color: #667eea; margin-bottom: 8px;">💡 안내</div>
+                            <div style="color: #333; font-size: 0.9em; line-height: 1.6;">
+                                ✓ 작문이 로컬 저장소에 저장되었습니다<br>
+                                ✓ 매일 아침 04:00 KST에 자동으로 평가됩니다<br>
+                                ✓ 평가 결과는 다음날 이 페이지에 표시됩니다
+                            </div>
+                        </div>
+                    `;
+                }}
+            }}
+        }});
+    </script>
 </body>
 </html>
 """

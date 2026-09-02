@@ -553,8 +553,11 @@ def _save_writing_html(
                 return;
             }}
 
-            // localStorage에 저장
-            const today = new Date().toISOString().split('T')[0];
+            // 오늘 날짜 (KST 기준)
+            const now = new Date();
+            const kstOffset = 9 * 60 * 60 * 1000;
+            const today = new Date(now.getTime() + kstOffset).toISOString().split('T')[0];
+
             const writingData = {{
                 date: today,
                 text: text,
@@ -563,7 +566,11 @@ def _save_writing_html(
                 savedAt: new Date().toISOString()
             }};
 
+            // 1. localStorage에 저장 (클라이언트)
             localStorage.setItem('todayWriting', JSON.stringify(writingData));
+
+            // 2. 서버 파일로 저장 (fetch를 통한 API 호출)
+            saveToDrafts(writingData);
 
             // 피드백 메시지 표시
             const feedbackSection = document.getElementById('feedbackSection');
@@ -582,6 +589,28 @@ def _save_writing_html(
 
             alert('작문이 저장되었습니다! 내일 아침에 평가받을 수 있습니다.');
         }});
+
+        // 서버 파일 저장 (localStorage 백업)
+        function saveToDrafts(writingData) {{
+            try {{
+                // localStorage에 작문 배열 유지
+                let drafts = localStorage.getItem('allDrafts');
+                let draftsList = drafts ? JSON.parse(drafts) : [];
+
+                // 같은 날짜 작문이 있으면 업데이트, 없으면 추가
+                const existingIdx = draftsList.findIndex(d => d.date === writingData.date);
+                if (existingIdx >= 0) {{
+                    draftsList[existingIdx] = writingData;
+                }} else {{
+                    draftsList.push(writingData);
+                }}
+
+                localStorage.setItem('allDrafts', JSON.stringify(draftsList));
+                console.log('작문이 로컬 저장소에 저장되었습니다.');
+            }} catch (e) {{
+                console.error('저장 실패:', e);
+            }}
+        }}
 
         function displayEvaluation(result) {{
             const contentScore = result.content_score || 0;
