@@ -72,7 +72,7 @@ async def main() -> None:
     try:
         # 1. 듣기 콘텐츠 수집 (초급 + 뉴스)
         log.info("[1] 듣기 콘텐츠 수집...")
-        listening_content = await fetch_daily_listening_content()
+        listening_content = await fetch_daily_listening_content(day_number=day_number)
         log.info(f"  ✓ 초급: {listening_content['beginner'].get('title', '')[:40]}...")
         log.info(f"  ✓ 뉴스: {listening_content['news'].get('title', '')[:40]}...")
 
