@@ -343,34 +343,53 @@ def _scrape_article(url: str) -> str:
 
 # ── 매일 새로운 콘텐츠 생성 (Claude API) ───────────────────────────────────────
 
-async def fetch_daily_vocabulary(current_level: str = "B1") -> dict:
-    """Claude API로 매일 새로운 어휘 5개 생성."""
+async def fetch_daily_vocabulary(current_level: str = "B1", day_number: int = 1) -> dict:
+    """Claude API로 매일 새로운 어휘 5개 생성. day_number로 다양한 구문/표현 제공."""
     import anthropic
 
     client = anthropic.Anthropic()
     today = date.today().isoformat()
 
+    # day_number에 따라 다양한 구문 쌍/표현 그룹 제시
+    vocabulary_themes = [
+        ("동사 쌍 비교", "Comparing similar verbs", "make vs do, say vs tell, bring vs take 같이 헷갈리는 동사 쌍"),
+        ("전치사 구분", "Preposition distinctions", "in/on/at, in/during, during/for 같이 혼동하기 쉬운 전치사"),
+        ("형용사 vs 부사", "Adjective vs Adverb", "good/well, quick/quickly 같이 구분이 필요한 단어"),
+        ("숙어/관용구", "Idioms and phrases", "make a decision, take a chance 같은 자주 쓰는 관용구"),
+        ("비슷한 명사", "Similar nouns", "journey/trip/voyage, job/work/position 같은 유사 단어"),
+        ("동의어 vs 미세 차이", "Synonyms with nuances", "love/like, hate/dislike 같이 강도가 다른 단어"),
+        ("발음 유사 단어", "Homophones/similar sounds", "accept/except, lose/loose 같이 발음이 비슷한 단어"),
+        ("콜로케이션", "Common collocations", "strong coffee, heavy rain 같이 자주 함께 쓰는 표현"),
+    ]
+
+    theme_idx = (day_number - 1) % len(vocabulary_themes)
+    theme_ko, theme_en, description = vocabulary_themes[theme_idx]
+
     prompt = f"""
-당신은 영어 학습 전문가입니다. 오늘({today})에 학습할 새로운 영어 단어 5개를 생성해주세요.
+당신은 영어 학습 전문가입니다. 오늘({today}, Day {day_number})에 학습할 새로운 영어 표현/어휘를 생성해주세요.
+
+주제: {theme_ko} ({theme_en})
+설명: {description}
 
 요구사항:
 1. 현재 레벨: {current_level}
-2. 실생활에서 자주 사용되는 단어
-3. 각 단어마다:
-   - 영단어
-   - 음성기호
-   - 한글 의미
-   - 예문 (영어 + 한글)
+2. {theme_ko} 관련 표현만 (3-5개, 비교 쌍으로 제시)
+3. 각 항목마다:
+   - word (또는 phrase): 영어 표현
+   - meaning_ko: 한글 의미
+   - explanation: 왜 이 표현을 사용하는지 설명 (한글, 2-3문장)
+   - example_en: 예문 (영어)
+   - example_ko: 예문 (한글)
 
-JSON 형식으로 다음과 같이 반환:
+JSON 형식:
 {{
   "words": [
     {{
-      "word": "단어",
-      "pronunciation": "/발음/",
-      "meaning_ko": "한글 의미",
-      "example_en": "예문 (영어)",
-      "example_ko": "예문 (한글)"
+      "word": "make a decision",
+      "meaning_ko": "결정을 내리다",
+      "explanation": "결정을 내릴 때는 'make'를 사용합니다. 'take a decision'도 가능하지만 'make'가 더 자연스럽습니다.",
+      "example_en": "She made a decision to study abroad.",
+      "example_ko": "그녀는 해외 유학을 가기로 결정했다."
     }}
   ]
 }}
@@ -402,20 +421,12 @@ JSON 형식으로 다음과 같이 반환:
         return {"words": []}
 
 
-async def fetch_daily_grammar_topic(current_level: str = "B1") -> dict:
+async def fetch_daily_grammar_topic(current_level: str = "B1", day_number: int = 1) -> dict:
     """커리큘럼 기반 문법 주제 제시 + Claude로 콘텐츠 생성."""
     import anthropic
     import json
     import re
     from grammar_curriculum import get_today_grammar
-    from level_tracker import LevelTracker
-    from datetime import datetime
-    import pytz
-
-    tracker = LevelTracker()
-    kst = pytz.timezone("Asia/Seoul")
-    today = datetime.now(kst).date()
-    day_number = tracker.get_day_number(today)
 
     curriculum = get_today_grammar(day_number)
     if not curriculum:
@@ -577,15 +588,34 @@ async def fetch_vocabulary_from_text(text: str, current_level: str = "B1") -> di
         return {"expressions": []}
 
 
-async def fetch_daily_words(current_level: str = "B1") -> dict:
-    """Claude API로 10개 단어 + 발음 + 정의 + 예문 한 번에 생성."""
+async def fetch_daily_words(current_level: str = "B1", day_number: int = 1) -> dict:
+    """Claude API로 10개 단어 + 발음 + 정의 + 예문 한 번에 생성. day_number로 다양한 주제 제공."""
     import anthropic
     import json
 
     client = anthropic.Anthropic()
     today = date.today().isoformat()
 
-    prompt = f"""당신은 영어 교육 전문가입니다. 오늘({today})에 학습할 {current_level} 레벨의 실용적인 영어 단어 10개를 생성해주세요.
+    # day_number에 따라 다양한 카테고리로 단어 제공
+    categories = [
+        ("일상 생활", "Daily life and common activities"),
+        ("직장/비즈니스", "Work and business contexts"),
+        ("여행/문화", "Travel and cultural experiences"),
+        ("학문/기술", "Academic and technology topics"),
+        ("감정/성격", "Emotions and personality traits"),
+        ("음식/건강", "Food and health topics"),
+        ("취미/스포츠", "Hobbies and sports"),
+        ("사람/관계", "People and relationships"),
+        ("시간/계획", "Time and planning"),
+        ("환경/자연", "Environment and nature"),
+    ]
+
+    category_idx = (day_number - 1) % len(categories)
+    category_ko, category_en = categories[category_idx]
+
+    prompt = f"""당신은 영어 교육 전문가입니다. 오늘({today}, Day {day_number})에 학습할 {current_level} 레벨의 실용적인 영어 단어 10개를 생성해주세요.
+
+주제: {category_ko} ({category_en})
 
 각 단어는 다음 정보를 포함해야 합니다:
 - word: 영어 단어
@@ -596,9 +626,10 @@ async def fetch_daily_words(current_level: str = "B1") -> dict:
 - example_en: 영어 예문
 
 요구사항:
-1. 일상에서 자주 사용되는 단어
+1. {category_ko} 관련 단어만
 2. 다양한 품사 포함
 3. 초보자도 이해할 수 있는 정의와 예문
+4. 이전에 제시된 단어와 겹치지 않는 새로운 단어
 
 다음 JSON 형식으로만 반환하세요. 설명이나 마크다운 없이 순수 JSON만:
 

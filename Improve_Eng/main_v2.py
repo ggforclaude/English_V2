@@ -90,17 +90,17 @@ async def main() -> None:
 
         # 2-2. 새로운 단어 생성 (10개 단어)
         log.info("[2-2] 매일 외울 10개 단어 생성...")
-        daily_words = await fetch_daily_words(current_levels.get("vocab", "B1"))
+        daily_words = await fetch_daily_words(current_levels.get("vocab", "B1"), day_number=day_number)
         log.info(f"  ✓ {len(daily_words.get('words', []))} 단어 생성")
 
         # 2-2-1. 기존 어휘 생성 (5개 - Claude)
         log.info("[2-2-1] 새로운 어휘 생성...")
-        daily_vocabulary = await fetch_daily_vocabulary(current_levels.get("vocab", "B1"))
+        daily_vocabulary = await fetch_daily_vocabulary(current_levels.get("vocab", "B1"), day_number=day_number)
         log.info(f"  ✓ {len(daily_vocabulary.get('words', []))} 어휘 생성")
 
         # 2-3. 다독 콘텐츠 추천
         log.info("[2-3] 다독 콘텐츠 추천...")
-        reading_article = await fetch_daily_reading_article()
+        reading_article = await fetch_daily_reading_article(day_number=day_number)
         log.info(f"  ✓ {reading_article.get('title', 'Article')[:50]}...")
 
         # 2-3-1. 읽기 콘텐츠에서 어휘 추출
