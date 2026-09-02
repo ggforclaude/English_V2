@@ -1,13 +1,15 @@
 """
-작문 교정 페이지 생성
+퀴즈 오답 분석 페이지 생성
 /today/correction 페이지를 빌드합니다.
+오늘 푼 퀴즈 중에서 오답만 분석하여 학습 강화
 """
 import pathlib
+import json
 from datetime import date
 
 
 def build_correction_page(today: date) -> str:
-    """작문 교정 페이지 생성."""
+    """퀴즈 오답 분석 페이지 생성."""
     page_path = _save_correction_html(today=today)
     return page_path
 
@@ -24,7 +26,7 @@ def _save_correction_html(today: date) -> str:
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <base href="/English_V2/">
-    <title>작문 교정 - Improve English</title>
+    <title>오답 분석 - Improve English</title>
     <style>
         * {{
             margin: 0;
@@ -255,8 +257,8 @@ def _save_correction_html(today: date) -> str:
 <body>
     <div class="container">
         <div class="header">
-            <h1>✅ 작문 교정</h1>
-            <p>당신의 작문을 AI가 검토했습니다</p>
+            <h1>🎯 오답 분석</h1>
+            <p>오늘 푼 퀴즈 중 틀린 문제를 분석하고 학습하세요</p>
         </div>
 
         <div class="content">
@@ -275,75 +277,126 @@ def _save_correction_html(today: date) -> str:
     </div>
 
     <script>
-        async function loadCorrection() {{
+        // 오늘의 퀴즈 데이터 저장 (sessionStorage 또는 localStorage에서 가져올 예정)
+        let quizResults = [];
+        let wrongAnswers = [];
+
+        async function loadWrongAnswers() {{
             const contentArea = document.getElementById('content-area');
 
             try {{
-                // localStorage에서 사용자 작문 가져오기
-                const userWriting = localStorage.getItem('userWriting');
+                // sessionStorage에서 오늘 푼 퀴즈 결과 가져오기
+                const todayQuizzes = sessionStorage.getItem('todayQuizResults') || localStorage.getItem('todayQuizResults');
 
-                if (!userWriting) {{
+                if (!todayQuizzes) {{
                     contentArea.innerHTML = `
                         <div class="empty-state">
-                            <h3>작문 데이터를 찾을 수 없습니다</h3>
-                            <p>먼저 <a href="today/writing">작문 페이지</a>에서 작문을 입력해주세요.</p>
+                            <h3>📊 오답이 없습니다!</h3>
+                            <p>오늘 모든 퀴즈를 정확히 풀었습니다. 훌륭합니다! 🎉</p>
+                            <p style="margin-top: 15px; font-size: 0.95em;">
+                                <a href="today" style="color: #667eea; font-weight: bold; text-decoration: none;">대시보드</a>로 돌아가서 다른 학습을 계속하세요.
+                            </p>
                         </div>
                     `;
                     return;
                 }}
 
-                // 여기서는 localStorage에 저장된 작문만 표시
-                // 실제 교정은 서버에서 처리하거나 나중에 추가
-                contentArea.innerHTML = `
-                    <div class="section">
-                        <div class="section-title">📝 당신의 작문</div>
-                        <div class="writing-box">${{escapeHtml(userWriting)}}</div>
-                    </div>
+                quizResults = JSON.parse(todayQuizzes);
 
+                // 오답만 필터링
+                wrongAnswers = quizResults.filter(q => !q.correct);
+
+                if (wrongAnswers.length === 0) {{
+                    contentArea.innerHTML = `
+                        <div class="empty-state">
+                            <h3>📊 완벽합니다!</h3>
+                            <p>오늘 푼 모든 퀴즈가 정답입니다. 👏</p>
+                        </div>
+                    `;
+                    return;
+                }}
+
+                // 오답 분석 페이지 생성
+                let html = `
                     <div class="section">
-                        <div class="section-title">💡 피드백</div>
+                        <div class="section-title">📋 오답 통계</div>
                         <div class="tips">
-                            <div class="tips-title">✨ 다음을 확인해보세요</div>
-                            <ul class="tips-list">
-                                <li>시제가 일관성 있게 사용되었는지 확인</li>
-                                <li>주어-동사가 올바르게 일치하는지 확인</li>
-                                <li>관사(a, the) 사용이 올바른지 확인</li>
-                                <li>전치사 사용이 자연스러운지 확인</li>
-                                <li>문장의 의미가 명확한지 확인</li>
-                            </ul>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                                <div style="background: white; padding: 15px; border-radius: 6px; text-align: center; border-left: 4px solid #2196f3;">
+                                    <div style="font-size: 2em; font-weight: bold; color: #2196f3;">${{wrongAnswers.length}}</div>
+                                    <div style="color: #666; font-size: 0.9em;">틀린 문제</div>
+                                </div>
+                                <div style="background: white; padding: 15px; border-radius: 6px; text-align: center; border-left: 4px solid #4caf50;">
+                                    <div style="font-size: 2em; font-weight: bold; color: #4caf50;">${{quizResults.length - wrongAnswers.length}}</div>
+                                    <div style="color: #666; font-size: 0.9em;">맞힌 문제</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                `;
 
-                    <div class="section">
-                        <div class="section-title">📊 학습 기록</div>
-                        <div class="writing-box">
-                            <strong>제출 시간:</strong> ${new Date(localStorage.getItem('writingDate') || new Date()).toLocaleString('ko-KR')}<br>
-                            <strong>글자 수:</strong> ${userWriting.length}자<br>
-                            <strong>문장 수:</strong> ${userWriting.split('.').filter(s => s.trim()).length}개
+                // 각 오답 분석
+                wrongAnswers.forEach((q, idx) => {{
+                    html += `
+                        <div class="section">
+                            <div class="section-title">#${{idx + 1}} ${{q.domain || '문제'}}</div>
+
+                            <div class="writing-box" style="background: #fff3cd; border-color: #ffc107; margin-bottom: 15px;">
+                                <strong>❓ 문제:</strong><br>
+                                ${{escapeHtml(q.question || '')}}
+                            </div>
+
+                            <div class="comparison">
+                                <div class="comparison-box" style="border-left: 4px solid #dc3545;">
+                                    <div class="comparison-title">❌ 당신의 답</div>
+                                    <div class="comparison-text">
+                                        ${{escapeHtml(q.userAnswer || '(답변 없음)')}}
+                                    </div>
+                                </div>
+
+                                <div class="comparison-box" style="border-left: 4px solid #28a745;">
+                                    <div class="comparison-title">✅ 정답</div>
+                                    <div class="comparison-text">
+                                        ${{escapeHtml(q.correctAnswer || '')}}
+                                    </div>
+                                </div>
+                            </div>
+
+                            ${{q.explanation ? `
+                                <div class="correction-section">
+                                    <div class="correction-title">💡 설명</div>
+                                    <div class="correction-content">
+                                        ${{q.explanation}}
+                                    </div>
+                                </div>
+                            ` : ''}}
                         </div>
-                    </div>
+                    `;
+                }});
 
+                // 학습 전략
+                html += `
                     <div class="section">
-                        <div class="section-title">🎯 다음 단계</div>
+                        <div class="section-title">🎯 학습 전략</div>
                         <div class="tips">
+                            <div class="tips-title">틀린 부분을 극복하기 위한 다음 단계:</div>
                             <ul class="tips-list">
-                                <li>같은 주제로 다시 한 번 작문해보세요</li>
-                                <li>오늘 배운 문법을 더 많이 사용해보세요</li>
-                                <li>발음과 함께 큰 목소리로 읽어보세요</li>
+                                <li>위의 오답들을 다시 한번 천천히 읽어보세요</li>
+                                <li>정답 해설을 이해할 때까지 분석하세요</li>
+                                <li>내일은 같은 유형의 문제를 다시 풀어보세요</li>
+                                <li>약점으로 파악된 주제를 추가로 복습하세요</li>
                             </ul>
                         </div>
                     </div>
                 `;
 
-                // localStorage 정리 (선택 사항)
-                // localStorage.removeItem('userWriting');
-                // localStorage.removeItem('writingDate');
+                contentArea.innerHTML = html;
             }} catch (error) {{
-                console.error('Error loading correction:', error);
+                console.error('오답 분석 오류:', error);
                 contentArea.innerHTML = `
                     <div class="empty-state">
-                        <h3>오류가 발생했습니다</h3>
-                        <p>페이지를 새로 고침해주세요.</p>
+                        <h3>아직 퀴즈 데이터가 없습니다</h3>
+                        <p>퀴즈를 풀면 여기에 오답 분석이 표시됩니다.</p>
                     </div>
                 `;
             }}
@@ -361,7 +414,7 @@ def _save_correction_html(today: date) -> str:
         }}
 
         // 페이지 로드 시 실행
-        window.addEventListener('load', loadCorrection);
+        window.addEventListener('load', loadWrongAnswers);
     </script>
 </body>
 </html>
