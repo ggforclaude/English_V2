@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/English_V2/">
+    <title>오답 분석 - Improve English</title>
+    <style>
+        * {{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }}
+
+        body {{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }}
+
+        .container {{
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }}
+
+        .header {{
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }}
+
+        .header h1 {{
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }}
+
+        .header p {{
+            font-size: 1.1em;
+            opacity: 0.9;
+        }}
+
+        .content {{
+            padding: 30px;
+        }}
+
+        .section {{
+            margin-bottom: 30px;
+        }}
+
+        .section-title {{
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }}
+
+        .writing-box {{
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 20px;
+        }}
+
+        .loading {{
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }}
+
+        .spinner {{
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }}
+
+        @keyframes spin {{
+            0% {{ transform: rotate(0deg); }}
+            100% {{ transform: rotate(360deg); }}
+        }}
+
+        .correction-section {{
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }}
+
+        .correction-title {{
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }}
+
+        .correction-content {{
+            color: #333;
+            line-height: 1.8;
+        }}
+
+        .comparison {{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }}
+
+        .comparison-box {{
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            background: white;
+        }}
+
+        .comparison-title {{
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #667eea;
+        }}
+
+        .comparison-text {{
+            color: #333;
+            line-height: 1.8;
+        }}
+
+        .error-highlight {{
+            background: #ffebee;
+            color: #c62828;
+            padding: 2px 4px;
+            border-radius: 2px;
+            text-decoration: underline wavy #c62828;
+        }}
+
+        .correct-highlight {{
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }}
+
+        .tips {{
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }}
+
+        .tips-title {{
+            font-weight: bold;
+            color: #1976d2;
+            margin-bottom: 10px;
+        }}
+
+        .tips-list {{
+            list-style: none;
+            padding-left: 0;
+        }}
+
+        .tips-list li {{
+            padding: 8px 0;
+            color: #333;
+            position: relative;
+            padding-left: 25px;
+        }}
+
+        .tips-list li:before {{
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #2196f3;
+            font-weight: bold;
+        }}
+
+        .navigation {{
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }}
+
+        .nav-button {{
+            display: inline-block;
+            padding: 12px 30px;
+            margin: 0 10px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }}
+
+        .nav-button:hover {{
+            background: #764ba2;
+        }}
+
+        .empty-state {{
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            color: #856404;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+        }}
+
+        .empty-state h3 {{
+            margin-bottom: 10px;
+        }}
+
+        @media (max-width: 768px) {{
+            .comparison {{
+                grid-template-columns: 1fr;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 오답 분석</h1>
+            <p>오늘 푼 퀴즈 중 틀린 문제를 분석하고 학습하세요</p>
+        </div>
+
+        <div class="content">
+            <div id="content-area">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>교정 내용을 준비 중입니다...</p>
+                </div>
+            </div>
+
+            <div class="navigation">
+                <a href="today/writing" class="nav-button">← 다시 작문하기</a>
+                <a href="today" class="nav-button">대시보드</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 오늘의 퀴즈 데이터 저장 (sessionStorage 또는 localStorage에서 가져올 예정)
+        let quizResults = [];
+        let wrongAnswers = [];
+
+        async function loadWrongAnswers() {{
+            const contentArea = document.getElementById('content-area');
+
+            try {{
+                // sessionStorage에서 오늘 푼 퀴즈 결과 가져오기
+                const todayQuizzes = sessionStorage.getItem('todayQuizResults') || localStorage.getItem('todayQuizResults');
+
+                if (!todayQuizzes) {{
+                    contentArea.innerHTML = `
+                        <div class="empty-state">
+                            <h3>📊 오답이 없습니다!</h3>
+                            <p>오늘 모든 퀴즈를 정확히 풀었습니다. 훌륭합니다! 🎉</p>
+                            <p style="margin-top: 15px; font-size: 0.95em;">
+                                <a href="today" style="color: #667eea; font-weight: bold; text-decoration: none;">대시보드</a>로 돌아가서 다른 학습을 계속하세요.
+                            </p>
+                        </div>
+                    `;
+                    return;
+                }}
+
+                quizResults = JSON.parse(todayQuizzes);
+
+                // 오답만 필터링
+                wrongAnswers = quizResults.filter(q => !q.correct);
+
+                if (wrongAnswers.length === 0) {{
+                    contentArea.innerHTML = `
+                        <div class="empty-state">
+                            <h3>📊 완벽합니다!</h3>
+                            <p>오늘 푼 모든 퀴즈가 정답입니다. 👏</p>
+                        </div>
+                    `;
+                    return;
+                }}
+
+                // 오답 분석 페이지 생성
+                let html = `
+                    <div class="section">
+                        <div class="section-title">📋 오답 통계</div>
+                        <div class="tips">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                                <div style="background: white; padding: 15px; border-radius: 6px; text-align: center; border-left: 4px solid #2196f3;">
+                                    <div style="font-size: 2em; font-weight: bold; color: #2196f3;">${{wrongAnswers.length}}</div>
+                                    <div style="color: #666; font-size: 0.9em;">틀린 문제</div>
+                                </div>
+                                <div style="background: white; padding: 15px; border-radius: 6px; text-align: center; border-left: 4px solid #4caf50;">
+                                    <div style="font-size: 2em; font-weight: bold; color: #4caf50;">${{quizResults.length - wrongAnswers.length}}</div>
+                                    <div style="color: #666; font-size: 0.9em;">맞힌 문제</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // 각 오답 분석
+                wrongAnswers.forEach((q, idx) => {{
+                    html += `
+                        <div class="section">
+                            <div class="section-title">#${{idx + 1}} ${{q.domain || '문제'}}</div>
+
+                            <div class="writing-box" style="background: #fff3cd; border-color: #ffc107; margin-bottom: 15px;">
+                                <strong>❓ 문제:</strong><br>
+                                ${{escapeHtml(q.question || '')}}
+                            </div>
+
+                            <div class="comparison">
+                                <div class="comparison-box" style="border-left: 4px solid #dc3545;">
+                                    <div class="comparison-title">❌ 당신의 답</div>
+                                    <div class="comparison-text">
+                                        ${{escapeHtml(q.userAnswer || '(답변 없음)')}}
+                                    </div>
+                                </div>
+
+                                <div class="comparison-box" style="border-left: 4px solid #28a745;">
+                                    <div class="comparison-title">✅ 정답</div>
+                                    <div class="comparison-text">
+                                        ${{escapeHtml(q.correctAnswer || '')}}
+                                    </div>
+                                </div>
+                            </div>
+
+                            ${{q.explanation ? `
+                                <div class="correction-section">
+                                    <div class="correction-title">💡 설명</div>
+                                    <div class="correction-content">
+                                        ${{q.explanation}}
+                                    </div>
+                                </div>
+                            ` : ''}}
+                        </div>
+                    `;
+                }});
+
+                // 학습 전략
+                html += `
+                    <div class="section">
+                        <div class="section-title">🎯 학습 전략</div>
+                        <div class="tips">
+                            <div class="tips-title">틀린 부분을 극복하기 위한 다음 단계:</div>
+                            <ul class="tips-list">
+                                <li>위의 오답들을 다시 한번 천천히 읽어보세요</li>
+                                <li>정답 해설을 이해할 때까지 분석하세요</li>
+                                <li>내일은 같은 유형의 문제를 다시 풀어보세요</li>
+                                <li>약점으로 파악된 주제를 추가로 복습하세요</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+
+                contentArea.innerHTML = html;
+            }} catch (error) {{
+                console.error('오답 분석 오류:', error);
+                contentArea.innerHTML = `
+                    <div class="empty-state">
+                        <h3>아직 퀴즈 데이터가 없습니다</h3>
+                        <p>퀴즈를 풀면 여기에 오답 분석이 표시됩니다.</p>
+                    </div>
+                `;
+            }}
+        }}
+
+        function escapeHtml(text) {{
+            const map = {{
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            }};
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }}
+
+        // 페이지 로드 시 실행
+        window.addEventListener('load', loadWrongAnswers);
+    </script>
+</body>
+</html>
