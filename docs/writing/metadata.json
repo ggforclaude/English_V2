@@ -1,17 +1,17 @@
 {
-  "date": "2026-09-17",
+  "date": "2026-09-18",
   "words": [
-    "commute",
     "chore",
+    "commute",
     "tidy",
     "errand",
-    "routine",
     "rarely",
-    "groceries",
     "borrow",
+    "leftover",
     "convenient",
-    "neighborhood"
+    "routine",
+    "hardly"
   ],
   "grammar_topic": "단순 현재형 - 기본",
-  "grammar_explanation": "단순 현재형은 반복되는 습관, 일상, 변하지 않는 사실이나 일반적인 진리를 말할 때 사용합니다. 3인칭 단수 주어(he, she, it)일 때는 동사에 -s 또는 -es를 붙이며, 부정문과 의문문에는 do/does를 사용합니다. 또한 always, usually, often, sometimes, never와 같은 빈도 부사와 자주 함께 쓰입니다."
+  "grammar_explanation": "단순 현재형은 반복되는 습관, 일상적인 일과, 변하지 않는 사실이나 일반적인 진리를 말할 때 사용합니다. 3인칭 단수(he, she, it)가 주어일 때는 동사에 -s 또는 -es를 붙이며, 부정문과 의문문에서는 do/does를 사용하고 동사는 원형으로 씁니다. always, usually, often, sometimes, never, every day와 같은 빈도 부사와 함께 자주 쓰입니다."
 }
